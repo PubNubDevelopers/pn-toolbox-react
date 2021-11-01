@@ -9,7 +9,7 @@ import routesAuthControl from "routesAuthControl";
 
 var routes = [
   {
-    path: "/index",
+    path: "/key-set",
     name: "Key Set",
     icon: VpnKey,
     iconColor: "Error",

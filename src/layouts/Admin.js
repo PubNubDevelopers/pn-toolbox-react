@@ -74,12 +74,13 @@ const Admin = () => {
                 openSidebarResponsive={() => setSidebarOpenResponsive(true)}
               />
             )} */}
+
             <Header/>
 
             {/* <AppParent> */}
               <Switch>
                 {getRoutes(routes)}
-                <Redirect from="*" to="/index" />
+                <Redirect from="*" to="/admin/key-set" />
               </Switch>
             {/* </AppParent> */}
 

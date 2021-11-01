@@ -27,3 +27,6 @@ yarn-debug.log*
 yarn-error.log*
 
 commit.sh
+
+~/properties/readme.md
+~/properties/properties_template.json

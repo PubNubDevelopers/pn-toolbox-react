@@ -30,9 +30,10 @@ ReactDOM.render(
         {/* <Route path="/index" render={(props) => <Index {...props} />} /> */}
         <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
         <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
-        <Redirect from="*" to="/admin" />
+        <Redirect from="*" to="/admin/key-set" />
       </Switch>
     </BrowserRouter>
+    Foo Bar
   </ThemeProvider>,
   document.querySelector("#root")
 );
