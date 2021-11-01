@@ -1,0 +1,471 @@
+/*!
+
+=========================================================
+* Argon Dashboard React - v1.2.1
+=========================================================
+
+* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
+* Copyright 2021 Creative Tim (https://www.creative-tim.com)
+* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
+
+* Coded by Creative Tim
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+*/
+import { useState } from "react";
+import classnames from "classnames";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+// reactstrap components
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardBody,
+  Form,
+  FormGroup,
+  Input,
+  Container,
+  Row,
+  Col,
+  CardFooter,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+  UncontrolledDropdown,
+  Table,
+  Nav,
+  NavLink,
+  NavItem,
+  TabContent,
+  TabPane,
+} from "reactstrap";
+
+// core components
+import { useKeySetData } from "./KeySetProvider";
+
+const KeySet = (props) => {
+  const keySetContext = useKeySetData();
+  console.log("KEYSET keySetContext: ", keySetContext);
+
+  const [tab, setTab] = useState(2);
+
+  const toggleNavs = (e, state, index) => {
+    e.preventDefault();
+    setTab(index);
+  };
+  
+  const [keySetName, setKeySetName] = useState("Select Key Set");
+  const [subKey, setSubKey] = useState();
+  const [pubKey, setPubKey] = useState();
+  const [secKey, setSecKey] = useState();
+
+  const [uuid, setUuid] = useState("cv-1");
+  const [keySetProps, setKeySetProps] = useState();
+
+  const openKeySetFile = (theFile) => {
+    const propFileReader = new FileReader();
+
+    propFileReader.onload = function(e) {
+        setKeySetProps(JSON.parse(e.target.result));
+        console.log("intern:", keySetProps);
+    };
+    
+    // $('#property-file-selector').prop('files')[0]
+    propFileReader.readAsText(theFile);
+  }
+
+  const submitForm = () => {
+    // props.initKeySet({
+    keySetContext.initKeySet({
+      keySetName: keySetName,
+      subKey: subKey,
+      pubKey: pubKey,
+      secKey: secKey,
+      uuid: uuid,
+    });
+  }
+
+  const openFile = (theFile) => {
+    openKeySetFile(theFile);
+  }
+
+  const keySetSelected = (index) => {
+    console.log("keySetSelected: index: ", index);
+    console.log("    keSetProps: ", keySetProps);
+
+    const keySet = keySetProps.pn_keys[index];
+    setKeySetName(keySet.name);
+    setPubKey(keySet.pub_key);
+    setSubKey(keySet.sub_key);
+    setSecKey(keySet.secret_key);
+  }
+
+  const notify = (title) => {
+    toast.success(title, {
+      position: "top-center",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  }
+  
+  return (
+    <>
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+      <Container className="mt--7" fluid>
+        <Row className="mt-0">
+          <Col className="order-xl-2">
+            <Card className="bg-secondary shadow"> 
+              <CardHeader className="border-0">
+                <Row className="align-items-center">
+                  <div className="col">
+                    <Nav
+                      className="nav-fill flex-column flex-md-row"
+                      id="tabs-icons-text"
+                      pills
+                      role="tablist"
+                    >
+                      <NavItem>
+                        <NavLink
+                          aria-selected={tab === 2}
+                          className={classnames("mb-sm-3 mb-md-0", {
+                            active: tab === 2
+                          })}
+                          onClick={e => toggleNavs(e, "tabs", 2)}
+                          role="tab"
+                        >
+                          <i className="ni ni-folder-17 mr-2" />
+                          Enter Key Set
+                        </NavLink>
+                      </NavItem>
+                      <NavItem>
+                        <NavLink
+                          aria-selected={tab === 1}
+                          className={classnames("mb-sm-3 mb-md-0", {
+                            active: tab === 1
+                          })}
+                          onClick={e => toggleNavs(e, "tabs", 1)}
+                          role="tab"
+                        >
+                          <i className="ni ni-settings-gear-65 mr-2" />
+                          PN Dashboard Key Sets (DEMO ONLY)
+                        </NavLink>
+                      </NavItem>
+                    </Nav>
+                  </div>
+                </Row>
+              </CardHeader>
+              <CardBody>
+                <TabContent activeTab={"tabs" + tab}>
+                  <TabPane tabId="tabs1">
+                    <Row className="mt-0">
+                      <Col className="mb-5 mb-xl-0" xl="12">
+                        <Card className="shadow">
+                          <CardHeader className="border-0">
+                            <Row className="align-items-center">
+                              <div className="col">
+                                <h3 className="mb-0">Key Sets</h3>
+                                <p>DEMO DISPLAY ONLY - FUTURE FEATURE</p>
+                              </div>
+                              <div className="col text-right">
+                                <Button
+                                  color="primary"
+                                  onClick={(e) => e.preventDefault()}
+                                  size="sm"
+                                >
+                                  Search
+                                </Button>
+                              </div>
+                            </Row>
+                          </CardHeader>
+                          <CardBody>
+                            <Table className="align-items-center table-flush" responsive>
+                              <thead className="thead-light">
+                                <tr>
+                                  <th scope="col">App</th>
+                                  <th scope="col">Key Set</th>
+                                  <th scope="col">Sub Key</th>
+                                  <th scope="col">Initialize</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <th scope="row">Date Night App</th>
+                                  <td>Dev Env</td>
+                                  <td>sub-c-fdslkj-afdsafsa</td>
+                                  <td>
+                                    <Button 
+                                      color="primary"
+                                      size="sm"
+                                      onClick={(e) => e.preventDefault()}
+                                    >
+                                      Initialize
+                                    </Button>
+                                  </td>
+                                </tr>
+                                <tr>
+                                <th scope="row">Date Night App</th>
+                                  <td>Test Env</td>
+                                  <td>sub-c-fddgk-cbbn</td>
+                                  <td>
+                                    <Button 
+                                      color="primary"
+                                      size="sm"
+                                      onClick={(e) => e.preventDefault()}
+                                    >
+                                      Initialize
+                                    </Button>
+                                  </td>
+                                </tr>
+                                <tr>
+                                <th scope="row">Date Night App</th>
+                                  <td>Prod Env</td>
+                                  <td>sub-c-f3x6y89lkj-af49f94sa</td>
+                                  <td>
+                                    <Button 
+                                      color="primary"
+                                      size="sm"
+                                      onClick={(e) => e.preventDefault()}
+                                    >
+                                      Initialize
+                                    </Button>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Arena Live</th>
+                                  <td>POC</td>
+                                  <td>sub-c-4ffju9-dkeke9b-o824ht</td>
+                                  <td>
+                                    <Button 
+                                      color="primary"
+                                      size="sm"
+                                      onClick={(e) => e.preventDefault()}
+                                    >
+                                      Initialize
+                                    </Button>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Excecutive Dashboard</th>
+                                  <td>Beta</td>
+                                  <td>sub-c-rgtdju9-dk46df9b-o824ht</td>
+                                  <td>
+                                    <Button 
+                                      color="primary"
+                                      size="sm"
+                                      onClick={(e) => e.preventDefault()}
+                                    >
+                                      Initialize
+                                    </Button>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </Table>
+                          </CardBody>
+                          <CardFooter>
+                          </CardFooter>
+                        </Card>
+                      </Col>
+                    </Row>
+                  </TabPane>
+                </TabContent>
+
+                <TabContent activeTab={"tabs" + tab}>
+                  <TabPane tabId="tabs2">
+                    <Row className="mt-0">
+                      <Col className="mb-5 mb-xl-0" xl="12">
+                        <Card className="shadow">
+                          <Form>
+                            <CardHeader className="border-0">
+                              <Row className="align-items-center">
+                                <div className="col">
+                                  <h3 className="mb-0">Initialize Key Set</h3>
+                                </div>
+                              </Row>
+                            </CardHeader>
+                            <CardBody>
+                              <div className="pl-lg-4">
+                                <Row>
+                                  <Col>
+                                    <KeySetSelector 
+                                    keySets={keySetProps} 
+                                    keySetSelected={keySetSelected}
+                                    openFile={openFile}
+                                    keySetName={keySetName}
+                                    />
+                                  </Col>
+                                </Row>
+                                <Row>
+                                  <Col>
+                                    <FormGroup>
+                                      <label
+                                        className="form-control-label"
+                                        htmlFor="input-pub-key"
+                                      >
+                                        Publish Key
+                                      </label>
+                                      <Input
+                                        className="form-control-alternative"
+                                        id="input-pub-key"
+                                        placeholder="required for sending test messages only"
+                                        type="text"
+                                        name="pubKey"
+                                        onChange={(e) => setPubKey(e.target.value)}
+                                        value={pubKey}
+                                      />
+                                    </FormGroup>
+                                  </Col>
+                                </Row>
+                                <Row>
+                                  <Col>
+                                    <FormGroup>
+                                      <label
+                                        className="form-control-label"
+                                        htmlFor="input-sub-key"
+                                      >
+                                        Subscribe Key *
+                                      </label>
+                                      <Input
+                                        className="form-control-alternative"
+                                        id="input-sub-key"
+                                        placeholder="required"
+                                        type="text"
+                                        name="subKey"
+                                        onChange={(e) => setSubKey(e.target.value)}
+                                        value={subKey}
+                                      />
+                                    </FormGroup>
+                                  </Col>
+                                </Row>
+                                <Row>
+                                  <Col>
+                                    <FormGroup>
+                                      <label
+                                        className="form-control-label"
+                                        htmlFor="input-sec-key"
+                                      >
+                                        Secret Key
+                                      </label>
+                                      <Input
+                                        className="form-control-alternative"
+                                        id="input-sec-key"
+                                        placeholder="required for retrieving device tokens only"
+                                        type="password"
+                                        name="secKey"
+                                        onChange={(e) => setSecKey(e.target.value)}
+                                        value={pubKey}
+                                      />
+                                    </FormGroup>
+                                  </Col>
+                                </Row>
+                                <Row>
+                                  <Col>
+                                    <FormGroup>
+                                      <label
+                                        className="form-control-label"
+                                        htmlFor="input-uuid"
+                                      >
+                                        UUID
+                                      </label>
+                                      <Input
+                                        className="form-control-alternative"
+                                        id="input-uuid"
+                                        placeholder="leave empty to auto-generate value"
+                                        type="text"
+                                        name="uuid"
+                                        onChange={(e) => setUuid(e.target.value)}
+                                      />
+                                    </FormGroup>
+                                  </Col>
+                                </Row>
+                              </div>
+                            </CardBody>
+                            <CardFooter>
+                            <div className="col text-right">
+                                <Button
+                                  color="primary"
+                                  disabled={subKey === ""}
+                                  onClick={submitForm}
+                                >
+                                  Initialize
+                                </Button>
+                              </div>
+                            </CardFooter>
+                          </Form>
+                        </Card>
+                      </Col>
+                    </Row>
+                  </TabPane>
+                </TabContent>
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </>
+  );
+};
+
+export default KeySet;
+
+
+const KeySetSelector = (props) => {
+  console.log("KeySetSelector: props: ", props);
+
+  if (props.keySets == null || props.keySets.pn_keys == null || props.keySets.pn_keys.length === 0) {
+    return (
+      <>
+        <label
+          className="form-control-label"
+          htmlFor="button-open-file"
+        >
+          Key Set Properties File
+        </label><br/>
+        <input id="button-open-file" type="file" onChange={(e) => props.openFile(e.target.files[0])}/>
+        <p/>
+      </>
+    )
+  }
+
+  const options = props.keySets.pn_keys.map((item, index) =>
+      <DropdownItem onClick={() => props.keySetSelected(index)}>
+        {item.name + ":  " + item.sub_key.substring(0,14)}
+      </DropdownItem>
+    /* <DropdownItem divider /> */
+  );
+
+  return (
+    // <div className="col text-left">
+      <>
+        <UncontrolledDropdown group>
+          <DropdownToggle width="100px" caret color="primary">
+            {props.keySetName}
+          </DropdownToggle>
+          <DropdownMenu>
+            {options}
+          </DropdownMenu>
+        </UncontrolledDropdown>
+        <p />
+      </>
+    // </div>
+
+  );
+}
