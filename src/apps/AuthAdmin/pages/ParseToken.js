@@ -128,7 +128,8 @@ const ParseToken = (props) => {
                             className="form-control-alternative"
                             id="input-token"
                             placeholder="Input v3 auth token"
-                            type="text"
+                            type="textarea"
+                            rows="2"
                             onChange={(e) => setToken(e.target.value)}
                           />
                         </FormGroup>
