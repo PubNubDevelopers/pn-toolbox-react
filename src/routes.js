@@ -5,7 +5,7 @@ import { Bolt, VpnKey } from "@mui/icons-material";
 
 // app routes
 import routesPushDebug from "apps/PushDebug/routesPushDebug";
-import routesAuthControl from "routesAuthControl";
+import routesAuthAdmin from "apps/AuthAdmin/routesAuthAdmin"
 
 var routes = [
   {
@@ -18,7 +18,7 @@ var routes = [
     index: 0,
   },
   routesPushDebug,
-  routesAuthControl,
+  routesAuthAdmin,
   {
     divider: true,
   },
