@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation, Route, Switch, Redirect } from "react-router-dom";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
@@ -24,11 +24,40 @@ const Admin = () => {
   const location = useLocation();
   const [sidebarOpenResponsive, setSidebarOpenResponsive] = React.useState(false);
 
+  const [serverData, setServerData] = useState(null);
+
   React.useEffect(() => {
+    console.log("useEffect");
+
+    callBackendAPI().then(res => {
+      console.log("    res", res);
+      setServerData(res.express);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
     // mainContent.current.scrollTop = 0;
   }, [location]);
+  
+  const callBackendAPI = async () => {
+    console.log("callBackendAPI");
+
+    const response = await fetch('http://localhost:5000/express_backend');
+    console.log("    response", response);
+
+    const body = await response.json();
+  
+    if (response.status !== 200) {
+      console.log("    error", body.message);
+      throw Error(body.message) 
+    }
+
+    console.log("    body", body);
+    return body;
+  };
 
   const getRoutes = (routes) => {
     return routes.map((prop, key) => {
