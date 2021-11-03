@@ -26,7 +26,7 @@ const PushDebugApp = (props) => {
 
   return (
     <>
-
+      {props.children}
     </>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useLocation, Route, Switch, Redirect } from "react-router-dom";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
@@ -16,64 +16,81 @@ import componentStyles from "assets/theme/layouts/admin.js";
 
 import { KeySetProvider } from "KeySetProvider";
 import Header from "components/Headers/Header";
+import PushDebugApp from "../apps/PushDebug/PushDebugApp";
 
 const useStyles = makeStyles(componentStyles);
 
-const Admin = () => {
+const Admin = (props) => {
+  console.log("ADMIN props:", props);
+
   const classes = useStyles();
   const location = useLocation();
   const [sidebarOpenResponsive, setSidebarOpenResponsive] = React.useState(false);
+  const parentName = React.useRef("");
 
-  const [serverData, setServerData] = useState(null);
+  // const [serverData, setServerData] = useState(null);
 
   React.useEffect(() => {
     console.log("useEffect");
 
-    callBackendAPI().then(res => {
-      console.log("    res", res);
-      setServerData(res.express);
-    })
-    .catch(err => {
-      console.log(err);
-    });
+    // callBackendAPI().then(res => {
+    //   console.log("    res", res);
+    //   setServerData(res.express);
+    // })
+    // .catch(err => {
+    //   console.log(err);
+    // });
 
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
     // mainContent.current.scrollTop = 0;
   }, [location]);
   
-  const callBackendAPI = async () => {
-    console.log("callBackendAPI");
+  // const callBackendAPI = async () => {
+  //   console.log("callBackendAPI");
 
-    const response = await fetch('http://localhost:5000/express_backend');
-    console.log("    response", response);
+  //   const response = await fetch('http://localhost:5000/express_backend');
+  //   console.log("    response", response);
 
-    const body = await response.json();
+  //   const body = await response.json();
   
-    if (response.status !== 200) {
-      console.log("    error", body.message);
-      throw Error(body.message) 
-    }
+  //   if (response.status !== 200) {
+  //     console.log("    error", body.message);
+  //     throw Error(body.message) 
+  //   }
 
-    console.log("    body", body);
-    return body;
-  };
+  //   console.log("    body", body);
+  //   return body;
+  // };
 
   const getRoutes = (routes) => {
-    return routes.map((prop, key) => {
-      if (prop.collapse) {
-        return getRoutes(prop.views);
+    console.log("getRoutes: location", props.location.pathname);
+
+    return routes.map((route, key) => {
+      console.log("   route", route);
+
+      if (route.collapse) {
+        return getRoutes(route.views);
       }
-      if (prop.layout === "/admin") {
+      if (route.layout === "/admin") {
+        const pathName = route.layout + route.path;
+
+        if (props.location.pathname === pathName) {
+          console.log("    route.parent", route.parent);
+          parentName.current = route.parent;
+        }
+
         return (
           <Route
-            path={prop.layout + prop.path}
-            component={prop.component}
-            appComponent={prop.appComponent}
+            path={route.layout + route.path}
+            component={route.component}
+            appComponent={route.appComponent}
             key={key}
+            parent={route.parent}
           />
         );
-      } else {
+      } 
+      else {
         return null;
       }
     });
@@ -106,12 +123,12 @@ const Admin = () => {
 
             <Header/>
 
-            {/* <AppParent> */}
+            <AppParent props={props} parentName={parentName}>
               <Switch>
                 {getRoutes(routes)}
                 <Redirect from="*" to="/admin/key-set" />
               </Switch>
-            {/* </AppParent> */}
+            </AppParent>
 
             <Container
               maxWidth={false}
@@ -128,3 +145,15 @@ const Admin = () => {
 };
 
 export default Admin;
+
+const AppParent = (props, parentName) => {
+  debugger;
+  if (parentName.current == null || parentName.current === "") {
+    return PushDebugApp;
+  }
+  else {
+    console.log("AppParent: props=", props, parentName);
+    const importedComponentModule = require("../apps/" + parentName).default;
+    return React.createElement(importedComponentModule, {props}, props.children); 
+  }
+}
