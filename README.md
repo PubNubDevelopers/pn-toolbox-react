@@ -24,9 +24,14 @@ Click the *Initialize* button to initialize a PubNub object that will be used th
 
 ![Key Set Properties File](properties/docs/keyset-props-4.png)
 
+## PN Dashboard Login
+
+(COMING SOON...ISH)
+At some point, you will be able to login to your PN account and select a key set. However, having a local properties file that contains common values associated to your key sets will be useful for speedy troubleshooting.
+
 ## Tools Menu Options
 
-The rest of the nav links on the left are pluggable tools that can be added as required. The process for creating and adding tools is ![documented here](properties/README.md). *The Toolbox* and all tools within are created using the *Argon Dashboard React* template from *Creative Tim*. See below for further details about licensing and usage.
+The rest of the nav links on the left are pluggable tools that can be added as required. The process for creating and adding tools is [documented here](docs/tools/README.md). *The Toolbox* and all tools within are created using the *Argon Dashboard React* template from *Creative Tim*. See below for further details about licensing and usage.
 
 ## Licensing
 

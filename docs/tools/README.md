@@ -6,16 +6,14 @@
 
 `src/apps/` - contains all of the tools home folder
 
-* `/PushDebug/`
+* `PushDebug`
 * `AuthAdmin`
 * ...
 
 `src/apps/{APP_NAME}` - contains all of the tools files and folders
 
 * `routes{APP_NAME}` - contains routes that are included in the base `routes.js` file that dynamically build the left nav
-* `{AppName}Provider` - in order to pass data to your page components, you will need to do so by using a *Context Provider* component
-  * this component will dynamically all of your page components by declaring its path and file name relative to the `apps` folder using the `parent` key in your app's *routes* file
-* `{APP_NAME}App.js` - optional parent app component that will dynamically encapsulate your app's page components
+* `{AppName}Provider` - in order to pass data to your page components, you will need to do so by using a *Context Provider* component; this component will dynamically all of your page components by declaring its path and file name relative to the `apps` folder using the `parent` key in your app's *routes* file
 * *README.md* - use this file to document your tool
 
 `src/apps/pages` - contains all of your apps page and other components (you can create custom folders under this folder)
