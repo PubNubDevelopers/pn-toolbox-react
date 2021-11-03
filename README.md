@@ -1,34 +1,37 @@
-# PubNub Mobile Push Debug Tool
-This tool was inspired by many (many...) hours or assisting customers with troubleshooting their mobile push issues (most APNs). The first effort was [documenting the process of troubleshooting mobile push issues](https://www.pubnub.com/docs/resources/mobile-push-troubleshooting) using the PN Debug Console to listen to the the `-pndebug` channel to receive information and error feedback from PubNub pusher system as well as the push vendors (APNs and FCM). 
+# PubNub Developer Toolbox (aka, "PN Dev Toolbox", "The Toolbox")
 
-However, most customers would not bother to go through the trouble of executing on this or were just confused or put off by the complexity of the process. This resulted in many support tickets which resulted in a conf call to do some realtime troubleshooting with the customer.
+This tool was inspired by many (many...) hours of assisting customers with troubleshooting their mobile push issues (most APNs) amongst many other PubNub related issues that required writing code or going through multiple setup steps to analyze, debug, workaround, and resolve. When the answer is "you need to write some code to do that" when it should be a simple tool that does that one thing would be the logical answer, it was not always an optimal customer experience.
 
-After years of talking about how great it would be have a tool to automate much of this troubleshooting process, one specific customer had such complex issues that it required daily, multi-hour troubleshooting session using the above process. This motivated me to finally implement this tool and as a bonus, learn React at the same time. The result of this effort is what you see before you. Enjoy!
+After years of talking about how great it would be have tools to automate much of this troubleshooting process, one specific customer had such complex issues that it required daily, multi-hour troubleshooting sessions. This proved to be the tipping point to finally implement this set of Pubnub developer tools, and as a bonus, learn React at the same time. The result of this effort is what you see before you. Enjoy!
 
-## Screenshots
+![Key Set](docs/pn-toolbox-key-set.png)
 
-### Key Set
+## Key Set
 
-Enter your PubNub key set and initialize it for use in the other screens to perform push-related operations: list/add/remove channels for a device token, send a test notification and receive feedback from PubNub and the push vendors (APNs & FCM), list/add/remove device for a channel (coming soon).
+Enter your PubNub key set and initialize it for use in the other screens to perform PubNub API operations throughout the various tools in *The Toolbox*. An alternative to entering your key set data manually, you can add them to a key set properties file.
 
-![Key Set](Documentation/screenshots/pnpush-keyset.png)
+![Key Set Properties File](properties/docs/keyset-props-1.png)
 
-### Push Test
+When you upload that file, the UI will load a select field with your key sets from the properties file.
 
-Subscribe to a channel (subscribes to `-pndebug`, automatically), enter the proper payload, publish and receive the message and feedback from PubNub and the push vendor systems (APNs and FCM).
+![Key Set Properties File](properties/docs/keyset-props-2.png)
 
-![Push Test](Documentation/screenshots/pnpush-pushtest.png)
+Selecting a key set will auto-populate the fields with the values for that key set.
 
-### Inspect Device
+![Key Set Properties File](properties/docs/keyset-props-3.png)
 
-Enter a device token and required push parameters (push type, environment, bundle id) and list the channels registered to that device and add and remove channels, as needed.
+Click the *Initialize* button to initialize a PubNub object that will be used throughout all the tools to execute PubNub APIs. The *Header* will be updated to indicate that the initialization was successful.
 
-![Inspect Device](Documentation/screenshots/pnpush-inspectdevice.png)
+![Key Set Properties File](properties/docs/keyset-props-4.png)
 
-<!-- ### Inspect Channel
+## PN Dashboard Login
 
-(coming soon)
-Enter a channel name and list the device tokens registered to that channel and add and remove device tokens, as needed. -->
+(COMING SOON...ISH)
+At some point, you will be able to login to your PN account and select a key set. However, having a local properties file that contains common values associated to your key sets will be useful for speedy troubleshooting.
+
+## Tools Menu Options
+
+The rest of the nav links on the left are pluggable tools that can be added as required. The process for creating and adding tools is [documented here](docs/tools/README.md). *The Toolbox* and all tools within are created using the *Argon Dashboard React* template from *Creative Tim*. See below for further details about licensing and usage.
 
 ## Licensing
 

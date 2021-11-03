@@ -13,7 +13,9 @@ For example, create a separate properties file for each customer:
 
 If you are working from a cloned git repository, these files will be ignored when you push changes and only the "readme.md" and "properties_template.json" files will be kept.
 
-> :warning: WARNING: DO NOT commit any of your own or other customers' key sets to the repo.
+> :warning: WARNING: DO NOT commit any of your own or other customers' key sets to the repo. You can store your own properties files in your system's home directory or wherever you will able to find it easily.
+
+![Sample Properties File](properties_template.json)
 
 ## Properties File Format
 
@@ -30,16 +32,16 @@ If you are working from a cloned git repository, these files will be ignored whe
 
 ### Key Set Properties File Chooser
 
-![Push Test](../Documentation/screenshots/keyset-props-1.png)
+![Properties File Chooser](docs/keyset-props-1.png)
 
 ### Key Set Selector Options
 
-![Push Test](../Documentation/screenshots/keyset-props-2.png)
+![Key Set Selector](docs/keyset-props-2.png)
 
 ### Key Set Selected & Form Populated
 
-![Push Test](../Documentation/screenshots/keyset-props-3.png)
+![Populated Key Set Form](docs/keyset-props-3.png)
 
 ### Key Set Initialized & Displayed in Header
 
-![Push Test](../Documentation/screenshots/keyset-props-4.png)
+![Initialized Key Set in Header](docs/keyset-props-4.png)
