@@ -1,0 +1,84 @@
+{
+  "pn_keys" : [{
+      "name": "PN demo set",
+      "pub_key": "demo",
+      "sub_key": "demo",
+      "secret_key": "demo",
+      "push_type" : "apns",
+      "environment" : "development",
+      "topics": [
+        "com.pubnub.mobile.pushtest"
+      ],
+      "devices" : {
+        "apns" : [
+          "apnstoken123",
+          "apnstoken456"
+        ],
+        "fcm" : [
+          "fcmtoken888",
+          "fcmtoken444"
+        ]
+      },
+      "channels" : [
+        "channel1",
+        "channel2"
+      ]
+    },
+    {
+      "name": "Chat App - Dev",
+      "pub_key": "pub-c-redacted",
+      "sub_key": "sub-c-redacted",
+      "secret_key": "sec-c-redacted",
+      "push_type" : "apns2",
+      "environment" : "production",
+      "topics": [
+        "com.pubnub.app.chat",
+        "com.pubnub.app.chat.voip"
+      ],
+      "devices" : {
+        "apns2" : [
+          "apns2token4242",
+          "apns2token6243"
+        ],
+        "fcm" : [
+          "fcmtoken1414",
+          "fcmtoken0007"
+        ]
+      },
+      "channels" : [
+        "channel4",
+        "channel7"
+      ]    
+    },
+    {
+      "name": "Date Night - Prod",
+      "pub_key": "pub-c-redacted",
+      "sub_key": "sub-c-redacted",
+      "secret_key": "sec-c-redacted",
+      "push_type" : "fcm",
+      "environment" : "production",
+      "topics": [
+        "com.PubNub.app.datenight",
+        "com.PubNub.app.datenight.voip"
+      ],
+      "devices" : {
+        "apns2" : [
+          "apns2token474",
+          "apns2token7854"
+        ],
+        "apns" : [
+          "apnstoken331",
+          "apnstoken1133"
+        ],
+        "fcm" : [
+          "fcmtoken555",
+          "fcmtoken747"
+        ]
+      },
+      "channels" : [
+        "channel20",
+        "channel11"
+      ]    
+    }
+  ]
+}
