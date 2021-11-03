@@ -19,36 +19,77 @@ import Header from "components/Headers/Header";
 
 const useStyles = makeStyles(componentStyles);
 
-const Admin = () => {
+const Admin = (props) => {
+  console.log("ADMIN props:", props);
+
   const classes = useStyles();
   const location = useLocation();
   const [sidebarOpenResponsive, setSidebarOpenResponsive] = React.useState(false);
+  const parentName = React.useRef("");
+
+  // const [serverData, setServerData] = useState(null);
 
   React.useEffect(() => {
+    console.log("useEffect");
+
+    // callBackendAPI().then(res => {
+    //   console.log("    res", res);
+    //   setServerData(res.express);
+    // })
+    // .catch(err => {
+    //   console.log(err);
+    // });
+
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
     // mainContent.current.scrollTop = 0;
   }, [location]);
+  
+  // const callBackendAPI = async () => {
+  //   console.log("callBackendAPI");
+
+  //   const response = await fetch('http://localhost:5000/express_backend');
+  //   console.log("    response", response);
+
+  //   const body = await response.json();
+  
+  //   if (response.status !== 200) {
+  //     console.log("    error", body.message);
+  //     throw Error(body.message) 
+  //   }
+
+  //   console.log("    body", body);
+  //   return body;
+  // };
 
   const getRoutes = (routes) => {
-    return routes.map((prop, key) => {
-      if (prop.collapse) {
-        return getRoutes(prop.views);
+    console.log("getRoutes: location", props.location.pathname);
+
+    return routes.map((route, key) => {
+      if (route.collapse) {
+        return getRoutes(route.views);
       }
-      if (prop.layout === "/admin") {
+      if (route.layout === "/admin") {
+        const pathName = route.layout + route.path;
+
+        if (props.location.pathname === pathName) {
+          parentName.current = route.parent;
+        }
         return (
           <Route
-            path={prop.layout + prop.path}
-            component={prop.component}
-            appComponent={prop.appComponent}
+            path={pathName}
+            component={route.component}
             key={key}
+            parent={route.parent}
           />
         );
-      } else {
-        return null;
-      }
+      } 
+      else return null;
     });
   };
+  
+  console.log("    before return", parentName.current);
+
   return (
     <>
       <KeySetProvider>
@@ -77,12 +118,12 @@ const Admin = () => {
 
             <Header/>
 
-            {/* <AppParent> */}
+            <AppParent props={props} parentName={parentName}>
               <Switch>
                 {getRoutes(routes)}
                 <Redirect from="*" to="/admin/key-set" />
               </Switch>
-            {/* </AppParent> */}
+            </AppParent>
 
             <Container
               maxWidth={false}
@@ -99,3 +140,18 @@ const Admin = () => {
 };
 
 export default Admin;
+
+const AppParent = (props) => {
+  console.log("AppParent", props, props.parentName.current);
+
+  if (props.parentName.current != null && props.parentName.current !== "") {
+    console.log("returning AppParent: props=", props, props.parentName.current);
+
+    return React.createElement(
+      require("../apps/" + props.parentName.current).default,
+      {props}, 
+      props.children
+    ); 
+  }
+  else return <></>;
+}

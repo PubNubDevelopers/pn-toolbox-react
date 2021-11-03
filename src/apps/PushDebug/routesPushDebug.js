@@ -2,7 +2,6 @@
 import { SendToMobile } from "@mui/icons-material";
 
 // app pages
-import PushDebugApp from "./PushDebugApp";
 import PushTest from "./pages/PushTest";
 import ManageDevice from "./pages/ManageDevice";
 import ManageChannel from "./pages/ManageChannel"
@@ -18,21 +17,21 @@ var routesPushDebug = {
       path: "/push-test",
       name: "Push Test",
       component: PushTest,
-      appComponent: PushDebugApp,
+      parent: "PushDebug/PushDebugApp",
       layout: "/admin",
     },
     {
       path: "/manage-device",
       name: "Manage Device",
       component: ManageDevice,
-      appComponent: PushDebugApp,
+      parent: "PushDebug/PushDebugApp",
       layout: "/admin",
     },
     {
       path: "/manage-channel",
       name: "Manage Channel",
       component: ManageChannel,
-      appComponent: PushDebugApp,
+      parent: "PushDebug/PushDebugApp",
       layout: "/admin",
     },
   ],

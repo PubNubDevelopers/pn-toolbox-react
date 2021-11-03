@@ -5,7 +5,7 @@ import { Bolt, VpnKey } from "@mui/icons-material";
 
 // app routes
 import routesPushDebug from "apps/PushDebug/routesPushDebug";
-import routesAuthControl from "routesAuthControl";
+import routesAuthAdmin from "apps/AuthAdmin/routesAuthAdmin"
 
 var routes = [
   {
@@ -15,10 +15,11 @@ var routes = [
     iconColor: "Error",
     component: KeySet,
     layout: "/admin",
+    parent: "PushDebug/PushDebugApp",
     index: 0,
   },
   routesPushDebug,
-  routesAuthControl,
+  routesAuthAdmin,
   {
     divider: true,
   },
