@@ -16,6 +16,7 @@ var routesAuthAdmin = {
       path: "/parse-token",
       name: "ParseToken",
       component: ParseToken,
+      parent: "PushDebug/PushDebugApp",
       layout: "/admin",
     },
     // {

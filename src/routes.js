@@ -15,6 +15,7 @@ var routes = [
     iconColor: "Error",
     component: KeySet,
     layout: "/admin",
+    parent: "PushDebug/PushDebugApp",
     index: 0,
   },
   routesPushDebug,

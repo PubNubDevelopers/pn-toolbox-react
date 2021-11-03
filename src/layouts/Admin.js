@@ -16,7 +16,6 @@ import componentStyles from "assets/theme/layouts/admin.js";
 
 import { KeySetProvider } from "KeySetProvider";
 import Header from "components/Headers/Header";
-import PushDebugApp from "../apps/PushDebug/PushDebugApp";
 
 const useStyles = makeStyles(componentStyles);
 
@@ -67,8 +66,6 @@ const Admin = (props) => {
     console.log("getRoutes: location", props.location.pathname);
 
     return routes.map((route, key) => {
-      console.log("   route", route);
-
       if (route.collapse) {
         return getRoutes(route.views);
       }
@@ -76,25 +73,23 @@ const Admin = (props) => {
         const pathName = route.layout + route.path;
 
         if (props.location.pathname === pathName) {
-          console.log("    route.parent", route.parent);
           parentName.current = route.parent;
         }
-
         return (
           <Route
-            path={route.layout + route.path}
+            path={pathName}
             component={route.component}
-            appComponent={route.appComponent}
             key={key}
             parent={route.parent}
           />
         );
       } 
-      else {
-        return null;
-      }
+      else return null;
     });
   };
+  
+  console.log("    before return", parentName.current);
+
   return (
     <>
       <KeySetProvider>
@@ -146,14 +141,17 @@ const Admin = (props) => {
 
 export default Admin;
 
-const AppParent = (props, parentName) => {
-  debugger;
-  if (parentName.current == null || parentName.current === "") {
-    return PushDebugApp;
+const AppParent = (props) => {
+  console.log("AppParent", props, props.parentName.current);
+
+  if (props.parentName.current != null && props.parentName.current !== "") {
+    console.log("returning AppParent: props=", props, props.parentName.current);
+
+    return React.createElement(
+      require("../apps/" + props.parentName.current).default,
+      {props}, 
+      props.children
+    ); 
   }
-  else {
-    console.log("AppParent: props=", props, parentName);
-    const importedComponentModule = require("../apps/" + parentName).default;
-    return React.createElement(importedComponentModule, {props}, props.children); 
-  }
+  else return <></>;
 }
