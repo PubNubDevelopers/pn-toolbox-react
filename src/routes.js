@@ -6,7 +6,8 @@ import { VpnKey } from "@mui/icons-material";
 // app routes
 import routesPushDebug from "apps/PushDebug/routesPushDebug";
 import routesAuthAdmin from "apps/AuthAdmin/routesAuthAdmin"
-import PushDebugApp from "apps/PushDebug/PushDebugApp";
+import { PushDebugProvider } from "apps/PushDebug/PushDebugProvider";
+// import PushDebugApp from "apps/PushDebug/PushDebugApp";
 
 var routes = [
   {
@@ -16,10 +17,16 @@ var routes = [
     iconColor: "Error",
     component: KeySet,
     layout: "/admin",
-    parent: PushDebugApp,
+    parent: PushDebugProvider,
     index: 0,
   },
+  {
+    divider: true,
+  },
   routesPushDebug,
+  {
+    divider: true,
+  },
   routesAuthAdmin,
   {
     divider: true,

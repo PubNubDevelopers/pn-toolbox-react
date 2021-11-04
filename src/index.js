@@ -33,7 +33,6 @@ ReactDOM.render(
         <Redirect from="*" to="/admin/key-set" />
       </Switch>
     </BrowserRouter>
-    Foo Bar
   </ThemeProvider>,
   document.querySelector("#root")
 );

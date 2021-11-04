@@ -3,12 +3,11 @@ import { createContext, useContext, useState } from 'react'
 const Context = createContext()
 
 export const PushDebugProvider = ({ children }) => {
-  const [pubnub, setPubNub] = useState(null);
-  const [status, setStatus] = useState("not initialized");
-  const [keySetName, setKeySetName] = useState("");
+  const [pushChannel, setPushChannel] = useState("pinchme");
 
   const pushDebugData = {
-    
+    pushChannel, setPushChannel,
+
   }
 
   return <Context.Provider value={pushDebugData}> {children} </Context.Provider>

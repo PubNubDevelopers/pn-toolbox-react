@@ -52,20 +52,14 @@ export const KeySetProvider = ({ children }) => {
   }
 
   const keySetData = {
-    keySetName,
-    subKey,
-    pubKey,
-    secKey,
-    uuid,
+    keySetName, setKeySetName,
+    subKey, setPubKey,
+    pubKey, setSubKey,
+    secKey, setSecKey,
+    uuid, setUuid,
+    keySetProps, setKeySetProps,
     status,
     pubnub,
-    keySetProps,
-    setKeySetName,
-    setPubKey,
-    setSubKey,
-    setSecKey,
-    setUuid,
-    setKeySetProps,
     initKeySet,
     uninitKeySet,
   }

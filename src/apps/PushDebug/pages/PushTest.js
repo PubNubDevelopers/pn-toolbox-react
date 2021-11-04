@@ -22,10 +22,10 @@ import { usePushDebugData } from "../PushDebugProvider";
 
 const PushTest = () => {
   const keySetContext = useKeySetData();
-  const pushDebugData = usePushDebugData();
+  const pushDebugContext = usePushDebugData();
 
   console.log("KEYSET keySetContext: ", keySetContext);
-  console.log("KEYSET pushDebugData: ", pushDebugData);
+  console.log("KEYSET pushDebugContext: ", pushDebugContext);
 
   const messageDefault = JSON.stringify({
     "pn_debug": true,
@@ -54,15 +54,15 @@ const PushTest = () => {
     },
     "pn_gcm": {
       "notification": {
-          "title": "PN Test Message - #counter#",
-          "body": "This is test message from PubNub - ask Mike Comer if you are concerned"
+        "title": "PN Test Message - #counter#",
+        "body": "This is test message from PubNub - ask Mike Comer if you are concerned"
       }
     }
   }, null, 2);
 
-  const [channel, setChannel] = useState("19e4598ef7278c4aa5c70fbd533d2788da9145a8512ba11ea9b303d4ec3bafab-push");
-  const [subscribeMessageChannel, setSubscribeMessageChannel] = useState();
-  const [subscribeFeedbackChannel, setSubscribeFeedbackChannel] = useState();
+  // const [channel, setChannel] = useState("19e4598ef7278c4aa5c70fbd533d2788da9145a8512ba11ea9b303d4ec3bafab-push");
+  // const [subscribeMessageChannel, setSubscribeMessageChannel] = useState();
+  // const [subscribeFeedbackChannel, setSubscribeFeedbackChannel] = useState();
   const [subscribeButtonLabel, setSubscribeButtonLabel] = useState("Subscribe");
 
   const [message, setMessage] = useState(messageDefault);
@@ -88,8 +88,8 @@ const PushTest = () => {
         console.log("status callback: ", status);
 
         if (status.category === "PNConnectedCategory" && status.operation === "PNSubscribeOperation") {
-          setSubscribeMessageChannel(() => status.subscribedChannels[0]);
-          setSubscribeFeedbackChannel(() => status.subscribedChannels[1]);
+          // setSubscribeMessageChannel(() => status.subscribedChannels[0]);
+          // setSubscribeFeedbackChannel(() => status.subscribedChannels[1]);
           setSubscribeButtonLabel((subscribeStatusLabel) => "Unsubscribe");
           timerAlert("Subscribe Success", 'You have successfully subscribed', 3000);
         }
@@ -115,12 +115,10 @@ const PushTest = () => {
         const timestamp = getDateTime(msg.timetoken) + "UTC\n[" + msg.timetoken + "]";
         const message = JSON.stringify(msg.message, null, 2);
 
-        if (msg.channel === channel) {
-          // setOutputMessage((outputMessage) => timestamp + "\n" + message);
+        if (msg.channel === pushDebugContext.pushChannel) {
           outputMessage.current = timestamp + "\n" + message;
         }
-        else { // -pndebug
-          // setOutputFeedback((outputFeedback) => [parseFeedback(message), ...outputFeedback]);
+        else if (msg.channel === pushDebugContext.pushChannel + "-pndebug") {
           outputFeedback.current.push(parseFeedback(message));
         }
       }
@@ -167,7 +165,7 @@ const PushTest = () => {
   }
 
   const manageSubscription = () => {
-    console.log("PushTest:manageSubscription: channel: ", channel);
+    console.log("PushTest:manageSubscription: channel: ", pushDebugContext.pushChannel);
     
     if (subscribeButtonLabel === "Unsubscribe") {
       keySetContext.pubnub.unsubscribeAll();
@@ -185,13 +183,13 @@ const PushTest = () => {
       console.log("before setTimeout: delay=", delay);
       setTimeout(function(){
         console.log("before subscribe");
-        keySetContext.pubnub.subscribe({channels: [channel, channel + "-pndebug"]});
+        keySetContext.pubnub.subscribe({channels: [pushDebugContext.pushChannel, pushDebugContext.pushChannel + "-pndebug"]});
       }, delay);
     }
   }
 
   const handlePublishClick = () => {
-    if (subscribeFeedbackChannel === "" && isWarnUnsubscribed) {
+    if ((pushDebugContext.pushChannel === "" || pushDebugContext.pushChannel === "") && isWarnUnsubscribed) {
       // display warning: publish will work but receiving messages will not work
       confirmAlert("Send without subscribing?", "Are you sure you want to send this message?");
     }
@@ -201,8 +199,6 @@ const PushTest = () => {
   }
 
   const publishMessage = () => {
-    // console.log("publishMessage: channel:", channel, "; message:", message);
-
     outputFeedback.current = [];
     isWarnUnsubscribed.current = false;
     hideAlert();
@@ -212,14 +208,10 @@ const PushTest = () => {
 
     keySetContext.pubnub.publish(
       {
-        channel : channel,
+        channel : pushDebugContext.pushChannel,
         message : JSON.parse(payload),
       },
       (status, response) => {
-        // console.log("status:", JSON.stringify(status));
-        // console.log("response", JSON.stringify(response));
-
-        // setCounter((counter) => ++counter);
         counter.current++;
         timerAlert("Processing Results", "Please wait just a couple seconds.", 2000);
 
@@ -238,8 +230,6 @@ const PushTest = () => {
   }
 
   const handleOutputResults = () => {
-    // console.log("PushTest:handleOutputResults");
-
     let data = {"message" : outputMessage.current};
     data.feedback = outputFeedback.current;
     setAllResults((allResults) => [data, ...allResults]);
@@ -278,9 +268,9 @@ const PushTest = () => {
           onConfirm={() => publishMessage()}
           onCancel={() => hideAlert()}
           showCancel
-          confirmBtnBsStyle="primary"
+          confirmBtnBsStyle="danger"
           confirmBtnText="Confirm"
-          cancelBtnBsStyle="info"
+          cancelBtnBsStyle="secondary"
           cancelBtnText="Cancel"
           reverseButtons={true}
           btnSize=""
@@ -323,7 +313,7 @@ const PushTest = () => {
                             href="#pablo"
                             onClick={manageSubscription}
                             size="sm"
-                            disabled = {!isInitialized || channel === ""}
+                            disabled = {!isInitialized || pushDebugContext.pushChannel === ""}
                           >
                             {subscribeButtonLabel}
                           </Button>
@@ -334,7 +324,7 @@ const PushTest = () => {
                         id="input-channel"
                         placeholder="Enter primary message channel"
                         type="text"
-                        onChange={(e) => setChannel(e.target.value)}
+                        onChange={(e) => pushDebugContext.setPushChannel(e.target.value)}
                         defaultValue="19e4598ef7278c4aa5c70fbd533d2788da9145a8512ba11ea9b303d4ec3bafab-push"
                       />
                     </FormGroup>

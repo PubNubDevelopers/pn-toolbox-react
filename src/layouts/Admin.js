@@ -25,7 +25,6 @@ const Admin = (props) => {
   const classes = useStyles();
   const location = useLocation();
   const [sidebarOpenResponsive, setSidebarOpenResponsive] = React.useState(false);
-  // const parentName = React.useRef("");
   const parent = React.useRef(null);
 
   // const [serverData, setServerData] = useState(null);
@@ -94,6 +93,8 @@ const Admin = (props) => {
   return (
     <>
       <KeySetProvider>
+        <AppParent props={props} parent={parent}>
+
         <Box display="flex">
           <Sidebar
             routes={routes}
@@ -119,12 +120,10 @@ const Admin = (props) => {
 
             <Header/>
 
-            <AppParent props={props} parent={parent}>
-              <Switch>
-                {getRoutes(routes)}
-                <Redirect from="*" to="/admin/key-set" />
-              </Switch>
-            </AppParent>
+            <Switch>
+              {getRoutes(routes)}
+              <Redirect from="*" to="/admin/key-set" />
+            </Switch>
 
             <Container
               maxWidth={false}
@@ -135,6 +134,7 @@ const Admin = (props) => {
             </Container>
           </Box>
         </Box>
+        </AppParent>
       </KeySetProvider>
     </>
   );
