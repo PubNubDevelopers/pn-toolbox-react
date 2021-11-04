@@ -25,7 +25,8 @@ const Admin = (props) => {
   const classes = useStyles();
   const location = useLocation();
   const [sidebarOpenResponsive, setSidebarOpenResponsive] = React.useState(false);
-  const parentName = React.useRef("");
+  // const parentName = React.useRef("");
+  const parent = React.useRef(null);
 
   // const [serverData, setServerData] = useState(null);
 
@@ -73,7 +74,7 @@ const Admin = (props) => {
         const pathName = route.layout + route.path;
 
         if (props.location.pathname === pathName) {
-          parentName.current = route.parent;
+          parent.current = route.parent;
         }
         return (
           <Route
@@ -88,7 +89,7 @@ const Admin = (props) => {
     });
   };
   
-  console.log("    before return", parentName.current);
+  console.log("    before return", parent.current);
 
   return (
     <>
@@ -118,7 +119,7 @@ const Admin = (props) => {
 
             <Header/>
 
-            <AppParent props={props} parentName={parentName}>
+            <AppParent props={props} parent={parent}>
               <Switch>
                 {getRoutes(routes)}
                 <Redirect from="*" to="/admin/key-set" />
@@ -130,7 +131,7 @@ const Admin = (props) => {
               component={Box}
               classes={{ root: classes.containerRoot }}
             >
-              <AdminFooter />
+            <AdminFooter />
             </Container>
           </Box>
         </Box>
@@ -142,13 +143,13 @@ const Admin = (props) => {
 export default Admin;
 
 const AppParent = (props) => {
-  console.log("AppParent", props, props.parentName.current);
+  console.log("AppParent", props);
 
-  if (props.parentName.current != null && props.parentName.current !== "") {
-    console.log("returning AppParent: props=", props, props.parentName.current);
+  if (props.parent.current != null) {
+    console.log("returning AppParent: props=", props.parent.current);
 
-    return React.createElement(
-      require("../apps/" + props.parentName.current).default,
+    return (
+      props.parent.current.default,
       {props}, 
       props.children
     ); 
