@@ -45,7 +45,7 @@ import {
 import { useKeySetData } from "../../../KeySetProvider";
 
 
-const InspectDevice = (props) => {
+const InspectDevice = () => {
   const keySetContext = useKeySetData();
   console.log("MANAGE CHANNEL keySetContext: ", keySetContext);
 
@@ -437,7 +437,7 @@ const InspectDevice = (props) => {
                     <Row>
                       <Col className="text-right">
                         <Button
-                          color="primary"
+                          color="danger"
                           onClick={generateURIs}
                           disabled = {channel === ""}
                           // size="sm"

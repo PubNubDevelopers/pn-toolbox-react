@@ -44,7 +44,7 @@ import {
 // core components
 import { useKeySetData } from "../../../KeySetProvider";
 
-const ManageDevice = (props) => {
+const ManageDevice = () => {
   const keySetContext = useKeySetData();
   console.log("INSPECT DEVICE keySetContext: ", keySetContext);
 
@@ -286,7 +286,7 @@ const ManageDevice = (props) => {
                             >
                               <Button 
                                 className={classnames({ active: pushRadios === 0})} 
-                                color="primary" 
+                                color="danger" 
                                 onClick={() => handlePushTypeClick(0)}
                                 // size="sm"
                               >
@@ -300,7 +300,7 @@ const ManageDevice = (props) => {
                               </Button>
                               <Button 
                                 className={classnames({ active: pushRadios === 1 })} 
-                                color="primary" 
+                                color="danger" 
                                 onClick={() => handlePushTypeClick(1)}
                                 // size="sm"
                               >
@@ -314,7 +314,7 @@ const ManageDevice = (props) => {
                               </Button>
                               <Button 
                                 className={classnames({ active: pushRadios === 2 })} 
-                                color="primary" 
+                                color="danger" 
                                 onClick={() => handlePushTypeClick(2)}
                                 // size="sm"
                               >
@@ -345,7 +345,7 @@ const ManageDevice = (props) => {
                             >
                               <Button 
                                 className={classnames({ active: environmentRadios === 0})} 
-                                color="primary" 
+                                color="danger" 
                                 onClick={() => handleEnvironmentClick(0)}
                                 // size="sm"
                                 disabled={!enableEnvironment}
@@ -360,7 +360,7 @@ const ManageDevice = (props) => {
                               </Button>
                               <Button 
                                 className={classnames({ active: environmentRadios === 1 })} 
-                                color="primary" 
+                                color="danger" 
                                 onClick={() => handleEnvironmentClick(1)}
                                 // size="sm"
                                 disabled={!enableEnvironment}
@@ -401,7 +401,7 @@ const ManageDevice = (props) => {
                   <Row>
                     <Col className="text-right">
                       <Button
-                        color="primary"
+                        color="danger"
                         onClick={listChannels}
                         disabled = {!isInitialized || token === "" || (pushType === "apns2" && topic === "")}
                         // size="sm"
@@ -576,7 +576,7 @@ const AddChannelsModal = (props) => {
           />
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={(e) => handleClick(e, true)}>Submit</Button>{' '}
+          <Button color="danger" onClick={(e) => handleClick(e, true)}>Submit</Button>{' '}
           <Button color="secondary" onClick={(e) => handleClick(e, false)}>Cancel</Button>
         </ModalFooter>
       </Modal>

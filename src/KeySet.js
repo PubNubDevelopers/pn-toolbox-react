@@ -17,8 +17,8 @@
 */
 import { useState } from "react";
 import classnames from "classnames";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+// import { ToastContainer, toast } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
 
 // reactstrap components
 import {
@@ -48,7 +48,7 @@ import {
 // core components
 import { useKeySetData } from "./KeySetProvider";
 
-const KeySet = (props) => {
+const KeySet = () => {
   const keySetContext = useKeySetData();
   console.log("KEYSET keySetContext: ", keySetContext);
 
@@ -58,35 +58,25 @@ const KeySet = (props) => {
     e.preventDefault();
     setTab(index);
   };
-  
-  const [keySetName, setKeySetName] = useState("Select Key Set");
-  const [subKey, setSubKey] = useState();
-  const [pubKey, setPubKey] = useState();
-  const [secKey, setSecKey] = useState();
-
-  const [uuid, setUuid] = useState("cv-1");
-  const [keySetProps, setKeySetProps] = useState();
 
   const openKeySetFile = (theFile) => {
     const propFileReader = new FileReader();
 
     propFileReader.onload = function(e) {
-        setKeySetProps(JSON.parse(e.target.result));
-        console.log("intern:", keySetProps);
+      keySetContext.setKeySetProps(JSON.parse(e.target.result));
+      console.log("intern:", keySetContext.keySetProps);
     };
     
-    // $('#property-file-selector').prop('files')[0]
     propFileReader.readAsText(theFile);
   }
 
   const submitForm = () => {
-    // props.initKeySet({
     keySetContext.initKeySet({
-      keySetName: keySetName,
-      subKey: subKey,
-      pubKey: pubKey,
-      secKey: secKey,
-      uuid: uuid,
+      keySetName: keySetContext.keySetName,
+      pubKey: keySetContext.pubKey,
+      subKey: keySetContext.subKey,
+      secKey: keySetContext.secKey,
+      uuid: keySetContext.uuid,
     });
   }
 
@@ -96,30 +86,30 @@ const KeySet = (props) => {
 
   const keySetSelected = (index) => {
     console.log("keySetSelected: index: ", index);
-    console.log("    keSetProps: ", keySetProps);
+    console.log("    keSetProps: ", keySetContext.keySetProps);
 
-    const keySet = keySetProps.pn_keys[index];
-    setKeySetName(keySet.name);
-    setPubKey(keySet.pub_key);
-    setSubKey(keySet.sub_key);
-    setSecKey(keySet.secret_key);
+    const keySet = keySetContext.keySetProps.pn_keys[index];
+    keySetContext.setKeySetName(keySet.name);
+    keySetContext.setPubKey(keySet.pub_key);
+    keySetContext.setSubKey(keySet.sub_key);
+    keySetContext.setSecKey(keySet.secret_key);
   }
 
-  const notify = (title) => {
-    toast.success(title, {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  }
+  // const notify = (title) => {
+  //   toast.success(title, {
+  //     position: "top-center",
+  //     autoClose: 3000,
+  //     hideProgressBar: false,
+  //     closeOnClick: true,
+  //     pauseOnHover: true,
+  //     draggable: true,
+  //     progress: undefined,
+  //   });
+  // }
   
   return (
     <>
-      <ToastContainer
+      {/* <ToastContainer
         position="top-center"
         autoClose={3000}
         hideProgressBar={false}
@@ -129,7 +119,7 @@ const KeySet = (props) => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-      />
+      /> */}
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -187,7 +177,7 @@ const KeySet = (props) => {
                               </div>
                               <div className="col text-right">
                                 <Button
-                                  color="primary"
+                                  color="danger"
                                   onClick={(e) => e.preventDefault()}
                                   size="sm"
                                 >
@@ -213,7 +203,7 @@ const KeySet = (props) => {
                                   <td>sub-c-fdslkj-afdsafsa</td>
                                   <td>
                                     <Button 
-                                      color="primary"
+                                      color="danger"
                                       size="sm"
                                       onClick={(e) => e.preventDefault()}
                                     >
@@ -227,7 +217,7 @@ const KeySet = (props) => {
                                   <td>sub-c-fddgk-cbbn</td>
                                   <td>
                                     <Button 
-                                      color="primary"
+                                      color="danger"
                                       size="sm"
                                       onClick={(e) => e.preventDefault()}
                                     >
@@ -241,7 +231,7 @@ const KeySet = (props) => {
                                   <td>sub-c-f3x6y89lkj-af49f94sa</td>
                                   <td>
                                     <Button 
-                                      color="primary"
+                                      color="danger"
                                       size="sm"
                                       onClick={(e) => e.preventDefault()}
                                     >
@@ -255,7 +245,7 @@ const KeySet = (props) => {
                                   <td>sub-c-4ffju9-dkeke9b-o824ht</td>
                                   <td>
                                     <Button 
-                                      color="primary"
+                                      color="danger"
                                       size="sm"
                                       onClick={(e) => e.preventDefault()}
                                     >
@@ -269,7 +259,7 @@ const KeySet = (props) => {
                                   <td>sub-c-rgtdju9-dk46df9b-o824ht</td>
                                   <td>
                                     <Button 
-                                      color="primary"
+                                      color="danger"
                                       size="sm"
                                       onClick={(e) => e.preventDefault()}
                                     >
@@ -306,10 +296,10 @@ const KeySet = (props) => {
                                 <Row>
                                   <Col>
                                     <KeySetSelector 
-                                    keySets={keySetProps} 
-                                    keySetSelected={keySetSelected}
-                                    openFile={openFile}
-                                    keySetName={keySetName}
+                                      keySets={keySetContext.keySetProps} 
+                                      keySetSelected={keySetSelected}
+                                      openFile={openFile}
+                                      keySetName={keySetContext.keySetName}
                                     />
                                   </Col>
                                 </Row>
@@ -328,8 +318,8 @@ const KeySet = (props) => {
                                         placeholder="required for sending test messages only"
                                         type="text"
                                         name="pubKey"
-                                        onChange={(e) => setPubKey(e.target.value)}
-                                        value={pubKey}
+                                        onChange={(e) => keySetContext.setPubKey(e.target.value)}
+                                        value={keySetContext.pubKey}
                                       />
                                     </FormGroup>
                                   </Col>
@@ -349,8 +339,8 @@ const KeySet = (props) => {
                                         placeholder="required"
                                         type="text"
                                         name="subKey"
-                                        onChange={(e) => setSubKey(e.target.value)}
-                                        value={subKey}
+                                        onChange={(e) => keySetContext.setSubKey(e.target.value)}
+                                        value={keySetContext.subKey}
                                       />
                                     </FormGroup>
                                   </Col>
@@ -370,8 +360,8 @@ const KeySet = (props) => {
                                         placeholder="required for retrieving device tokens only"
                                         type="password"
                                         name="secKey"
-                                        onChange={(e) => setSecKey(e.target.value)}
-                                        value={pubKey}
+                                        onChange={(e) => keySetContext.setSecKey(e.target.value)}
+                                        value={keySetContext.pubKey}
                                       />
                                     </FormGroup>
                                   </Col>
@@ -391,7 +381,7 @@ const KeySet = (props) => {
                                         placeholder="leave empty to auto-generate value"
                                         type="text"
                                         name="uuid"
-                                        onChange={(e) => setUuid(e.target.value)}
+                                        onChange={(e) => keySetContext.setUuid(e.target.value)}
                                       />
                                     </FormGroup>
                                   </Col>
@@ -401,8 +391,8 @@ const KeySet = (props) => {
                             <CardFooter>
                             <div className="col text-right">
                                 <Button
-                                  color="primary"
-                                  disabled={subKey === ""}
+                                  color="danger"
+                                  disabled={keySetContext.subKey === ""}
                                   onClick={submitForm}
                                 >
                                   Initialize
@@ -446,7 +436,7 @@ const KeySetSelector = (props) => {
   }
 
   const options = props.keySets.pn_keys.map((item, index) =>
-      <DropdownItem onClick={() => props.keySetSelected(index)}>
+      <DropdownItem key={index} onClick={() => props.keySetSelected(index)}>
         {item.name + ":  " + item.sub_key.substring(0,14)}
       </DropdownItem>
     /* <DropdownItem divider /> */
@@ -456,7 +446,7 @@ const KeySetSelector = (props) => {
     // <div className="col text-left">
       <>
         <UncontrolledDropdown group>
-          <DropdownToggle width="100px" caret color="primary">
+          <DropdownToggle width="100px" caret color="danger">
             {props.keySetName}
           </DropdownToggle>
           <DropdownMenu>

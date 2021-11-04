@@ -6,11 +6,12 @@ const Context = createContext()
 export const KeySetProvider = ({ children }) => {
   const [pubnub, setPubNub] = useState(null);
   const [status, setStatus] = useState("not initialized");
-  const [keySetName, setKeySetName] = useState("");
+  const [keySetName, setKeySetName] = useState("Select Key Set");
   const [pubKey, setPubKey] = useState("");
   const [subKey, setSubKey] = useState("");
   const [secKey, setSecKey] = useState("");
   const [uuid, setUuid] = useState("");
+  const [keySetProps, setKeySetProps] = useState();
 
   const initKeySet = (keySetConfig) => {
     const pn = new PubNub({
@@ -58,6 +59,13 @@ export const KeySetProvider = ({ children }) => {
     uuid,
     status,
     pubnub,
+    keySetProps,
+    setKeySetName,
+    setPubKey,
+    setSubKey,
+    setSecKey,
+    setUuid,
+    setKeySetProps,
     initKeySet,
     uninitKeySet,
   }

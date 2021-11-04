@@ -18,10 +18,14 @@ import {
 
 // core components
 import { useKeySetData } from "../../../KeySetProvider";
+import { usePushDebugData } from "../PushDebugProvider";
 
-const PushTest = (props) => {
+const PushTest = () => {
   const keySetContext = useKeySetData();
+  const pushDebugData = usePushDebugData();
+
   console.log("KEYSET keySetContext: ", keySetContext);
+  console.log("KEYSET pushDebugData: ", pushDebugData);
 
   const messageDefault = JSON.stringify({
     "pn_debug": true,
@@ -315,7 +319,7 @@ const PushTest = (props) => {
                         </Col>
                         <Col className="col text-right">
                           <Button
-                            color="primary"
+                            color="danger"
                             href="#pablo"
                             onClick={manageSubscription}
                             size="sm"
@@ -351,7 +355,7 @@ const PushTest = (props) => {
                               </Col>
                               <Col className="col text-right">
                                 <Button
-                                  color="primary"
+                                  color="danger"
                                   size="sm"
                                   onClick={handlePublishClick}
                                   disabled={!isInitialized || message === ""}
@@ -390,7 +394,7 @@ const PushTest = (props) => {
                               </Col>
                               <Col className="col text-right">
                                 <Button
-                                  color="primary"
+                                  color="danger"
                                   href="#pablo"
                                   size="sm"
                                   onClick={() => setAllResults([])}
