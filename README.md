@@ -10,19 +10,19 @@ After years of talking about how great it would be have tools to automate much o
 
 Enter your PubNub key set and initialize it for use in the other screens to perform PubNub API operations throughout the various tools in *The Toolbox*. An alternative to entering your key set data manually, you can add them to a key set properties file.
 
-![Key Set Properties File](properties/docs/keyset-props-1.png)
+![Key Set Properties File](docs/properties/keyset-props-1.png)
 
 When you upload that file, the UI will load a select field with your key sets from the properties file.
 
-![Key Set Properties File](properties/docs/keyset-props-2.png)
+![Key Set Properties File](docs/properties/keyset-props-2.png)
 
 Selecting a key set will auto-populate the fields with the values for that key set.
 
-![Key Set Properties File](properties/docs/keyset-props-3.png)
+![Key Set Properties File](docs/properties/keyset-props-3.png)
 
 Click the *Initialize* button to initialize a PubNub object that will be used throughout all the tools to execute PubNub APIs. The *Header* will be updated to indicate that the initialization was successful.
 
-![Key Set Properties File](properties/docs/keyset-props-4.png)
+![Key Set Properties File](docs/properties/keyset-props-4.png)
 
 ## PN Dashboard Login
 

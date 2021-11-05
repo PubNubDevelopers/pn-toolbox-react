@@ -32,16 +32,16 @@ If you are working from a cloned git repository, these files will be ignored whe
 
 ### Key Set Properties File Chooser
 
-![Properties File Chooser](docs/keyset-props-1.png)
+![Properties File Chooser](./keyset-props-1.png)
 
 ### Key Set Selector Options
 
-![Key Set Selector](docs/keyset-props-2.png)
+![Key Set Selector](./keyset-props-2.png)
 
 ### Key Set Selected & Form Populated
 
-![Populated Key Set Form](docs/keyset-props-3.png)
+![Populated Key Set Form](./keyset-props-3.png)
 
 ### Key Set Initialized & Displayed in Header
 
-![Initialized Key Set in Header](docs/keyset-props-4.png)
+![Initialized Key Set in Header](./keyset-props-4.png)
