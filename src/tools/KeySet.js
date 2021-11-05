@@ -52,6 +52,13 @@ const KeySet = () => {
   const keySetContext = useKeySetData();
   console.log("KEYSET keySetContext: ", keySetContext);
 
+  const [keySetName, setKeySetName] = useState(keySetContext.keySetName);
+  const [subKey, setSubKey] = useState(keySetContext.subKey);
+  const [pubKey, setPubKey] = useState(keySetContext.pubKey);
+  const [secKey, setSecKey] = useState(keySetContext.secKey);
+  const [uuid, setUuid] = useState(keySetContext.uuid);
+
+  // const [authKey, setAuthKey] = useState();
   const [tab, setTab] = useState(2);
 
   const toggleNavs = (e, state, index) => {
@@ -64,7 +71,6 @@ const KeySet = () => {
 
     propFileReader.onload = function(e) {
       keySetContext.setKeySetProps(JSON.parse(e.target.result));
-      console.log("intern:", keySetContext.keySetProps);
     };
     
     propFileReader.readAsText(theFile);
@@ -72,16 +78,13 @@ const KeySet = () => {
 
   const submitForm = () => {
     keySetContext.initKeySet({
-      keySetName: keySetContext.keySetName,
-      pubKey: keySetContext.pubKey,
-      subKey: keySetContext.subKey,
-      secKey: keySetContext.secKey,
-      uuid: keySetContext.uuid,
+      keySetName: keySetName,
+      pubKey: pubKey,
+      subKey: subKey,
+      secKey: secKey,
+      uuid: uuid,
+      // authKey: authKey,
     });
-  }
-
-  const openFile = (theFile) => {
-    openKeySetFile(theFile);
   }
 
   const keySetSelected = (index) => {
@@ -89,10 +92,10 @@ const KeySet = () => {
     console.log("    keSetProps: ", keySetContext.keySetProps);
 
     const keySet = keySetContext.keySetProps.pn_keys[index];
-    keySetContext.setKeySetName(keySet.name);
-    keySetContext.setPubKey(keySet.pub_key);
-    keySetContext.setSubKey(keySet.sub_key);
-    keySetContext.setSecKey(keySet.secret_key);
+    setKeySetName(keySet.name);
+    setPubKey(keySet.pub_key);
+    setSubKey(keySet.sub_key);
+    setSecKey(keySet.secret_key);
   }
 
   // const notify = (title) => {
@@ -298,7 +301,7 @@ const KeySet = () => {
                                     <KeySetSelector 
                                       keySets={keySetContext.keySetProps} 
                                       keySetSelected={keySetSelected}
-                                      openFile={openFile}
+                                      openKeySetFile={openKeySetFile}
                                       keySetName={keySetContext.keySetName}
                                     />
                                   </Col>
@@ -318,8 +321,8 @@ const KeySet = () => {
                                         placeholder="required for sending test messages only"
                                         type="text"
                                         name="pubKey"
-                                        onChange={(e) => keySetContext.setPubKey(e.target.value)}
-                                        value={keySetContext.pubKey}
+                                        onChange={(e) => setPubKey(e.target.value)}
+                                        value={pubKey}
                                       />
                                     </FormGroup>
                                   </Col>
@@ -339,8 +342,8 @@ const KeySet = () => {
                                         placeholder="required"
                                         type="text"
                                         name="subKey"
-                                        onChange={(e) => keySetContext.setSubKey(e.target.value)}
-                                        value={keySetContext.subKey}
+                                        onChange={(e) => setSubKey(e.target.value)}
+                                        value={subKey}
                                       />
                                     </FormGroup>
                                   </Col>
@@ -360,8 +363,8 @@ const KeySet = () => {
                                         placeholder="required for retrieving device tokens only"
                                         type="password"
                                         name="secKey"
-                                        onChange={(e) => keySetContext.setSecKey(e.target.value)}
-                                        value={keySetContext.pubKey}
+                                        onChange={(e) => setSecKey(e.target.value)}
+                                        value={pubKey}
                                       />
                                     </FormGroup>
                                   </Col>
@@ -381,7 +384,7 @@ const KeySet = () => {
                                         placeholder="leave empty to auto-generate value"
                                         type="text"
                                         name="uuid"
-                                        onChange={(e) => keySetContext.setUuid(e.target.value)}
+                                        onChange={(e) => setUuid(e.target.value)}
                                       />
                                     </FormGroup>
                                   </Col>
@@ -392,7 +395,7 @@ const KeySet = () => {
                             <div className="col text-right">
                                 <Button
                                   color="danger"
-                                  disabled={keySetContext.subKey === ""}
+                                  disabled={subKey === ""}
                                   onClick={submitForm}
                                 >
                                   Initialize
@@ -429,7 +432,11 @@ const KeySetSelector = (props) => {
         >
           Key Set Properties File
         </label><br/>
-        <input id="button-open-file" type="file" onChange={(e) => props.openFile(e.target.files[0])}/>
+        <input 
+          id="button-open-file" 
+          type="file" 
+          onChange={(e) => props.openKeySetFile(e.target.files[0])}
+        />
         <p/>
       </>
     )
