@@ -35,7 +35,7 @@ import {
 } from "reactstrap";
 
 // core components
-import { useKeySetData } from "../../../KeySetProvider";
+import { useKeySetData } from "../../../tools/KeySetProvider"
 
 const ParseToken = (props) => {
   const keySetContext = useKeySetData();

@@ -17,7 +17,7 @@ import {
 
 
 // core components
-import { useKeySetData } from "../../../KeySetProvider";
+import { useKeySetData } from "../../../tools/KeySetProvider";
 import { usePushDebugData } from "../PushDebugProvider";
 
 const PushTest = () => {
@@ -325,7 +325,8 @@ const PushTest = () => {
                         placeholder="Enter primary message channel"
                         type="text"
                         onChange={(e) => pushDebugContext.setPushChannel(e.target.value)}
-                        defaultValue="19e4598ef7278c4aa5c70fbd533d2788da9145a8512ba11ea9b303d4ec3bafab-push"
+                        // defaultValue="19e4598ef7278c4aa5c70fbd533d2788da9145a8512ba11ea9b303d4ec3bafab-push"
+                        value={pushDebugContext.pushChannel}
                       />
                     </FormGroup>
                   </CardHeader>

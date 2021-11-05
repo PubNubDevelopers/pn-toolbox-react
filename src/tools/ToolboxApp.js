@@ -21,8 +21,8 @@ import React from "react";
 
 // core components
 
-const PushDebugApp = (props) => {
-  console.log("PushDebugApp props", props);
+const ToolboxApp = (props) => {
+  console.log("ToolboxApp props", props);
 
   return (
     <>
@@ -31,4 +31,4 @@ const PushDebugApp = (props) => {
   );
 };
 
-export default PushDebugApp;
+export default ToolboxApp;

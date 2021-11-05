@@ -1,9 +1,11 @@
 import React from "react";
 import { useLocation, Route, Switch, Redirect } from "react-router-dom";
+
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import Box from "@material-ui/core/Box";
 import Container from "@material-ui/core/Container";
+
 // @material-ui/icons components
 
 // core components
@@ -14,7 +16,7 @@ import Sidebar from "components/Sidebar/Sidebar.js";
 import routes from "routes.js";
 import componentStyles from "assets/theme/layouts/admin.js";
 
-import { KeySetProvider } from "KeySetProvider";
+import { KeySetProvider } from "../tools/KeySetProvider";
 import Header from "components/Headers/Header";
 
 const useStyles = makeStyles(componentStyles);
@@ -63,7 +65,8 @@ const Admin = (props) => {
   // };
 
   const getRoutes = (routes) => {
-    console.log("getRoutes: location", props.location.pathname);
+    console.log("getRoutes: location", 
+      props.location ? props.location.pathname : "no pathname");
 
     return routes.map((route, key) => {
       if (route.collapse) {
@@ -93,8 +96,6 @@ const Admin = (props) => {
   return (
     <>
       <KeySetProvider>
-        <AppParent props={props} parent={parent}>
-
         <Box display="flex">
           <Sidebar
             routes={routes}
@@ -118,23 +119,24 @@ const Admin = (props) => {
               />
             )} */}
 
-            <Header/>
+            <AppParent props={props} parent={parent}>
+              <Header/>
 
-            <Switch>
-              {getRoutes(routes)}
-              <Redirect from="*" to="/admin/key-set" />
-            </Switch>
+              <Switch>
+                {getRoutes(routes)}
+                <Redirect from="*" to="/admin/key-set" />
+              </Switch>
 
-            <Container
-              maxWidth={false}
-              component={Box}
-              classes={{ root: classes.containerRoot }}
-            >
-            <AdminFooter />
-            </Container>
+              <Container
+                maxWidth={false}
+                component={Box}
+                classes={{ root: classes.containerRoot }}
+              >
+                <AdminFooter />
+              </Container>
+            </AppParent>
           </Box>
         </Box>
-        </AppParent>
       </KeySetProvider>
     </>
   );
@@ -147,12 +149,10 @@ const AppParent = (props) => {
 
   if (props.parent.current != null) {
     console.log("returning AppParent: props=", props.parent.current);
+    const Component = props.parent.current;
 
     return (
-      props.parent.current.default,
-      {props}, 
-      props.children
+      <Component {...props}>{props.children}</Component>
     ); 
   }
-  else return <></>;
 }

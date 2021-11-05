@@ -13,8 +13,10 @@ import "@fullcalendar/common/main.min.css";
 import "@fullcalendar/daygrid/main.min.css";
 import "quill/dist/quill.core.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+
 // plugins styles downloaded
 import "assets/plugins/nucleo/css/nucleo.css";
+
 // core styles
 import "assets/scss/argon-dashboard-pro-material-ui.scss?v1.0.0";
 

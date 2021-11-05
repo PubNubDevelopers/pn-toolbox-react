@@ -42,7 +42,7 @@ import {
 } from "reactstrap";
 
 // core components
-import { useKeySetData } from "../../../KeySetProvider";
+import { useKeySetData } from "../../../tools/KeySetProvider";
 
 const ManageDevice = () => {
   const keySetContext = useKeySetData();
