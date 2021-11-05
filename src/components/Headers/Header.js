@@ -18,10 +18,10 @@
 
 // reactstrap components
 import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
-import { useKeySetData } from "../../KeySetProvider"
+import { useKeySetData } from "../../tools/KeySetProvider"
 
 
-const Header = (props) => {
+const Header = () => {
   const keySetContext = useKeySetData();
   console.log("HEADER: keySetContext: ", keySetContext);
 

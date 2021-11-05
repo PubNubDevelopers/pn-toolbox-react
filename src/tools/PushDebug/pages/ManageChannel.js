@@ -42,10 +42,10 @@ import {
 } from "reactstrap";
 
 // core components
-import { useKeySetData } from "../../../KeySetProvider";
+import { useKeySetData } from "../../../tools/KeySetProvider";
 
 
-const InspectDevice = (props) => {
+const InspectDevice = () => {
   const keySetContext = useKeySetData();
   console.log("MANAGE CHANNEL keySetContext: ", keySetContext);
 
@@ -437,7 +437,7 @@ const InspectDevice = (props) => {
                     <Row>
                       <Col className="text-right">
                         <Button
-                          color="primary"
+                          color="danger"
                           onClick={generateURIs}
                           disabled = {channel === ""}
                           // size="sm"
