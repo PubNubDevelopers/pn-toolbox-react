@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useRef } from 'react'
 
 const Context = createContext()
 
@@ -7,8 +7,6 @@ export const PushDebugProvider = ({ children }) => {
   ///////////////////
   // PushTest State
   //////////////////
-
-  const [pushChannel, setPushChannel] = useState();
 
   const messageDefault = JSON.stringify({
     "pn_debug": true,
@@ -42,9 +40,14 @@ export const PushDebugProvider = ({ children }) => {
       }
     }
   }, null, 2);
-
+  
+  const [pushChannel, setPushChannel] = useState();
+  const [subscribeButtonLabel, setSubscribeButtonLabel] = useState("Subscribe");
   const [message, setMessage] = useState(messageDefault);
   const [testResults, setTestResults] = useState([]);
+
+  const counter = useRef(0);
+  const isWarnUnsubscribed = useRef(true);
 
   //////////////////////
   // ManageDevice State
@@ -64,8 +67,10 @@ export const PushDebugProvider = ({ children }) => {
   const pushDebugData = {
     // PushTest State
     pushChannel, setPushChannel,
+    subscribeButtonLabel, setSubscribeButtonLabel,
     message, setMessage, 
     testResults, setTestResults,
+    counter, isWarnUnsubscribed,
     // ManageDevice State
     token, setToken,
     pushType, setPushType,

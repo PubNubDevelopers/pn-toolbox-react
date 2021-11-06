@@ -28,21 +28,14 @@ const PushTest = () => {
   console.log("PushTest pushDebugContext: ", pushDebugContext);
 
   const [pushChannel, setPushChannel] = useState(pushDebugContext.pushChannel);
-  // const [subscribeMessageChannel, setSubscribeMessageChannel] = useState();
-  // const [subscribeFeedbackChannel, setSubscribeFeedbackChannel] = useState();
-  const [subscribeButtonLabel, setSubscribeButtonLabel] = useState("Subscribe");
-
   const [message, setMessage] = useState(pushDebugContext.message);
   const [inputRows, setInputRows] = useState(28);
 
   const [alert, setAlert] = useState(null);
 
-  const outputMessage = useRef();
+  const outputMessage = useRef([]);
   const outputFeedback = useRef([]);
   const [allResults, setAllResults] = useState(() => pushDebugContext.testResults || []);
-  
-  const counter = useRef(0);
-  const isWarnUnsubscribed = useRef(true);
 
   // should this go in the KeySetContext (where it is now) or
   //  PushDebugContext for tool specific listeners???
@@ -54,15 +47,13 @@ const PushTest = () => {
         console.log("status callback: ", status);
 
         if (status.category === "PNConnectedCategory" && status.operation === "PNSubscribeOperation") {
-          // setSubscribeMessageChannel(() => status.subscribedChannels[0]);
-          // setSubscribeFeedbackChannel(() => status.subscribedChannels[1]);
           pushDebugContext.setPushChannel(pushChannel);
-          setSubscribeButtonLabel((subscribeStatusLabel) => "Unsubscribe");
+          pushDebugContext.setSubscribeButtonLabel(() => "Unsubscribe");
           timerAlert("Subscribe Success", 'You have successfully subscribed', 3000);
         }
         else if (status.operation === "PNUnsubscribeOperation") {
-          setSubscribeButtonLabel((subscribeStatusLabel) => "Subscribe");
-          isWarnUnsubscribed.current = true;
+          pushDebugContext.setSubscribeButtonLabel(() => "Subscribe");
+          pushDebugContext.isWarnUnsubscribed.current = true;
           timerAlert("Unsubscribe Success", "You have successfully UNsubscribed.", 3000);
         }
         else if (status.category === "PNNetworkDownCategory" || status.category === "PNNetworkIssuesCategory") {
@@ -78,12 +69,12 @@ const PushTest = () => {
       },
 
       message: function(msg) {
-        console.log("message callback: channel", msg.channel, "; message", msg.message);
+        console.log("MESSAGE CALLBACK: channel", msg.channel, "; message", msg.message);
         const timestamp = getDateTime(msg.timetoken) + "UTC\n[" + msg.timetoken + "]";
         const message = JSON.stringify(msg.message, null, 2);
 
         if (msg.channel === pushChannel) {
-          outputMessage.current = timestamp + "\n" + message;
+          outputMessage.current[0] = timestamp + "\n" + message;
         }
         else if (msg.channel === pushChannel + "-pndebug") {
           outputFeedback.current.push(parseFeedback(message));
@@ -134,7 +125,7 @@ const PushTest = () => {
   const manageSubscription = () => {
     console.log("PushTest:manageSubscription: channel: ", pushDebugContext.pushChannel);
     
-    if (subscribeButtonLabel === "Unsubscribe") {
+    if (pushDebugContext.subscribeButtonLabel === "Unsubscribe") {
       keySetContext.pubnub.unsubscribeAll();
     }
 
@@ -156,7 +147,7 @@ const PushTest = () => {
   }
 
   const handlePublishClick = () => {
-    if ((pushDebugContext.pushChannel === "" || pushDebugContext.pushChannel === "") && isWarnUnsubscribed) {
+    if ((pushDebugContext.pushChannel === "" || pushDebugContext.pushChannel === "") && pushDebugContext.isWarnUnsubscribed) {
       // display warning: publish will work but receiving messages will not work
       confirmAlert("Send without subscribing?", "Are you sure you want to send this message?");
     }
@@ -167,7 +158,7 @@ const PushTest = () => {
 
   const publishMessage = () => {
     outputFeedback.current = [];
-    isWarnUnsubscribed.current = false;
+    pushDebugContext.isWarnUnsubscribed.current = false;
     pushDebugContext.setMessage(message);
     const payload = tokenizePayload(message);
 
@@ -180,25 +171,32 @@ const PushTest = () => {
         message : JSON.parse(payload),
       },
       (status, response) => {
-        counter.current++;
-        timerAlert("Processing Results", "Please wait just a couple seconds.", 2000);
+        console.log("publish callback", status, response);
+        if (!status.error) {
+          pushDebugContext.counter.current++;
+          timerAlert(`Publish Success`, "Processing results, please wait just a couple seconds.", 2000);
+          // timerAlert(`Publish Success [${response.timetoken}]`, "Processing results, please wait just a couple seconds.", 2000);
 
-        setTimeout(function(){ 
-          handleOutputResults();
-          hideAlert();
-        }, 2000);
+          setTimeout(function(){ 
+            handleOutputResults();
+            hideAlert();
+          }, 2000);
+        }
+        else { // publish error
+          confirmAlert("Error Publishing Message", JSON.stringify(status));
+        }
       }
     );
   }
 
   const tokenizePayload = (message) => {
-    let payload = message.replaceAll("#counter#", counter.current);
+    let payload = message.replaceAll("#counter#", pushDebugContext.counter.current);
     // TODO: do the same for other things: APNs 2 Token, environment, 
     return payload;
   }
 
   const handleOutputResults = () => {
-    let data = {"message" : outputMessage.current};
+    let data = {"message" : outputMessage.current[0]};
     data.feedback = outputFeedback.current;
 
     setAllResults((allResults) => [data, ...allResults]);
@@ -284,7 +282,7 @@ const PushTest = () => {
                             size="sm"
                             disabled = {keySetContext.pubnub == null || pushChannel === ""}
                           >
-                            {subscribeButtonLabel}
+                            {pushDebugContext.subscribeButtonLabel}
                           </Button>
                         </Col>
                       </Row>
