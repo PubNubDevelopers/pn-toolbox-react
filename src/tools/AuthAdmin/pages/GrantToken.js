@@ -35,34 +35,52 @@ import {
 } from "reactstrap";
 
 // core components
-import { useKeySetData } from "../../../tools/KeySetProvider"
+import { useKeySetData } from "../../KeySetProvider"
 import { useAuthAdminData } from "../AuthAdminProvider";
 
-const ParseToken = () => {
+const GrantToken = () => {
   const keySetContext = useKeySetData();
   const authAdminContext = useAuthAdminData();
 
   console.log("ParseToken keySetContext: ", keySetContext);
   console.log("ParseToken authAdminContext: ", authAdminContext);
 
-  const [authToken, setAuthToken] = useState(authAdminContext.authToken);
-  // const [permissions, setPermissions] = useState(authAdminContext.permissions);
+  // const [authToken, setAuthToken] = useState(authAdminContext.authToken);
+  const [permissions, setPermissions] = useState(authAdminContext.permissions);
   
   // const [modal, setModal] = useState(false);
   // const toggle = () => setModal(!modal);
 
-  const parseToken = () => {
-    try {
-      console.log("parseToken", authToken);
-      const perms = JSON.stringify(keySetContext.pubnub.parseToken(authToken), null, 4);
+  // const parseToken = () => {
+  //   try {
+  //     console.log("parseToken", authToken);
+  //     const perms = JSON.stringify(keySetContext.pubnub.parseToken(authToken), null, 4);
       
-      console.log("    permissions", perms);
-      authAdminContext.setPermissions((perms) => (perms));
-    }
-    catch (error) {
-        console.log("    error", error);
-        authAdminContext.setPermissions("ERROR:\n" + error);
-    }
+  //     console.log("    permissions", perms);
+  //     authAdminContext.setPermissions((perms) => (perms));
+  //   }
+  //   catch (error) {
+  //       console.log("    error", error);
+  //       authAdminContext.setPermissions("ERROR:\n" + error);
+  //   }
+  // }
+
+  const grantToken = () => {
+    console.log("grantToken", permissions);
+
+    keySetContext.pubnub.grantToken(
+      JSON.parse(permissions),
+      function (status, token) {
+        if (!status.error) {
+          console.log(status, token);
+          authAdminContext.setAuthToken(token);
+          authAdminContext.setPermissions(permissions);
+        }
+        else {
+          authAdminContext.setAuthToken(JSON.stringify(status));
+        }
+      }
+    );
   }
 
   // const toastNotify = (type, title) => {
@@ -108,7 +126,7 @@ const ParseToken = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Parse Token - Auth v3</h3>
+                    <h3 className="mb-0">Grant Token - Auth v3</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -124,16 +142,15 @@ const ParseToken = () => {
                             className="form-control-label"
                             htmlFor="input-token"
                           >
-                            Auth Token
+                            Permissions
                           </label>
                           <Input
                             className="form-control-alternative"
-                            id="input-token"
-                            placeholder="Input v3 auth token"
+                            id="input-message"
                             type="textarea"
-                            rows="2"
-                            value={authToken}
-                            onChange={(e) => setAuthToken(e.target.value)}
+                            rows="30"
+                            value={permissions}
+                            onChange={(e) => setPermissions(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -143,11 +160,11 @@ const ParseToken = () => {
                     <Col className="text-right">
                       <Button
                         color="primary"
-                        onClick={parseToken}
-                        disabled = {keySetContext.pubnub == null || authToken === ""}
+                        onClick={grantToken}
+                        disabled = {keySetContext.pubnub == null || permissions === ""}
                         // size="sm"
                       >
-                        Parse Token
+                        Grant Token
                       </Button>
                     </Col>
                   </Row> 
@@ -160,7 +177,7 @@ const ParseToken = () => {
                 <Row>
                   <div className="col">
                     <h3 className="mb-0">
-                      Permissions
+                      Auth Token
                     </h3>
                   </div>
                 </Row>
@@ -200,11 +217,12 @@ const ParseToken = () => {
                       </Row> */}
                       <Input
                         className="form-control-alternative"
-                        id="input-message"
+                        id="input-token"
+                        placeholder="Input v3 auth token"
                         type="textarea"
-                        rows="25"
-                        value={authAdminContext.permissions}
-                        onChange={(e) => authAdminContext.setPermissions(e.target.value)}
+                        rows="5"
+                        value={authAdminContext.authToken}
+                        onChange={(e) => authAdminContext.setAuthToken(e.target.value)}
                       />
                     </FormGroup>
                   </Card>
@@ -219,4 +237,4 @@ const ParseToken = () => {
   );
 };
 
-export default ParseToken;
+export default GrantToken;
