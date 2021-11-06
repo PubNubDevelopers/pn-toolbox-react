@@ -17,8 +17,8 @@
 */
 
 import { useState } from "react";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+// import { ToastContainer, toast } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
 
 // reactstrap components
 import {
@@ -36,48 +36,50 @@ import {
 
 // core components
 import { useKeySetData } from "../../../tools/KeySetProvider"
+import { useAuthAdminData } from "../AuthAdminProvider";
 
-const ParseToken = (props) => {
+const ParseToken = () => {
   const keySetContext = useKeySetData();
-  console.log("PARSE TOKEN keySetContext: ", keySetContext);
+  const authAdminContext = useAuthAdminData();
 
-  const [token, setToken] = useState();
-  const [permissions, setPermissions] = useState();
+  console.log("ParseToken keySetContext: ", keySetContext);
+  console.log("ParseToken authAdminContext: ", authAdminContext);
+
+  const [authToken, setAuthToken] = useState(authAdminContext.authToken);
+  // const [permissions, setPermissions] = useState(authAdminContext.permissions);
   
-  const [isInitialized, setIsInitialized] = useState(keySetContext.pubnub != null);
-
-  const [modal, setModal] = useState(false);
-  const toggle = () => setModal(!modal);
+  // const [modal, setModal] = useState(false);
+  // const toggle = () => setModal(!modal);
 
   const parseToken = () => {
     try {
-      console.log("parseToken", token);
-      const perms = JSON.stringify(keySetContext.pubnub.parseToken(token), null, 4);
+      console.log("parseToken", authToken);
+      const perms = JSON.stringify(keySetContext.pubnub.parseToken(authToken), null, 4);
       
       console.log("    permissions", perms);
-      setPermissions((permsissions) => (perms));
+      authAdminContext.setPermissions((perms) => (perms));
     }
     catch (error) {
         console.log("    error", error);
-        setPermissions("ERROR:\n" + error);
+        authAdminContext.setPermissions("ERROR:\n" + error);
     }
   }
 
-  const toastNotify = (type, title) => {
-    const params = {
-      position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    };
+  // const toastNotify = (type, title) => {
+  //   const params = {
+  //     position: "top-center",
+  //     autoClose: 5000,
+  //     hideProgressBar: false,
+  //     closeOnClick: true,
+  //     pauseOnHover: true,
+  //     draggable: true,
+  //     progress: undefined,
+  //   };
 
-    if (type === "success") toast.success(title, params);
-    else if (type === "error") toast.error(title, params);
-    else toast.info(title, params);
-  }
+  //   if (type === "success") toast.success(title, params);
+  //   else if (type === "error") toast.error(title, params);
+  //   else toast.info(title, params);
+  // }
 
   return (
     <>
@@ -87,7 +89,7 @@ const ParseToken = (props) => {
         newChannels={newChannels}
         addChannels={addChannels}
       /> */}
-      <ToastContainer
+      {/* <ToastContainer
         position="top-center"
         autoClose={3000}
         hideProgressBar={false}
@@ -97,7 +99,7 @@ const ParseToken = (props) => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-      />      
+      />       */}
       {/* Page content */}
       <Container className="mt--7" fluid>
         <Row className="mt-0">
@@ -130,7 +132,7 @@ const ParseToken = (props) => {
                             placeholder="Input v3 auth token"
                             type="textarea"
                             rows="2"
-                            onChange={(e) => setToken(e.target.value)}
+                            onChange={(e) => setAuthToken(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -141,7 +143,7 @@ const ParseToken = (props) => {
                       <Button
                         color="primary"
                         onClick={parseToken}
-                        disabled = {!isInitialized || token === ""}
+                        disabled = {keySetContext.pubnub != null || authToken === ""}
                         // size="sm"
                       >
                         Parse Token
@@ -200,7 +202,7 @@ const ParseToken = (props) => {
                         id="input-message"
                         type="textarea"
                         rows="25"
-                        value={permissions}
+                        value={authAdminContext.permissions}
                       />
                     </FormGroup>
                   </Card>

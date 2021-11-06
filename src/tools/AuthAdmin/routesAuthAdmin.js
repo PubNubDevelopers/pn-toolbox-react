@@ -1,6 +1,6 @@
 // @mui/icons-material
 import { AdminPanelSettings } from "@mui/icons-material";
-import { PushDebugProvider } from "tools/PushDebug/PushDebugProvider";
+import { AuthAdminProvider } from "./AuthAdminProvider";
 
 // app pages
 import ParseToken from "./pages/ParseToken";
@@ -17,19 +17,14 @@ var routesAuthAdmin = {
       path: "/parse-token",
       name: "ParseToken",
       component: ParseToken,
-      parent: PushDebugProvider,
+      parent: AuthAdminProvider,
       layout: "/admin",
     },
     // {
     //   path: "/create-token",
     //   name: "Create Token",
     //   component: CreateToken,
-    //   layout: "/admin",
-    // },
-    // {
-    //   path: "/permissions",
-    //   name: "Permissions",
-    //   component: Permissions,
+    //   parent: AuthAdminProvider,
     //   layout: "/admin",
     // },
   ]
