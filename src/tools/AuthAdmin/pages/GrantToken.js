@@ -45,8 +45,8 @@ const GrantToken = () => {
   console.log("ParseToken keySetContext: ", keySetContext);
   console.log("ParseToken authAdminContext: ", authAdminContext);
 
+  const [grantedPermissions, setGrantedPermissions] = useState(authAdminContext.grantedPermissions);
   // const [authToken, setAuthToken] = useState(authAdminContext.authToken);
-  const [permissions, setPermissions] = useState(authAdminContext.permissions);
   
   // const [modal, setModal] = useState(false);
   // const toggle = () => setModal(!modal);
@@ -66,18 +66,18 @@ const GrantToken = () => {
   // }
 
   const grantToken = () => {
-    console.log("grantToken", permissions);
+    console.log("grantToken", grantedPermissions);
 
     keySetContext.pubnub.grantToken(
-      JSON.parse(permissions),
+      JSON.parse(grantedPermissions),
       function (status, token) {
         if (!status.error) {
           console.log(status, token);
-          authAdminContext.setAuthToken(token);
-          authAdminContext.setPermissions(permissions);
+          authAdminContext.setGrantedAuthToken(token);
+          authAdminContext.setGrantedPermissions(grantedPermissions);
         }
         else {
-          authAdminContext.setAuthToken(JSON.stringify(status));
+          authAdminContext.setGrantedAuthToken(JSON.stringify(status, null, 4));
         }
       }
     );
@@ -149,8 +149,8 @@ const GrantToken = () => {
                             id="input-message"
                             type="textarea"
                             rows="30"
-                            value={permissions}
-                            onChange={(e) => setPermissions(e.target.value)}
+                            value={grantedPermissions}
+                            onChange={(e) => setGrantedPermissions(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -161,7 +161,7 @@ const GrantToken = () => {
                       <Button
                         color="primary"
                         onClick={grantToken}
-                        disabled = {keySetContext.pubnub == null || permissions === ""}
+                        disabled = {keySetContext.pubnub == null || grantedPermissions === ""}
                         // size="sm"
                       >
                         Grant Token
@@ -221,8 +221,8 @@ const GrantToken = () => {
                         placeholder="Input v3 auth token"
                         type="textarea"
                         rows="5"
-                        value={authAdminContext.authToken}
-                        onChange={(e) => authAdminContext.setAuthToken(e.target.value)}
+                        value={authAdminContext.grantedAuthToken}
+                        onChange={(e) => authAdminContext.setGrantedAuthToken(e.target.value)}
                       />
                     </FormGroup>
                   </Card>

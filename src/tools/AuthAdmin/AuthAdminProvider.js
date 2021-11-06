@@ -6,7 +6,7 @@ export const AuthAdminProvider = ({ children }) => {
 
   ///////////////////
   // ParseToken State
-  //////////////////
+  ///////////////////
 
   const defaultPermissions = JSON.stringify({
     "ttl": 15,
@@ -51,17 +51,28 @@ export const AuthAdminProvider = ({ children }) => {
         }
       }
     }
-  }, null, 2);
+  }, null, 4);
 
-  const [authToken, setAuthToken] = useState();
-  const [permissions, setPermissions] = useState(defaultPermissions);
+  const [parsedAuthToken, setParsedAuthToken] = useState();
+  const [parsedPermissions, setParsedPermissions] = useState();
+
+
+  ///////////////////
+  // GrantToken State
+  ///////////////////
+
+  const [grantedAuthToken, setGrantedAuthToken] = useState();
+  const [grantedPermissions, setGrantedPermissions] = useState(defaultPermissions);
+
 
   // provide data/functions to context users
   //////////////////////////////////////////
   const useAuthAdminData = {
     // ManageDevice State
-    authToken, setAuthToken,
-    permissions, setPermissions,
+    parsedAuthToken, setParsedAuthToken,
+    parsedPermissions, setParsedPermissions,
+    grantedAuthToken, setGrantedAuthToken,
+    grantedPermissions, setGrantedPermissions,
     defaultPermissions,
   }
 

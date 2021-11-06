@@ -45,7 +45,7 @@ const ParseToken = () => {
   console.log("ParseToken keySetContext: ", keySetContext);
   console.log("ParseToken authAdminContext: ", authAdminContext);
 
-  const [authToken, setAuthToken] = useState(authAdminContext.authToken);
+  const [parsedAuthToken, setParsedAuthToken] = useState(authAdminContext.parsedAuthToken);
   // const [permissions, setPermissions] = useState(authAdminContext.permissions);
   
   // const [modal, setModal] = useState(false);
@@ -53,15 +53,17 @@ const ParseToken = () => {
 
   const parseToken = () => {
     try {
-      console.log("parseToken", authToken);
-      const perms = JSON.stringify(keySetContext.pubnub.parseToken(authToken), null, 4);
+      console.log("parseToken", parsedAuthToken);
+      authAdminContext.setParsedAuthToken(parsedAuthToken);
+
+      const perms = JSON.stringify(keySetContext.pubnub.parseToken(parsedAuthToken), null, 4);
       
       console.log("    permissions", perms);
-      authAdminContext.setPermissions((perms) => (perms));
+      authAdminContext.setParsedPermissions(perms);
     }
     catch (error) {
         console.log("    error", error);
-        authAdminContext.setPermissions("ERROR:\n" + error);
+        authAdminContext.setParsedPermissions("ERROR:\n" + error);
     }
   }
 
@@ -100,7 +102,6 @@ const ParseToken = () => {
         draggable
         pauseOnHover
       />       */}
-      {/* Page content */}
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -132,8 +133,8 @@ const ParseToken = () => {
                             placeholder="Input v3 auth token"
                             type="textarea"
                             rows="2"
-                            value={authToken}
-                            onChange={(e) => setAuthToken(e.target.value)}
+                            value={parsedAuthToken}
+                            onChange={(e) => setParsedAuthToken(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -144,7 +145,7 @@ const ParseToken = () => {
                       <Button
                         color="primary"
                         onClick={parseToken}
-                        disabled = {keySetContext.pubnub == null || authToken === ""}
+                        disabled = {keySetContext.pubnub == null || parsedAuthToken === ""}
                         // size="sm"
                       >
                         Parse Token
@@ -203,8 +204,8 @@ const ParseToken = () => {
                         id="input-message"
                         type="textarea"
                         rows="25"
-                        value={authAdminContext.permissions}
-                        onChange={(e) => authAdminContext.setPermissions(e.target.value)}
+                        value={authAdminContext.parsedPermissions}
+                        // onChange={(e) => authAdminContext.setParsedPermissions(e.target.value)}
                       />
                     </FormGroup>
                   </Card>
