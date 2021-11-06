@@ -1,5 +1,7 @@
 // @mui/icons-material
-// import { AppIconName, } from "@mui/icons-material";
+// look for icon names here: https://mui.com/components/material-icons/ 
+//   and replace "ExtensionIcon" with that icon name
+// import ExtensionIcon from '@mui/icons-material/Extension';
 
 // app pages
 // import Page1 from "pages/Page1.js";
@@ -8,7 +10,7 @@
 // var routesAppName = {
 //   collapse: true,
 //   name: "App Name",
-//   icon: AppIconName,
+//   icon: ExtensionIcon,
 //   iconColor: "Primary",
 //   state: "appNameCollapse",
 //   views: [

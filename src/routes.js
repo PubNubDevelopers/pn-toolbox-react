@@ -1,4 +1,5 @@
 import KeySet from "tools/KeySet";
+import ToolboxApp from "tools/ToolboxApp";
 
 // @mui/icons-material
 import { VpnKey } from "@mui/icons-material";
@@ -6,7 +7,7 @@ import { VpnKey } from "@mui/icons-material";
 // app routes
 import routesPushDebug from "tools/PushDebug/routesPushDebug";
 import routesAuthAdmin from "tools/AuthAdmin/routesAuthAdmin"
-import ToolboxApp from "tools/ToolboxApp";
+import routesObjectAdmin from "tools/ObjectAdmin/routesObjectAdmin";
 
 var routes = [
   {
@@ -27,6 +28,10 @@ var routes = [
     divider: true,
   },
   routesAuthAdmin,
+  {
+    divider: true,
+  },
+  routesObjectAdmin,
   {
     divider: true,
   },

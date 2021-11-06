@@ -46,24 +46,6 @@ const GrantToken = () => {
   console.log("ParseToken authAdminContext: ", authAdminContext);
 
   const [grantedPermissions, setGrantedPermissions] = useState(authAdminContext.grantedPermissions);
-  // const [authToken, setAuthToken] = useState(authAdminContext.authToken);
-  
-  // const [modal, setModal] = useState(false);
-  // const toggle = () => setModal(!modal);
-
-  // const parseToken = () => {
-  //   try {
-  //     console.log("parseToken", authToken);
-  //     const perms = JSON.stringify(keySetContext.pubnub.parseToken(authToken), null, 4);
-      
-  //     console.log("    permissions", perms);
-  //     authAdminContext.setPermissions((perms) => (perms));
-  //   }
-  //   catch (error) {
-  //       console.log("    error", error);
-  //       authAdminContext.setPermissions("ERROR:\n" + error);
-  //   }
-  // }
 
   const grantToken = () => {
     console.log("grantToken", grantedPermissions);
