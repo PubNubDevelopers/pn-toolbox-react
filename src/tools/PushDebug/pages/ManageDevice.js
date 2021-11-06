@@ -43,30 +43,25 @@ import {
 
 // core components
 import { useKeySetData } from "../../../tools/KeySetProvider";
+import { usePushDebugData } from "../PushDebugProvider";
 
 const ManageDevice = () => {
   const keySetContext = useKeySetData();
-  console.log("INSPECT DEVICE keySetContext: ", keySetContext);
+  const pushDebugContext = usePushDebugData();
 
-  const [token, setToken] = useState();
-  const [pushType, setPushType] = useState("apns2"); // apns, gcm
-  const [environment, setEnvironment] = useState(true);
-  const [topic, setTopic] = useState();
+  console.log("ManageDevice keySetContext: ", keySetContext);
+  console.log("ManageDevice pushDebugContext: ", pushDebugContext);
 
-  const [resultsToken, setResultsToken] = useState();
-  const [resultsPushType, setResultsPushType] = useState(); // apns, gcm
-  const [resultsEnvironment, setResultsEnvironment] = useState(true);
-  const [resultsTopic, setResultsTopic] = useState(true);
+  const [token, setToken] = useState(pushDebugContext.token);
+  const [pushType, setPushType] = useState(pushDebugContext.pushType); // apns, gcm
+  const [environment, setEnvironment] = useState(pushDebugContext.environment);
+  const [topic, setTopic] = useState(pushDebugContext.topic);
 
-  const [registeredChannels, setRegisteredChannels] = useState([]);
+  const [pushRadios, setPushRadios] = useState(pushDebugContext.pushRadios);
+  const [environmentRadios, setEnvironmentRadios] = useState(pushDebugContext.environmentRadios);
+  const [enableEnvironment, setEnableEnvironment] = useState(pushDebugContext.enableEnvironment);
+  const [enableTopic, setEnableTopic] = useState(pushDebugContext.enableTopic);
   
-  const [pushRadios, setPushRadios] = useState(0);
-  const [environmentRadios, setEnvironmentRadios] = useState(0);
-  const [enableEnvironment, setEnableEnvironment] = useState(true);
-  const [enableTopic, setEnableTopic] = useState(true);
-  
-  const [isInitialized, setIsInitialized] = useState(keySetContext.pubnub != null);
-
   const [modal, setModal] = useState(false);
   const toggle = () => setModal(!modal);
   const newChannels = useRef("");
@@ -84,32 +79,20 @@ const ManageDevice = () => {
     return newParams;
   }
 
-  const updateResultsFields = () => {
-    setResultsToken((resultsToken) => token);
-
-    setResultsPushType(function(resultsPushType) {
-      if (pushType === 'gcm') return 'FCM';
-      if (pushType === 'apns') return 'APNs';
-      if (pushType === 'apns2') return 'APNs 2';
-    });
-
-    setResultsEnvironment((resultsEnvironment) => environment);
-    setResultsTopic((resultsTopic) => topic);
-  }
-
   const listChannels = () => {
     keySetContext.pubnub.push.listChannels(
       getPushParams(),
       (status, response) => {
         if (!status.error) {
-          updateResultsFields();
+          updateContextState();
 
           if (response.channels !== null && response.channels.length === 0) {
             toastNotify("info", "No registered channels.");
-            setRegisteredChannels([]);
+            pushDebugContext.setRegisteredChannels([]);
           }
           else {
-            setRegisteredChannels(response.channels.sort());
+            const sortedChannels = response.channels.sort()
+            pushDebugContext.setRegisteredChannels(sortedChannels);
           }
         }
         else {
@@ -118,6 +101,18 @@ const ManageDevice = () => {
         }
       }
     );
+  }
+
+  const updateContextState = () => {
+    pushDebugContext.setToken(token);
+    pushDebugContext.setPushType(pushType);
+    pushDebugContext.setEnvironment(environment);
+    pushDebugContext.setTopic(topic);
+
+    pushDebugContext.setPushRadios(pushRadios);
+    pushDebugContext.setEnvironmentRadios(environmentRadios);
+    pushDebugContext.setEnableEnvironment(enableEnvironment);
+    pushDebugContext.setEnableTopic(enableTopic);
   }
 
   const addChannels = (isConfirmed) => {
@@ -265,6 +260,7 @@ const ManageDevice = () => {
                             id="input-token"
                             placeholder="Input device push token"
                             type="text"
+                            value={token}
                             onChange={(e) => setToken(e.target.value)}
                           />
                         </FormGroup>
@@ -392,6 +388,7 @@ const ManageDevice = () => {
                             placeholder="com.example.app.topic"
                             type="text"
                             disabled={!enableTopic}
+                            value={topic}
                             onChange={(e) => setTopic(e.target.value)}
                           />
                         </FormGroup>
@@ -403,7 +400,7 @@ const ManageDevice = () => {
                       <Button
                         color="danger"
                         onClick={listChannels}
-                        disabled = {!isInitialized || token === "" || (pushType === "apns2" && topic === "")}
+                        disabled = {keySetContext.pubnub == null || token === "" || (pushType === "apns2" && topic === "")}
                         // size="sm"
                       >
                         List Channels
@@ -411,7 +408,7 @@ const ManageDevice = () => {
                       <Button
                         color="secondary"
                         onClick={toggle}
-                        disabled = {!isInitialized || token === "" || (pushType === "apns2" && topic === "")}
+                        disabled = {keySetContext.pubnub == null || token === "" || (pushType === "apns2" && topic === "")}
                         // size="sm"
                       >
                         Add Channels
@@ -439,7 +436,7 @@ const ManageDevice = () => {
                     </h4>
                   </div>
                   </Col>
-                  <Col>{resultsToken}</Col>
+                  <Col>{pushDebugContext.token}</Col>
                 </Row>
                 <Row>
                   <Col lg="2">
@@ -449,9 +446,9 @@ const ManageDevice = () => {
                     </h4>
                   </div>
                   </Col>
-                  <Col>{resultsPushType}</Col>
+                  <Col>{pushDebugContext.pushType}</Col>
                 </Row>
-                <Row hidden={resultsPushType !== "APNs 2"}>
+                <Row hidden={pushDebugContext.pushType !== "apns2"}>
                   <Col lg="2">
                   <div className="col">
                     <h4 className="mb-0">
@@ -459,9 +456,9 @@ const ManageDevice = () => {
                     </h4>
                   </div>
                   </Col>
-                  <Col>{resultsEnvironment}</Col>
+                  <Col>{pushDebugContext.environment}</Col>
                 </Row>
-                <Row hidden={resultsPushType !== "APNs 2"}>
+                <Row hidden={pushDebugContext.pushType !== "apns2"}>
                   <Col lg="2">
                   <div className="col">
                     <h4 className="mb-0">
@@ -469,13 +466,13 @@ const ManageDevice = () => {
                     </h4>
                   </div>
                   </Col>
-                  <Col>{resultsTopic}</Col>
+                  <Col>{pushDebugContext.topic}</Col>
                 </Row>
                 <p></p>
                 <Row>
                   <div className="col">
                     <h3 className="mb-0">
-                      Registered Channels: {registeredChannels.length}
+                      Registered Channels: {pushDebugContext.registeredChannels.length}
                     </h3>
                   </div>
                 </Row>
@@ -483,7 +480,7 @@ const ManageDevice = () => {
                 <CardBody>
                   <div className="pl-lg-4">
                     <Table className="align-items-center table-flush" responsive >
-                      <ChannelRows channels={registeredChannels} handleRemoveChannel={handleRemoveChannel}/>
+                      <ChannelRows channels={pushDebugContext.registeredChannels} handleRemoveChannel={handleRemoveChannel}/>
                     </Table>
                   </div>
               </CardBody>
@@ -497,11 +494,12 @@ const ManageDevice = () => {
 
 export default ManageDevice;
 
+
 function ChannelRows(props) {
   const channels = props.channels;
 
   const rows = channels.map((ch, index) =>
-    <tr id={index}>
+    <tr key={index}>
       <td width="100%">{ch}</td>
       {/* <td>
         <UncontrolledTooltip

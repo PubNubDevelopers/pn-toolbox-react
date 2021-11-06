@@ -24,62 +24,28 @@ const PushTest = () => {
   const keySetContext = useKeySetData();
   const pushDebugContext = usePushDebugData();
 
-  console.log("KEYSET keySetContext: ", keySetContext);
-  console.log("KEYSET pushDebugContext: ", pushDebugContext);
+  console.log("PushTest keySetContext: ", keySetContext);
+  console.log("PushTest pushDebugContext: ", pushDebugContext);
 
-  const messageDefault = JSON.stringify({
-    "pn_debug": true,
-    "text": "This is test message from PubNub - #counter#",
-    "pn_apns": {
-      "aps": {
-        "alert": {
-          "title": "PN Test Message - #counter#",
-          "body": "This is test message from PubNub - ask Mike Comer if you are concerned",
-          "content-available": "1"
-        },
-      },
-      "pn_push":[
-        {
-          "push_type": "alert",
-          "auth_method": "token",
-          "targets":[
-            {
-              "environment":"production",
-              "topic":"com.everbridge.mobile.iv.Recipient"
-            }
-          ],
-          "version":"v2"
-        }
-      ]
-    },
-    "pn_gcm": {
-      "notification": {
-        "title": "PN Test Message - #counter#",
-        "body": "This is test message from PubNub - ask Mike Comer if you are concerned"
-      }
-    }
-  }, null, 2);
-
-  // const [channel, setChannel] = useState("19e4598ef7278c4aa5c70fbd533d2788da9145a8512ba11ea9b303d4ec3bafab-push");
+  const [pushChannel, setPushChannel] = useState(pushDebugContext.pushChannel);
   // const [subscribeMessageChannel, setSubscribeMessageChannel] = useState();
   // const [subscribeFeedbackChannel, setSubscribeFeedbackChannel] = useState();
   const [subscribeButtonLabel, setSubscribeButtonLabel] = useState("Subscribe");
 
-  const [message, setMessage] = useState(messageDefault);
+  const [message, setMessage] = useState(pushDebugContext.message);
   const [inputRows, setInputRows] = useState(28);
 
   const [alert, setAlert] = useState(null);
-  // probably should be useRef
-  const isWarnUnsubscribed = useRef(true);
-  const [isInitialized, setIsInitialized] = useState(keySetContext.pubnub != null);
 
   const outputMessage = useRef();
   const outputFeedback = useRef([]);
-  const [allResults, setAllResults] = useState(() => []);
-
-  // const [counter, setCounter] = useState(0);
+  const [allResults, setAllResults] = useState(() => pushDebugContext.testResults || []);
+  
   const counter = useRef(0);
+  const isWarnUnsubscribed = useRef(true);
 
+  // should this go in the KeySetContext (where it is now) or
+  //  PushDebugContext for tool specific listeners???
   const createListener = () => {
     console.log("PushTest:createListener: ");
 
@@ -90,6 +56,7 @@ const PushTest = () => {
         if (status.category === "PNConnectedCategory" && status.operation === "PNSubscribeOperation") {
           // setSubscribeMessageChannel(() => status.subscribedChannels[0]);
           // setSubscribeFeedbackChannel(() => status.subscribedChannels[1]);
+          pushDebugContext.setPushChannel(pushChannel);
           setSubscribeButtonLabel((subscribeStatusLabel) => "Unsubscribe");
           timerAlert("Subscribe Success", 'You have successfully subscribed', 3000);
         }
@@ -115,10 +82,10 @@ const PushTest = () => {
         const timestamp = getDateTime(msg.timetoken) + "UTC\n[" + msg.timetoken + "]";
         const message = JSON.stringify(msg.message, null, 2);
 
-        if (msg.channel === pushDebugContext.pushChannel) {
+        if (msg.channel === pushChannel) {
           outputMessage.current = timestamp + "\n" + message;
         }
-        else if (msg.channel === pushDebugContext.pushChannel + "-pndebug") {
+        else if (msg.channel === pushChannel + "-pndebug") {
           outputFeedback.current.push(parseFeedback(message));
         }
       }
@@ -183,7 +150,7 @@ const PushTest = () => {
       console.log("before setTimeout: delay=", delay);
       setTimeout(function(){
         console.log("before subscribe");
-        keySetContext.pubnub.subscribe({channels: [pushDebugContext.pushChannel, pushDebugContext.pushChannel + "-pndebug"]});
+        keySetContext.pubnub.subscribe({channels: [pushChannel, pushChannel + "-pndebug"]});
       }, delay);
     }
   }
@@ -201,10 +168,11 @@ const PushTest = () => {
   const publishMessage = () => {
     outputFeedback.current = [];
     isWarnUnsubscribed.current = false;
+    pushDebugContext.setMessage(message);
+    const payload = tokenizePayload(message);
+
     hideAlert();
     setInputRows(4);
-
-    const payload = tokenizePayload(message);
 
     keySetContext.pubnub.publish(
       {
@@ -232,7 +200,9 @@ const PushTest = () => {
   const handleOutputResults = () => {
     let data = {"message" : outputMessage.current};
     data.feedback = outputFeedback.current;
+
     setAllResults((allResults) => [data, ...allResults]);
+    pushDebugContext.setTestResults((testResults) => [data, ...testResults]);
   }
 
   const getDateTime = (pntt) => {
@@ -310,10 +280,9 @@ const PushTest = () => {
                         <Col className="col text-right">
                           <Button
                             color="danger"
-                            href="#pablo"
                             onClick={manageSubscription}
                             size="sm"
-                            disabled = {!isInitialized || pushDebugContext.pushChannel === ""}
+                            disabled = {keySetContext.pubnub == null || pushChannel === ""}
                           >
                             {subscribeButtonLabel}
                           </Button>
@@ -324,9 +293,8 @@ const PushTest = () => {
                         id="input-channel"
                         placeholder="Enter primary message channel"
                         type="text"
-                        onChange={(e) => pushDebugContext.setPushChannel(e.target.value)}
-                        // defaultValue="19e4598ef7278c4aa5c70fbd533d2788da9145a8512ba11ea9b303d4ec3bafab-push"
-                        value={pushDebugContext.pushChannel}
+                        value={pushChannel}
+                        onChange={(e) => setPushChannel(e.target.value)}
                       />
                     </FormGroup>
                   </CardHeader>
@@ -349,7 +317,7 @@ const PushTest = () => {
                                   color="danger"
                                   size="sm"
                                   onClick={handlePublishClick}
-                                  disabled={!isInitialized || message === ""}
+                                  disabled={keySetContext.pubnub == null || message === ""}
                                 >
                                   Publish
                                 </Button>
@@ -360,9 +328,9 @@ const PushTest = () => {
                               id="input-message"
                               placeholder="Enter message with push payload"
                               type="textarea"
-                              defaultValue={messageDefault}
-                              onChange={(e) => setMessage(e.target.value)}
                               rows={inputRows}
+                              value={message}
+                              onChange={(e) => setMessage(e.target.value)}
                             />
                           </FormGroup>
                         </Card>
@@ -386,7 +354,6 @@ const PushTest = () => {
                               <Col className="col text-right">
                                 <Button
                                   color="danger"
-                                  href="#pablo"
                                   size="sm"
                                   onClick={() => setAllResults([])}
                                 >
