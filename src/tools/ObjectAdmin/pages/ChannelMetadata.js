@@ -17,7 +17,7 @@
 */
 
 import { useState } from "react";
-import classnames from "classnames";
+// import classnames from "classnames";
 
 // reactstrap components
 import {
@@ -31,7 +31,7 @@ import {
   Input,
   Row,
   Col,
-  ButtonGroup,
+  // ButtonGroup,
   CardFooter,
 } from "reactstrap";
 
@@ -149,6 +149,7 @@ const ChannelMetadata = () => {
                         </FormGroup>
                       </Col>
                       <Col lg="3" className="text-center">
+                        {/*                         
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -190,6 +191,7 @@ const ChannelMetadata = () => {
                             </ButtonGroup>
                           </div>
                         </FormGroup>
+                         */}
                       </Col>
                     </Row>
                   </div>
@@ -202,25 +204,18 @@ const ChannelMetadata = () => {
                       color="danger"
                       onClick={getChannelObject}
                       disabled = {keySetContext.pubnub == null || channelId === ""}
-                      // size="sm"
                     >
                       Get Metadata
                     </Button>
-                    {/* <Button
-                      color="secondary"
-                      // onClick={toggle}
-                      // disabled = {keySetContext.pubnub == null || token === "" || (pushType === "apns2" && topic === "")}
-                      // size="sm"
-                    >
-                      Add Channel Objects
-                    </Button> */}
+                  </Col>
+                  <Col lg="3" className="text-center">
+                    
                   </Col>
                 </Row> 
               </CardFooter>
             </Card>
           </Col>
         </Row>
-
         <Row className="mt-0">
           <Col className="order-xl-2">
             <Card className="bg-secondary shadow"> 
@@ -234,9 +229,7 @@ const ChannelMetadata = () => {
                 </Row>
               </CardHeader>             
               <CardBody>
-              {/* <Row> */}
                 <Form>
-                  {/* <div className="pl-lg-14"> */}
                     <Row>
                       <Col>
                         <FormGroup>
@@ -256,9 +249,7 @@ const ChannelMetadata = () => {
                         </FormGroup>
                       </Col>
                     </Row>
-                  {/* </div> */}
                 </Form>
-              {/* </Row> */}
               <Row>
                 <Col>
                 <Form>
@@ -397,6 +388,9 @@ const ChannelMetadata = () => {
                     >
                       Save Metadata
                     </Button>
+                  </Col>
+                  <Col lg="3" className="text-center">
+                    
                   </Col>
                 </Row> 
               </CardFooter>
