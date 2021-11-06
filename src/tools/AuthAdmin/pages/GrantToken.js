@@ -35,36 +35,52 @@ import {
 } from "reactstrap";
 
 // core components
-import { useKeySetData } from "../../../tools/KeySetProvider"
+import { useKeySetData } from "../../KeySetProvider"
 import { useAuthAdminData } from "../AuthAdminProvider";
 
-const ParseToken = () => {
+const GrantToken = () => {
   const keySetContext = useKeySetData();
   const authAdminContext = useAuthAdminData();
 
   console.log("ParseToken keySetContext: ", keySetContext);
   console.log("ParseToken authAdminContext: ", authAdminContext);
 
-  const [parsedAuthToken, setParsedAuthToken] = useState(authAdminContext.parsedAuthToken);
-  // const [permissions, setPermissions] = useState(authAdminContext.permissions);
+  const [grantedPermissions, setGrantedPermissions] = useState(authAdminContext.grantedPermissions);
+  // const [authToken, setAuthToken] = useState(authAdminContext.authToken);
   
   // const [modal, setModal] = useState(false);
   // const toggle = () => setModal(!modal);
 
-  const parseToken = () => {
-    try {
-      console.log("parseToken", parsedAuthToken);
-      authAdminContext.setParsedAuthToken(parsedAuthToken);
-
-      const perms = JSON.stringify(keySetContext.pubnub.parseToken(parsedAuthToken), null, 4);
+  // const parseToken = () => {
+  //   try {
+  //     console.log("parseToken", authToken);
+  //     const perms = JSON.stringify(keySetContext.pubnub.parseToken(authToken), null, 4);
       
-      console.log("    permissions", perms);
-      authAdminContext.setParsedPermissions(perms);
-    }
-    catch (error) {
-        console.log("    error", error);
-        authAdminContext.setParsedPermissions("ERROR:\n" + error);
-    }
+  //     console.log("    permissions", perms);
+  //     authAdminContext.setPermissions((perms) => (perms));
+  //   }
+  //   catch (error) {
+  //       console.log("    error", error);
+  //       authAdminContext.setPermissions("ERROR:\n" + error);
+  //   }
+  // }
+
+  const grantToken = () => {
+    console.log("grantToken", grantedPermissions);
+
+    keySetContext.pubnub.grantToken(
+      JSON.parse(grantedPermissions),
+      function (status, token) {
+        if (!status.error) {
+          console.log(status, token);
+          authAdminContext.setGrantedAuthToken(token);
+          authAdminContext.setGrantedPermissions(grantedPermissions);
+        }
+        else {
+          authAdminContext.setGrantedAuthToken(JSON.stringify(status, null, 4));
+        }
+      }
+    );
   }
 
   // const toastNotify = (type, title) => {
@@ -102,6 +118,7 @@ const ParseToken = () => {
         draggable
         pauseOnHover
       />       */}
+      {/* Page content */}
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -109,7 +126,7 @@ const ParseToken = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Parse Token - Auth v3</h3>
+                    <h3 className="mb-0">Grant Token - Auth v3</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -125,16 +142,15 @@ const ParseToken = () => {
                             className="form-control-label"
                             htmlFor="input-token"
                           >
-                            Auth Token
+                            Permissions
                           </label>
                           <Input
                             className="form-control-alternative"
-                            id="input-token"
-                            placeholder="Input v3 auth token"
+                            id="input-message"
                             type="textarea"
-                            rows="2"
-                            value={parsedAuthToken}
-                            onChange={(e) => setParsedAuthToken(e.target.value)}
+                            rows="30"
+                            value={grantedPermissions}
+                            onChange={(e) => setGrantedPermissions(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -144,24 +160,26 @@ const ParseToken = () => {
                     <Col className="text-right">
                       <Button
                         color="primary"
-                        onClick={parseToken}
-                        disabled = {keySetContext.pubnub == null || parsedAuthToken === ""}
+                        onClick={grantToken}
+                        disabled = {keySetContext.pubnub == null || grantedPermissions === ""}
                         // size="sm"
                       >
-                        Parse Token
+                        Grant Token
                       </Button>
                     </Col>
                   </Row> 
                 </Form>
               </CardBody>
             </Card>
+            
             <p />
+
             <Card className="bg-secondary shadow">              
               <CardHeader>
                 <Row>
                   <div className="col">
                     <h3 className="mb-0">
-                      Permissions
+                      Auth Token
                     </h3>
                   </div>
                 </Row>
@@ -201,11 +219,12 @@ const ParseToken = () => {
                       </Row> */}
                       <Input
                         className="form-control-alternative"
-                        id="input-message"
+                        id="input-token"
+                        placeholder="Input v3 auth token"
                         type="textarea"
-                        rows="25"
-                        value={authAdminContext.parsedPermissions}
-                        // onChange={(e) => authAdminContext.setParsedPermissions(e.target.value)}
+                        rows="5"
+                        value={authAdminContext.grantedAuthToken}
+                        onChange={(e) => authAdminContext.setGrantedAuthToken(e.target.value)}
                       />
                     </FormGroup>
                   </Card>
@@ -220,4 +239,4 @@ const ParseToken = () => {
   );
 };
 
-export default ParseToken;
+export default GrantToken;

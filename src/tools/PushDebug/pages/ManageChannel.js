@@ -18,8 +18,8 @@
 
 import { useState } from "react";
 // import classnames from "classnames";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+// import { ToastContainer, toast } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
 
 // reactstrap components 
 import {
@@ -43,11 +43,14 @@ import {
 
 // core components
 import { useKeySetData } from "../../../tools/KeySetProvider";
-
+import { usePushDebugData } from "../PushDebugProvider";
 
 const InspectDevice = () => {
   const keySetContext = useKeySetData();
-  console.log("MANAGE CHANNEL keySetContext: ", keySetContext);
+  const pushDebugContext = usePushDebugData();
+
+  console.log("ManageChannel keySetContext: ", keySetContext);
+  console.log("ManageChannel pushDebugContext: ", pushDebugContext);
 
   // const [pushType, setPushType] = useState("apns2"); // apns, gcm
   // const [environment, setEnvironment] = useState(true);
@@ -210,42 +213,39 @@ const InspectDevice = () => {
   // }
 
 
-  const [channel, setChannel] = useState("CHANNEL_NAME");
-  const [topic, setTopic] = useState("com.example.app.topic");
+  const [channel, setChannel] = useState(pushDebugContext.manageChannel);
+  const [topic, setTopic] = useState(pushDebugContext.topic);
 
-  const defaultApnsUri = `curl -s -v storageweb-red1.aws-sjc-1.ps.pn:9000/v1/push/sub-key/SUB_KEY}/audit-devices/CHANNEL_NAME`;
-  const defaultApns2DevUri = `curl -s -v "storageweb-red1.aws-sjc-1.ps.pn:9000/v2/admin-push/sub-key/SUB_KEY/channel/CHANNEL_NAME?type=apns2&environment=development&topic=TOPIC`;
-  const defaultApns2PrdUri = `curl -s -v "storageweb-red1.aws-sjc-1.ps.pn:9000/v2/admin-push/sub-key/SUB_KEY/channel/CHANNEL_NAME?type=apns2&environment=production&topic=TOPIC`;
-  const defaultFcmUri = `curl -s -v "storageweb-red1.aws-sjc-1.ps.pn:9000/v2/admin-push/sub-key/SUB_KEY/channel/CHANNEL_NAME?type=gcm`;
-
-
-  const [apns2DevUri, setApns2DevUri] = useState();
-  const [apns2PrdUri, setApns2PrdUri] = useState();
-  const [apnsUri, setApnsUri] = useState();
-  const [fcmUri, setFcmUri] = useState();
+  // const [apns2DevUri, setApns2DevUri] = useState();
+  // const [apns2PrdUri, setApns2PrdUri] = useState();
+  // const [apnsUri, setApnsUri] = useState();
+  // const [fcmUri, setFcmUri] = useState();
 
   const generateURIs = () => {
-    setApnsUri(() => defaultApnsUri.replace("SUB_KEY", keySetContext.subKey).replace("CHANNEL_NAME", channel));
-    setApns2DevUri(() => defaultApns2DevUri.replace("SUB_KEY", keySetContext.subKey).replace("CHANNEL_NAME", channel).replace("TOPIC", topic));
-    setApns2PrdUri(() => defaultApns2PrdUri.replace("SUB_KEY", keySetContext.subKey).replace("CHANNEL_NAME", channel).replace("TOPIC", topic));
-    setFcmUri(() => defaultFcmUri.replace("SUB_KEY", keySetContext.subKey).replace("CHANNEL_NAME", channel));
+    pushDebugContext.setManageChannel(channel);
+    pushDebugContext.setTopic(topic);
+
+    pushDebugContext.setApnsUri(() => pushDebugContext.defaultApnsUri.replace("SUB_KEY", keySetContext.subKey).replace("CHANNEL_NAME", channel));
+    pushDebugContext.setApns2DevUri(() => pushDebugContext.defaultApns2DevUri.replace("SUB_KEY", keySetContext.subKey).replace("CHANNEL_NAME", channel).replace("TOPIC", topic));
+    pushDebugContext.setApns2PrdUri(() => pushDebugContext.defaultApns2PrdUri.replace("SUB_KEY", keySetContext.subKey).replace("CHANNEL_NAME", channel).replace("TOPIC", topic));
+    pushDebugContext.setFcmUri(() => pushDebugContext.defaultFcmUri.replace("SUB_KEY", keySetContext.subKey).replace("CHANNEL_NAME", channel));
   }
 
-  const toastNotify = (type, title) => {
-    const params = {
-      position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    };
+  // const toastNotify = (type, title) => {
+  //   const params = {
+  //     position: "top-center",
+  //     autoClose: 5000,
+  //     hideProgressBar: false,
+  //     closeOnClick: true,
+  //     pauseOnHover: true,
+  //     draggable: true,
+  //     progress: undefined,
+  //   };
 
-    if (type === "success") toast.success(title, params);
-    else if (type === "error") toast.error(title, params);
-    else toast.info(title, params);
-  }
+  //   if (type === "success") toast.success(title, params);
+  //   else if (type === "error") toast.error(title, params);
+  //   else toast.info(title, params);
+  // }
 
   return (
     <>
@@ -255,7 +255,7 @@ const InspectDevice = () => {
         newDevices={newDevices}
         addDevices={addDevices}
       /> */}
-      <ToastContainer
+      {/* <ToastContainer
         position="top-center"
         autoClose={3000}
         hideProgressBar={false}
@@ -265,7 +265,7 @@ const InspectDevice = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-      />
+      /> */}
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -493,9 +493,8 @@ const InspectDevice = () => {
                       id="input-apns2-dev"
                       type="textarea"
                       rows="2"
-                      value={apns2DevUri}
-                      defaultValue={defaultApns2DevUri}
-                      onChange={(e) => setApns2DevUri(e.target.value)}
+                      value={pushDebugContext.apns2DevUri}
+                      onChange={(e) => pushDebugContext.setApns2DevUri(e.target.value)}
                     />
                     </FormGroup>
                   </Col>
@@ -514,9 +513,8 @@ const InspectDevice = () => {
                       id="input-apns2-prd"
                       type="textarea"
                       rows="2"
-                      value={apns2PrdUri}
-                      defaultValue={defaultApns2PrdUri}
-                      onChange={(e) => setApns2PrdUri(e.target.value)}
+                      value={pushDebugContext.apns2PrdUri}
+                      onChange={(e) => pushDebugContext.setApns2PrdUri(e.target.value)}
                     />
                     </FormGroup>
                   </Col>
@@ -535,9 +533,8 @@ const InspectDevice = () => {
                       id="input-apns"
                       type="textarea"
                       rows="2"
-                      value={apnsUri}
-                      defaultValue={defaultApnsUri}
-                      onChange={(e) => setApnsUri(e.target.value)}
+                      value={pushDebugContext.apnsUri}
+                      onChange={(e) => pushDebugContext.setApnsUri(e.target.value)}
                     />
                     </FormGroup>
                   </Col>
@@ -556,9 +553,8 @@ const InspectDevice = () => {
                       id="input-fcm"
                       type="textarea"
                       rows="2"
-                      value={fcmUri}
-                      defaultValue={defaultFcmUri}
-                      onChange={(e) => setFcmUri(e.target.value)}
+                      value={pushDebugContext.fcmUri}
+                      onChange={(e) => pushDebugContext.setFcmUri(e.target.value)}
                     />
                     </FormGroup>
                   </Col>
