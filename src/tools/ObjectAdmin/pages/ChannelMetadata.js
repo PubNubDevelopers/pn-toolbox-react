@@ -56,7 +56,7 @@ const ChannelMetadata = () => {
   const getChannelObject = () => {
     console.log("channelId", channelId);
 
-    keySetContext.pubnub.getChannelMetadata(
+    keySetContext.pubnub.objects.getChannelMetadata(
       {
         channel : channelId,
       },
@@ -68,7 +68,7 @@ const ChannelMetadata = () => {
           objectAdminContext.setChannelName(result.data.name);
           objectAdminContext.setChannelDesc(result.data.description);
           objectAdminContext.setChannelUpdated(result.data.updated);
-          objectAdminContext.setChannelCustom(result.data.custom);
+          objectAdminContext.setChannelCustom(JSON.stringify(result.data.custom, null, 4));
           objectAdminContext.setChannelEtag(result.data.eTag);
         }
         else {
@@ -82,17 +82,17 @@ const ChannelMetadata = () => {
   const saveChannelObject = () => {
     console.log("channelId", channelId);
 
-    keySetContext.pubnub.setChannelMetadata(
+    keySetContext.pubnub.objects.setChannelMetadata(
       {
         channel : objectAdminContext.channelId,
         data: {
             name: objectAdminContext.channelName,
             description: objectAdminContext.channelDesc,
-            custom: objectAdminContext.channelCustom,
+            custom: JSON.parse(objectAdminContext.channelCustom)
         },
         include: {
-            customFields: true,
-        },
+            customFields: true
+        }
       },
       function (status) {
         console.log(status);
@@ -234,6 +234,33 @@ const ChannelMetadata = () => {
                 </Row>
               </CardHeader>             
               <CardBody>
+              {/* <Row> */}
+                <Form>
+                  {/* <div className="pl-lg-14"> */}
+                    <Row>
+                      <Col>
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-channel-id"
+                          >
+                            Channel ID
+                          </label>
+                          <Input
+                            className="form-control-alternative"
+                            id="input-channel-id"
+                            type="text"
+                            value={objectAdminContext.channelId}
+                            onChange={(e) => objectAdminContext.setChannelId(e.target.value)}
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  {/* </div> */}
+                </Form>
+              {/* </Row> */}
+              <Row>
+                <Col>
                 <Form>
                   <div className="pl-lg-4">
                     <Row>
@@ -272,33 +299,9 @@ const ChannelMetadata = () => {
                             className="form-control-alternative"
                             id="input-channel-desc"
                             type="textarea"
-                            rows="3"
+                            rows="4"
                             value={objectAdminContext.channelDesc}
                             onChange={(e) => objectAdminContext.setChannelDesc(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  </div>
-                </Form>
-                <Form>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-channel-custom"
-                          >
-                            Custom Fields 
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-channel-custom"
-                            type="textarea"
-                            rows="6"
-                            value={objectAdminContext.channelCustom}
-                            onChange={(e) => objectAdminContext.setChannelCustom(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -329,6 +332,7 @@ const ChannelMetadata = () => {
                     </Row>
                   </div>
                 </Form>
+
                 <Form>
                   <div className="pl-lg-4">
                     <Row>
@@ -353,26 +357,46 @@ const ChannelMetadata = () => {
                     </Row>
                   </div>
                 </Form>
+
+                </Col>
+                <Col>
+                <Form>
+                  <div className="pl-lg-4">
+                    <Row>
+                      <Col>
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-channel-custom"
+                          >
+                            Custom Fields 
+                          </label>
+                          <Input
+                            className="form-control-alternative"
+                            id="input-channel-custom"
+                            type="textarea"
+                            rows="18"
+                            value={objectAdminContext.channelCustom}
+                            onChange={(e) => objectAdminContext.setChannelCustom(e.target.value)}
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  </div>
+                </Form>
+                </Col>
+              </Row>
               </CardBody>
               <CardFooter>
                 <Row>
                   <Col className="text-right">
                     <Button
                       color="danger"
-                      // onClick={saveChannelObject}
+                      onClick={saveChannelObject}
                       disabled = {keySetContext.pubnub == null || channelId === ""}
-                      // size="sm"
                     >
                       Save Metadata
                     </Button>
-                    {/* <Button
-                      color="secondary"
-                      // onClick={toggle}
-                      // disabled = {keySetContext.pubnub == null || token === "" || (pushType === "apns2" && topic === "")}
-                      // size="sm"
-                    >
-                      Add Channel Objects
-                    </Button> */}
                   </Col>
                 </Row> 
               </CardFooter>
