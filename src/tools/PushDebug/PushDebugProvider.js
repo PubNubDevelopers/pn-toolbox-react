@@ -3,6 +3,11 @@ import { createContext, useContext, useState } from 'react'
 const Context = createContext()
 
 export const PushDebugProvider = ({ children }) => {
+
+  ///////////////////
+  // PushTest State
+  //////////////////
+
   const [pushChannel, setPushChannel] = useState();
 
   const messageDefault = JSON.stringify({
@@ -39,13 +44,38 @@ export const PushDebugProvider = ({ children }) => {
   }, null, 2);
 
   const [message, setMessage] = useState(messageDefault);
-
   const [testResults, setTestResults] = useState([]);
 
+  //////////////////////
+  // ManageDevice State
+  //////////////////////
+
+  const [token, setToken] = useState();
+  const [pushType, setPushType] = useState("apns2"); // apns2, apns, gcm
+  const [environment, setEnvironment] = useState(true);
+  const [topic, setTopic] = useState("com.mycompany.app.abc");
+  const [registeredChannels, setRegisteredChannels] = useState([]);
+
+  const [pushRadios, setPushRadios] = useState(0);
+  const [environmentRadios, setEnvironmentRadios] = useState(0);
+  const [enableEnvironment, setEnableEnvironment] = useState(true);
+  const [enableTopic, setEnableTopic] = useState(true);
+
   const pushDebugData = {
+    // PushTest State
     pushChannel, setPushChannel,
     message, setMessage, 
     testResults, setTestResults,
+    // ManageDevice State
+    token, setToken,
+    pushType, setPushType,
+    environment, setEnvironment,
+    topic, setTopic,
+    registeredChannels, setRegisteredChannels,
+    pushRadios, setPushRadios,
+    environmentRadios, setEnvironmentRadios,
+    enableEnvironment, setEnableEnvironment,
+    enableTopic, setEnableTopic,
   }
 
   return <Context.Provider value={pushDebugData}> {children} </Context.Provider>
