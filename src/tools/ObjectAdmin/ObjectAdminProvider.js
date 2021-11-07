@@ -13,6 +13,9 @@ export const ObjectAdminProvider = ({ children }) => {
   const [channelUpdated, setChannelUpdated] = useState([]);
   const [channelEtag, setChannelEtag] = useState([]);
 
+  const [channelFilter, setChannelFilter] = useState();
+  const [metadataResults, setMetadataResults] = useState([]);
+
   // provide data/functions to context users
   ////////////////////////////////////////
   const useObjectAdminData = {
@@ -24,6 +27,10 @@ export const ObjectAdminProvider = ({ children }) => {
     channelUpdated, setChannelUpdated,
     channelCustom, setChannelCustom,
     channelEtag, setChannelEtag,
+
+    // ChannelMetadataList State
+    channelFilter, setChannelFilter,
+    metadataResults, setMetadataResults,
   }
 
   return <Context.Provider value={useObjectAdminData}> {children} </Context.Provider>

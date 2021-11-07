@@ -47,11 +47,11 @@ const ChannelMetadata = () => {
   console.log("Page1 objectAdminContext: ", objectAdminContext);
 
   const [channelId, setChannelId] = useState(objectAdminContext.channelId);
-  const [customFieldRadios, setCustomFieldRadios] = useState(objectAdminContext.customFieldRadios);
+  // const [customFieldRadios, setCustomFieldRadios] = useState(objectAdminContext.customFieldRadios);
 
-  const handleCustomFieldClick = (value) => {
-    setCustomFieldRadios(value);
-  }
+  // const handleCustomFieldClick = (value) => {
+  //   setCustomFieldRadios(value);
+  // }
 
   const getChannelObject = () => {
     console.log("channelId", channelId);
