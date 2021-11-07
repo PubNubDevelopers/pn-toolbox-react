@@ -4,6 +4,7 @@ const Context = createContext()
 
 export const ObjectAdminProvider = ({ children }) => {
 
+  // ChannelMetadata State
   const [channelId, setChannelId] = useState();
   const [customFieldRadios, setCustomFieldRadios] = useState(1);
   
@@ -13,13 +14,14 @@ export const ObjectAdminProvider = ({ children }) => {
   const [channelUpdated, setChannelUpdated] = useState([]);
   const [channelEtag, setChannelEtag] = useState([]);
 
-  const [channelFilter, setChannelFilter] = useState();
-  const [metadataResults, setMetadataResults] = useState([]);
+  const [channelFilter, setChannelFilter] = useState('name LIKE "*"');
+  const [channelMetadataResults, setChannelMetadataResults] = useState([]);
 
-  // provide data/functions to context users
-  ////////////////////////////////////////
+  // expose data/functions to context users
+  /////////////////////////////////////////
+
   const useObjectAdminData = {
-    // Channel State
+    // ChannelMetadata State
     channelId, setChannelId,
     customFieldRadios, setCustomFieldRadios,
     channelName, setChannelName,
@@ -30,7 +32,7 @@ export const ObjectAdminProvider = ({ children }) => {
 
     // ChannelMetadataList State
     channelFilter, setChannelFilter,
-    metadataResults, setMetadataResults,
+    channelMetadataResults, setChannelMetadataResults,
   }
 
   return <Context.Provider value={useObjectAdminData}> {children} </Context.Provider>

@@ -49,7 +49,7 @@ const ChannelMetadataList = () => {
   const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
   // const [metadataResults, setMetadataResults] = useState(objectAdminContext.metadataResults || {});
 
-  const getChannelObject = () => {
+  const retrieveMetadata = () => {
     console.log("channelFilter", channelFilter);
 
     keySetContext.pubnub.objects.getAllChannelMetadata(
@@ -63,9 +63,10 @@ const ChannelMetadataList = () => {
       },
       function (status, result) {
         console.log(status, result);
+        objectAdminContext.setChannelFilter(channelFilter);
 
         if (!status.error) {
-          objectAdminContext.setMetadataResults(result.data);
+          objectAdminContext.setChannelMetadataResults(result.data);
         }
         else {
           console.log("Error: ", status);
@@ -157,7 +158,7 @@ const ChannelMetadataList = () => {
                   <Col className="text-right">
                     <Button
                       color="danger"
-                      onClick={getChannelObject}
+                      onClick={retrieveMetadata}
                       disabled = {keySetContext.pubnub == null || channelFilter === ""}
                     >
                       Get Metadata
@@ -196,7 +197,7 @@ const ChannelMetadataList = () => {
                         <th>Last Updated</th>
                       </tr>
                     </thead>
-                    <MetadataRows metadata={objectAdminContext.metadataResults}/>
+                    <MetadataRows metadata={objectAdminContext.channelMetadataResults}/>
                   </Table>
                 </div>
               </CardBody>
