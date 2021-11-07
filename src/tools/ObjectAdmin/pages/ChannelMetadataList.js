@@ -16,7 +16,7 @@
 
 */
 
-import { useState } from "react";
+import React, { useState } from "react";
 // import classnames from "classnames";
 
 // reactstrap components
@@ -31,9 +31,25 @@ import {
   Input,
   Row,
   Col,
-  Table,
+  // Table,
   CardFooter,
 } from "reactstrap";
+
+// import PropTypes from 'prop-types';
+import Box from '@mui/material/Box';
+import Collapse from '@mui/material/Collapse';
+import IconButton from '@mui/material/IconButton';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+// import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+// import Typography from '@mui/material/Typography';
+// import Paper from '@mui/material/Paper';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+
 
 // // core components
 import { useKeySetData } from "../../KeySetProvider";
@@ -75,38 +91,6 @@ const ChannelMetadataList = () => {
       }
     );
   }
-
-  // const saveChannelObject = () => {
-  //   console.log("channelId", channelFilter);
-
-  //   keySetContext.pubnub.objects.setChannelMetadata(
-  //     {
-  //       channel : objectAdminContext.channelId,
-  //       data: {
-  //           name: objectAdminContext.channelName,
-  //           description: objectAdminContext.channelDesc,
-  //           custom: JSON.parse(objectAdminContext.channelCustom)
-  //       },
-  //       include: {
-  //           customFields: true
-  //       }
-  //     },
-  //     function (status) {
-  //       console.log(status);
-
-  //       if (!status.error) {
-  //         console.log("Success: ", status);
-          
-  //       }
-  //       else {
-  //         console.log("Error: ", status);
-  //         alert(JSON.stringify(status, null, 4));
-  //       }
-
-  //       alert(JSON.stringify(status, null, 4));
-  //     }
-  //   );
-  // }
 
   return (
     <>
@@ -185,21 +169,9 @@ const ChannelMetadataList = () => {
                 </Row>
               </CardHeader>             
               <CardBody>
-                <div className="pl-lg-4">
-                  {/* <Table className="align-items-center table-flush" responsive > */}
-                  <Table className="align-items-center" responsive striped>
-                    <thead className="thead-light">
-                      <tr>
-                        <th>Channel ID</th>
-                        <th>Channel Name</th>
-                        <th>Description</th>
-                        <th>Custom</th>
-                        <th>Last Updated</th>
-                      </tr>
-                    </thead>
-                    <MetadataRows metadata={objectAdminContext.channelMetadataResults}/>
-                  </Table>
-                </div>
+                  <MetadataTable 
+                    metadata={objectAdminContext.channelMetadataResults} 
+                  />
               </CardBody>
               <CardFooter>
                 <Row>
@@ -227,27 +199,99 @@ const ChannelMetadataList = () => {
 
 export default ChannelMetadataList;
 
-// {
-//   "id": "my-channel",
-//   "name": "My channel",
-//   "description": "A channel that is mine",
-//   "custom": null,
-// }
 
-function MetadataRows({metadata}) {
-  console.log("MetadataRows", metadata);
-  const rows = metadata.map((md, index) =>
-    <tr key={index}>
-      <th scope="row">{md.id}</th>
-      <td>{md.name}</td>
-      <td>{md.description}</td>
-      <td>{JSON.stringify(md.custom, null, 2)}</td>
-      <td>{md.updated}</td>
-    </tr>
-  );
+const MetadataTable = ({metadata}) => {
+  console.log("MetadataTable", metadata);
+
+  if (metadata == null || metadata.length ===0) return <><h2>No Results</h2></>;
+
   return (
-    <tbody>
-      {rows}
-    </tbody>
+    // <TableContainer component={Paper}>
+      <Table aria-label="collapsible table">
+        <TableHead>
+          <TableRow>
+            <TableCell/>
+            <TableCell>Channel ID</TableCell>
+            <TableCell>Channel Name</TableCell>
+            <TableCell>Description</TableCell>
+            <TableCell>Custom Field Data</TableCell>
+            <TableCell>Last Updated</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {metadata.map((row) => (
+            <MetadataRow key={row.id} row={row} />
+          ))}
+        </TableBody>
+      </Table>
+    // </TableContainer>
+  );
+}
+
+const truncate = (data, size, noDots) => {
+  let result = "";
+
+  if (data == null || data === "" || data.length <= size) result = data
+  else {
+    result = data.substring(0, size) + (noDots ? "" : "...");
+  }
+
+  return result;
+}
+
+const MetadataRow = ({row}) => {
+  console.log("MetadataRow", row);
+
+  // const {row} = props;
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
+        <TableCell component="th" scope="row">{row.id.substring(0, 100)}</TableCell>
+        <TableCell>{truncate(row.name, 100)}</TableCell>
+        <TableCell>{truncate(row.description, 60)}</TableCell>
+        <TableCell>{truncate(JSON.stringify(row.custom), 60)}</TableCell>
+        <TableCell>{row.updated}</TableCell>
+      </TableRow>
+
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
+              <Table size="small" aria-label="custom data">
+                <TableHead>
+                  {/* TODO: dynamically generate row per custom field */}
+                  <TableRow>
+                    {/* <TableCell></TableCell> */}
+                    <TableCell size="small">Custom Fields</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {/* TODO: dynamically generate row per custom field */}
+                  {/* {row.custom.map((historyRow) => ( */}
+                    <TableRow>
+                      <TableCell component="th" scope="row">
+
+                        {JSON.stringify(row.custom)}
+                      </TableCell>
+                    </TableRow>
+                  {/* ))} */}
+                </TableBody>
+              </Table>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </>
   );
 }
