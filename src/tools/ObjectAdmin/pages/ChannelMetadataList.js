@@ -47,8 +47,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 // import Typography from '@mui/material/Typography';
 // import Paper from '@mui/material/Paper';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 
 
 // // core components
@@ -254,7 +254,7 @@ const MetadataRow = ({row}) => {
             size="small"
             onClick={() => setOpen(!open)}
           >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            {open ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">{row.id.substring(0, 100)}</TableCell>
@@ -268,24 +268,11 @@ const MetadataRow = ({row}) => {
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
-              <Table size="small" aria-label="custom data">
-                <TableHead>
-                  {/* TODO: dynamically generate row per custom field */}
-                  <TableRow>
-                    {/* <TableCell></TableCell> */}
-                    <TableCell size="small">Custom Fields</TableCell>
-                  </TableRow>
-                </TableHead>
+              <Table size="small">
                 <TableBody>
-                  {/* TODO: dynamically generate row per custom field */}
-                  {/* {row.custom.map((historyRow) => ( */}
-                    <TableRow>
-                      <TableCell component="th" scope="row">
-
-                        {JSON.stringify(row.custom)}
-                      </TableCell>
-                    </TableRow>
-                  {/* ))} */}
+                  {Object.keys(row.custom).map((key) => (
+                    <CustomFieldRow name={key} value={row.custom[key]} />
+                  ))}
                 </TableBody>
               </Table>
             </Box>
@@ -293,5 +280,20 @@ const MetadataRow = ({row}) => {
         </TableCell>
       </TableRow>
     </>
+  );
+}
+
+const CustomFieldRow = (props) => {
+  console.log('CustomFieldRows', props);
+
+  // assumption: flat custom field json data
+  //   can compensate for nested json in future, if needed
+
+  return (
+    <TableRow>
+      <TableCell width="5%"></TableCell>
+      <TableCell>{props.name}</TableCell>
+      <TableCell width="95%">{props.value}</TableCell>
+    </TableRow>
   );
 }
