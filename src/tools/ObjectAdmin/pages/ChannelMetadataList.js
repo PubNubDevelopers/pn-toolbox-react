@@ -41,19 +41,24 @@ import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
+// import TableFooter from '@mui/material/TableFooter';
+import TablePagination from '@mui/material/TablePagination';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { useTheme } from '@mui/material/styles';
+
 // import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
-import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import PropTypes from 'prop-types';
+
 
 
 // // core components
 import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
+import { FirstPage, KeyboardArrowDown, KeyboardArrowRight, KeyboardArrowLeft, LastPage } from "@mui/icons-material";
 
 const ChannelMetadataList = () => {
   const keySetContext = useKeySetData();
@@ -62,8 +67,27 @@ const ChannelMetadataList = () => {
   console.log("ChannelMetadataList keySetContext: ", keySetContext);
   console.log("ChannelMetadataList objectAdminContext: ", objectAdminContext);
 
+  // table nav controls
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+  // Avoid a layout jump when reaching the last page with empty rows.
+  const emptyRows =
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - objectAdminContext.channelMetadataResults.length) : 0;
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  // page state
   const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
   // const [metadataResults, setMetadataResults] = useState(objectAdminContext.metadataResults || {});
+
 
   const retrieveMetadata = () => {
     console.log("channelFilter", channelFilter);
@@ -74,8 +98,7 @@ const ChannelMetadataList = () => {
         include: {
           totalCount: true,
           customFields: true
-        },
-
+        }
       },
       function (status, result) {
         console.log(status, result);
@@ -167,12 +190,19 @@ const ChannelMetadataList = () => {
                   <div className="col text-right">
                   </div>
                 </Row>
-              </CardHeader>             
+              </CardHeader>      
+
               <CardBody>
                   <MetadataTable 
-                    metadata={objectAdminContext.channelMetadataResults} 
+                    metadata={objectAdminContext.channelMetadataResults}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    emptyRows={emptyRows}
+                    handleChangePage={handleChangePage}
+                    handleChangeRowsPerPage={handleChangeRowsPerPage}
                   />
               </CardBody>
+
               <CardFooter>
                 <Row>
                   <Col className="text-right">
@@ -200,7 +230,7 @@ const ChannelMetadataList = () => {
 export default ChannelMetadataList;
 
 
-const MetadataTable = ({metadata}) => {
+const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage}) => {
   console.log("MetadataTable", metadata);
 
   if (metadata == null || metadata.length ===0) return <><h2>No Results</h2></>;
@@ -210,7 +240,26 @@ const MetadataTable = ({metadata}) => {
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: 800 }}>
         <Table stickyHeader>
+
           <TableHead>
+          <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                colSpan={6}
+                count={metadata.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                SelectProps={{
+                  inputProps: {
+                    'aria-label': 'rows per page',
+                  },
+                  native: true,
+                }}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+              />
+            </TableRow>
             <TableRow>
               <TableCell/>
               <TableCell>Channel ID</TableCell>
@@ -220,10 +269,20 @@ const MetadataTable = ({metadata}) => {
               <TableCell>Last Updated</TableCell>
             </TableRow>
           </TableHead>
+
           <TableBody>
-            {metadata.map((row) => (
+            {(rowsPerPage > 0
+              ? metadata.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              : metadata
+            ).map((row) => (
               <MetadataRow key={row.id} row={row} />
             ))}
+
+            {emptyRows > 0 && (
+              <TableRow style={{ height: 53 * emptyRows }}>
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
@@ -312,17 +371,63 @@ const MetadataRow = ({row}) => {
   );
 }
 
-// const CustomFieldRow = (props) => {
-//   console.log('CustomFieldRows', props);
+function TablePaginationActions(props) {
+  const theme = useTheme();
+  const { count, page, rowsPerPage, onPageChange } = props;
 
-//   // assumption: flat custom field json data
-//   //   can compensate for nested json in future, if needed
+  const handleFirstPageButtonClick = (event) => {
+    onPageChange(event, 0);
+  };
 
-//   return (
-//     <TableRow>
-//       <TableCell width="5%"></TableCell>
-//       <TableCell>{props.name}</TableCell>
-//       <TableCell width="95%">{props.value}</TableCell>
-//     </TableRow>
-//   );
-// }
+  const handleBackButtonClick = (event) => {
+    onPageChange(event, page - 1);
+  };
+
+  const handleNextButtonClick = (event) => {
+    onPageChange(event, page + 1);
+  };
+
+  const handleLastPageButtonClick = (event) => {
+    onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+  };
+
+  return (
+    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+      <IconButton
+        onClick={handleFirstPageButtonClick}
+        disabled={page === 0}
+        aria-label="first page"
+      >
+        {theme.direction === 'rtl' ? <LastPage /> : <FirstPage />}
+      </IconButton>
+      <IconButton
+        onClick={handleBackButtonClick}
+        disabled={page === 0}
+        aria-label="previous page"
+      >
+        {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+      </IconButton>
+      <IconButton
+        onClick={handleNextButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="next page"
+      >
+        {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+      </IconButton>
+      <IconButton
+        onClick={handleLastPageButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="last page"
+      >
+        {theme.direction === 'rtl' ? <FirstPage /> : <LastPage />}
+      </IconButton>
+    </Box>
+  );
+}
+
+TablePaginationActions.propTypes = {
+  count: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
+  page: PropTypes.number.isRequired,
+  rowsPerPage: PropTypes.number.isRequired,
+};
