@@ -42,11 +42,11 @@ import IconButton from '@mui/material/IconButton';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-// import TableContainer from '@mui/material/TableContainer';
+import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 // import Typography from '@mui/material/Typography';
-// import Paper from '@mui/material/Paper';
+import Paper from '@mui/material/Paper';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 
@@ -207,24 +207,27 @@ const MetadataTable = ({metadata}) => {
 
   return (
     // <TableContainer component={Paper}>
-      <Table aria-label="collapsible table">
-        <TableHead>
-          <TableRow>
-            <TableCell/>
-            <TableCell>Channel ID</TableCell>
-            <TableCell>Channel Name</TableCell>
-            <TableCell>Description</TableCell>
-            <TableCell>Custom Field Data</TableCell>
-            <TableCell>Last Updated</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {metadata.map((row) => (
-            <MetadataRow key={row.id} row={row} />
-          ))}
-        </TableBody>
-      </Table>
-    // </TableContainer>
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <TableContainer sx={{ maxHeight: 800 }}>
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell/>
+              <TableCell>Channel ID</TableCell>
+              <TableCell>Channel Name</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Custom Field Data</TableCell>
+              <TableCell>Last Updated</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {metadata.map((row) => (
+              <MetadataRow key={row.id} row={row} />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
   );
 }
 
@@ -274,21 +277,30 @@ const MetadataRow = ({row}) => {
                 <TableBody>
                 <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell>Channel ID</TableCell>
+                    <TableCell><strong>Channel ID</strong></TableCell>
                     <TableCell width="95%">{row.id}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell>Channel Name</TableCell>
+                    <TableCell><strong>Channel Name</strong></TableCell>
                     <TableCell width="95%">{row.name}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell>Description</TableCell>
+                    <TableCell><strong>Description</strong></TableCell>
                     <TableCell width="95%">{row.description}</TableCell>
                   </TableRow>
+                  <TableRow>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell colspan="2" component="th" width="5%"><strong>Custom Fields</strong></TableCell>
+                  </TableRow>
                   {Object.keys(row.custom).map((key) => (
-                    <CustomFieldRow name={key} value={row.custom[key]} />
+                    // <CustomFieldRow name={key} value={row.custom[key]} />
+                    <TableRow>
+                      <TableCell width="5%"></TableCell>
+                      <TableCell>{key}</TableCell>
+                      <TableCell width="95%" colspan="2">{row.custom[key]}</TableCell>
+                    </TableRow>
                   ))}
                 </TableBody>
               </Table>
@@ -300,17 +312,17 @@ const MetadataRow = ({row}) => {
   );
 }
 
-const CustomFieldRow = (props) => {
-  console.log('CustomFieldRows', props);
+// const CustomFieldRow = (props) => {
+//   console.log('CustomFieldRows', props);
 
-  // assumption: flat custom field json data
-  //   can compensate for nested json in future, if needed
+//   // assumption: flat custom field json data
+//   //   can compensate for nested json in future, if needed
 
-  return (
-    <TableRow>
-      <TableCell width="5%"></TableCell>
-      <TableCell>{props.name}</TableCell>
-      <TableCell width="95%">{props.value}</TableCell>
-    </TableRow>
-  );
-}
+//   return (
+//     <TableRow>
+//       <TableCell width="5%"></TableCell>
+//       <TableCell>{props.name}</TableCell>
+//       <TableCell width="95%">{props.value}</TableCell>
+//     </TableRow>
+//   );
+// }
