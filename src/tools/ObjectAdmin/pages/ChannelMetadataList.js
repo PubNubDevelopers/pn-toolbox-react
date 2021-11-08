@@ -260,7 +260,9 @@ const MetadataRow = ({row}) => {
         <TableCell component="th" scope="row">{row.id.substring(0, 100)}</TableCell>
         <TableCell>{truncate(row.name, 100)}</TableCell>
         <TableCell>{truncate(row.description, 60)}</TableCell>
+        {/* <TableCell>{row.description}</TableCell> */}
         <TableCell>{truncate(JSON.stringify(row.custom), 60)}</TableCell>
+        {/* <TableCell>{JSON.stringify(row.custom, null, 2)}</TableCell> */}
         <TableCell>{row.updated}</TableCell>
       </TableRow>
 
@@ -270,6 +272,21 @@ const MetadataRow = ({row}) => {
             <Box sx={{ margin: 1 }}>
               <Table size="small">
                 <TableBody>
+                <TableRow>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell>Channel ID</TableCell>
+                    <TableCell width="95%">{row.id}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell>Channel Name</TableCell>
+                    <TableCell width="95%">{row.name}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell>Description</TableCell>
+                    <TableCell width="95%">{row.description}</TableCell>
+                  </TableRow>
                   {Object.keys(row.custom).map((key) => (
                     <CustomFieldRow name={key} value={row.custom[key]} />
                   ))}
