@@ -17,11 +17,12 @@
 */
 
 import React, { useState } from "react";
-// import classnames from "classnames";
+import classnames from "classnames";
 
 // reactstrap components
 import {
   Button,
+  ButtonGroup,
   Card,
   CardHeader,
   CardBody,
@@ -84,7 +85,7 @@ const ChannelMetadataList = () => {
 
   // page state
   const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
-  const [maxRows, setMaxRows] = useState(objectAdminContext.maxRows);
+  const [isTruncate, setIsTruncate] = useState(true);
 
   async function retrieveMetadata() {
     console.log("channelFilter", channelFilter);
@@ -92,7 +93,7 @@ const ChannelMetadataList = () => {
     let more = true;
     let results = [];
     let next = null;
-// debugger;
+
     do {
       try {
         const result = await keySetContext.pubnub.objects.getAllChannelMetadata({
@@ -107,7 +108,7 @@ const ChannelMetadataList = () => {
         if (result != null && result.data.length > 0) {
           results = results.concat(result.data);
           next = result.next;
-          more = next != null;
+          more = next != null & results.length < objectAdminContext.maxRows;
         }
         else {
           more = false;
@@ -117,33 +118,8 @@ const ChannelMetadataList = () => {
         console.log("  fail", JSON.stringify(status));
       }
     } while (more);
-debugger;
+
     objectAdminContext.setChannelMetadataResults(results);
-  }
-
-
-  const getAllChannelMetadata = () => {
-    keySetContext.pubnub.objects.getAllChannelMetadata(
-      {
-        filter : channelFilter,
-        include: {
-          totalCount: true,
-          customFields: true
-        }
-      },
-      function (status, result) {
-        console.log("getAllChannelMetadata status/results", status, result);
-        objectAdminContext.setChannelFilter(channelFilter);
-
-        if (!status.error) {
-          objectAdminContext.setChannelMetadataResults(result.data);
-        }
-        else {
-          console.log("Error: ", status);
-          alert(JSON.stringify(status, null, 4));
-        }
-      }
-    );
   }
 
   return (
@@ -184,7 +160,6 @@ debugger;
                         </FormGroup>
                       </Col>
                       <Col lg="3" className="text-center">
-              
                       </Col>
                     </Row>
                   </div>
@@ -202,17 +177,16 @@ debugger;
                             className="form-control-alternative"
                             id="input-max-rows"
                             type="text"
-                            value={maxRows}
+                            value={objectAdminContext.maxRows}
                             max="5000"
                             min="5"
                             maxLength="5"
-                            onChange={(e) => setMaxRows(e.target.value)}
+                            onChange={(e) => objectAdminContext.setMaxRows(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
-                      <Col lg="3" className="text-center">
-              
-                      </Col>
+                      <Col sm="4"></Col>
+                      <Col lg="3" className="text-center"></Col>
                     </Row>
                   </div>
                 </Form>
@@ -250,30 +224,21 @@ debugger;
               </CardHeader>      
 
               <CardBody>
-                  <MetadataTable 
-                    metadata={objectAdminContext.channelMetadataResults}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    emptyRows={emptyRows}
-                    handleChangePage={handleChangePage}
-                    handleChangeRowsPerPage={handleChangeRowsPerPage}
-                  />
+                <MetadataTable 
+                  metadata={objectAdminContext.channelMetadataResults}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  emptyRows={emptyRows}
+                  handleChangePage={handleChangePage}
+                  handleChangeRowsPerPage={handleChangeRowsPerPage}
+                  isTruncate={isTruncate}
+                  setIsTruncate={setIsTruncate}
+                />
               </CardBody>
 
               <CardFooter>
                 <Row>
-                  <Col className="text-right">
-                    {/* <Button
-                      color="danger"
-                      onClick={saveChannelObject}
-                      disabled = {keySetContext.pubnub == null || channelFilter === ""}
-                    >
-                      Save Metadata
-                    </Button> */}
-                  </Col>
-                  <Col lg="3" className="text-center">
-                    
-                  </Col>
+                  <Col lg="3" className="text-center"></Col>
                 </Row> 
               </CardFooter>
             </Card>
@@ -286,30 +251,76 @@ debugger;
 
 export default ChannelMetadataList;
 
+const TruncateSwitch = ({isTruncate, setIsTruncate}) => {
+  return(
+    <>
+    <label
+      className="form-control-label"
+      htmlFor="input-truncate"
+    >
+      Truncate Large Values?
+    </label>
+    <br/>
+    <ButtonGroup 
+      className="btn-group-toggle" 
+      data-toggle="buttons"
+    >
+      <Button 
+        className={classnames({ active: !isTruncate })} 
+        color="danger" 
+        onClick={() => setIsTruncate(false)}
+      >
+        <input
+          autoComplete="off"
+          name="options"
+          type="radio"
+          value={!isTruncate}
+          size="small"
+        />
+        No
+      </Button>
+      <Button 
+        className={classnames({ active: isTruncate })} 
+        color="danger" 
+        onClick={() => setIsTruncate(true)}
+      >
+        <input
+          autoComplete="off"
+          name="options"
+          type="radio"
+          value={isTruncate}
+          size="small"
+        />
+        Yes
+      </Button>
+    </ButtonGroup>
+    </>
+  );
+}
 
-const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage}) => {
+const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate}) => {
   console.log("MetadataTable", metadata);
 
   if (metadata == null || metadata.length ===0) return <><h2>No Results</h2></>;
 
   return (
-    // <TableContainer component={Paper}>
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: 800 }}>
         <Table stickyHeader>
 
           <TableHead>
             <TableRow>
+              <TableCell colSpan="4">
+                <TruncateSwitch isTruncate={isTruncate} setIsTruncate={setIsTruncate}/>
+              </TableCell>
               <TablePagination
-                rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                rowsPerPageOptions={[5, 10, 25, 50, 100, { label: 'All', value: -1 }]}
                 colSpan={6}
                 count={metadata.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 SelectProps={{
-                  inputProps: {
-                    'aria-label': 'rows per page',
-                  },
+                  inputProps: {'aria-label': 'rows per page',},
                   native: true,
                 }}
                 onPageChange={handleChangePage}
@@ -332,7 +343,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               ? metadata.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               : metadata
             ).map((row) => (
-              <MetadataRow key={row.id} row={row} />
+              <MetadataRow key={row.id} row={row} isTruncate={isTruncate} />
             ))}
 
             {emptyRows > 0 && (
@@ -350,9 +361,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
                 rowsPerPage={rowsPerPage}
                 page={page}
                 SelectProps={{
-                  inputProps: {
-                    'aria-label': 'rows per page',
-                  },
+                  inputProps: {'aria-label': 'rows per page',},
                   native: true,
                 }}
                 onPageChange={handleChangePage}
@@ -378,7 +387,7 @@ const truncate = (data, size, noDots) => {
   return result;
 }
 
-const MetadataRow = ({row}) => {
+const MetadataRow = ({row, isTruncate}) => {
   console.log("MetadataRow", row);
 
   // const {row} = props;
@@ -396,13 +405,23 @@ const MetadataRow = ({row}) => {
             {open ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
           </IconButton>
         </TableCell>
-        {/* <TableCell component="th" scope="row">{row.id.substring(0, 100)}</TableCell> */}
-        <TableCell component="th" scope="row">{row.id}</TableCell>
-        <TableCell>{truncate(row.name, 100)}</TableCell>
-        <TableCell>{truncate(row.description, 60)}</TableCell>
-        {/* <TableCell>{row.description}</TableCell> */}
-        <TableCell>{truncate(JSON.stringify(row.custom), 60)}</TableCell>
-        {/* <TableCell>{JSON.stringify(row.custom, null, 2)}</TableCell> */}
+
+        {isTruncate && (
+          <>
+            <TableCell component="th" scope="row">{truncate(row.id.substring, 100)}</TableCell>
+            <TableCell>{truncate(row.name, 100)}</TableCell>
+            <TableCell>{truncate(row.description, 60)}</TableCell>
+            <TableCell>{truncate(JSON.stringify(row.custom), 60)}</TableCell>
+          </>
+        )}
+        {!isTruncate && (
+          <>
+            <TableCell component="th" scope="row">{row.id}</TableCell>
+            <TableCell>{row.name}</TableCell>
+            <TableCell>{row.description}</TableCell>
+            <TableCell>{JSON.stringify(row.custom, null, 2)}</TableCell>
+          </>
+        )}
         <TableCell>{row.updated}</TableCell>
       </TableRow>
 
@@ -432,11 +451,10 @@ const MetadataRow = ({row}) => {
                     <TableCell colSpan="2" component="th" width="5%"><strong>Custom Fields</strong></TableCell>
                   </TableRow>
                   {Object.keys(row.custom).map((key) => (
-                    // <CustomFieldRow name={key} value={row.custom[key]} />
                     <TableRow>
                       <TableCell width="5%"></TableCell>
                       <TableCell>{key}</TableCell>
-                      <TableCell width="95%" colspan="2">{row.custom[key]}</TableCell>
+                      <TableCell width="95%" colSpan="2">{row.custom[key]}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

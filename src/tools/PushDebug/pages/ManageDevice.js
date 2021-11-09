@@ -372,7 +372,6 @@ const ManageDevice = () => {
                             </ButtonGroup>
                           </div>
                         </FormGroup>
-                        
                       </Col>
                       <Col lg="6">
                         <FormGroup>
