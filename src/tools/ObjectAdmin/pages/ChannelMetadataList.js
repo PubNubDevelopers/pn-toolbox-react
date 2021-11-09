@@ -56,6 +56,9 @@ import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
 import { FirstPage, KeyboardArrowDown, KeyboardArrowRight, KeyboardArrowLeft, LastPage } from "@mui/icons-material";
 import { Switch, FormControlLabel } from "@mui/material";
+// import DeleteForeverIcon from "@mui/icons-material";
+// import EditIcon from '@mui/icons-material/Edit';
+// import GroupIcon from '@mui/icons-material/Group';
 
 const ChannelMetadataList = () => {
   const keySetContext = useKeySetData();
@@ -66,7 +69,7 @@ const ChannelMetadataList = () => {
 
   // table nav controls
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
@@ -295,6 +298,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               <TableCell>Description</TableCell>
               <TableCell>Custom Field Data</TableCell>
               <TableCell>Last Updated</TableCell>
+              {/* <TableCell align="center">Actions</TableCell> */}
             </TableRow>
           </TableHead>
 
@@ -368,7 +372,7 @@ const MetadataRow = ({row, isTruncate}) => {
 
         {isTruncate && (
           <>
-            <TableCell component="th" scope="row">{truncate(row.id.substring, 100)}</TableCell>
+            <TableCell>{truncate(row.id, 100)}</TableCell>
             <TableCell>{truncate(row.name, 100)}</TableCell>
             <TableCell>{truncate(row.description, 60)}</TableCell>
             <TableCell>{truncate(JSON.stringify(row.custom), 60)}</TableCell>
@@ -383,8 +387,28 @@ const MetadataRow = ({row, isTruncate}) => {
           </>
         )}
         <TableCell>{row.updated}</TableCell>
+        {/* <TableCell align="center">
+          <IconButton aria-label="edit" size="small"
+            // onClick={() => editChannelMetadata(row.updated)}
+          >
+            <EditIcon/>
+          </IconButton>
+          
+          <IconButton aria-label="members" size="small"
+            // onClick={() => getMemberMetadata(row.updated)}
+          >
+            <GroupIcon/>
+          </IconButton>
+
+          <IconButton aria-label="delete" size="small"
+            // onClick={() => deleteChannelMetadata(row.updated)}
+          >
+            <DeleteForever/>
+          </IconButton>
+        </TableCell> */}
       </TableRow>
 
+      {/* Expandable Detail Data */}
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
