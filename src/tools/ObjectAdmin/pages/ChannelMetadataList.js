@@ -17,12 +17,10 @@
 */
 
 import React, { useState } from "react";
-import classnames from "classnames";
 
 // reactstrap components
 import {
   Button,
-  ButtonGroup,
   Card,
   CardHeader,
   CardBody,
@@ -32,7 +30,6 @@ import {
   Input,
   Row,
   Col,
-  // Table,
   CardFooter,
 } from "reactstrap";
 
@@ -253,52 +250,6 @@ const ChannelMetadataList = () => {
 
 export default ChannelMetadataList;
 
-const TruncateSwitch = ({isTruncate, setIsTruncate}) => {
-  return(
-    <>
-    <label
-      className="form-control-label"
-      htmlFor="input-truncate"
-    >
-      Truncate Large Values?
-    </label>
-    <br/>
-    <ButtonGroup 
-      className="btn-group-toggle" 
-      data-toggle="buttons"
-    >
-      <Button 
-        className={classnames({ active: !isTruncate })} 
-        color="danger" 
-        onClick={() => setIsTruncate(false)}
-      >
-        <input
-          autoComplete="off"
-          name="options"
-          type="radio"
-          value={!isTruncate}
-          size="small"
-        />
-        No
-      </Button>
-      <Button 
-        className={classnames({ active: isTruncate })} 
-        color="danger" 
-        onClick={() => setIsTruncate(true)}
-      >
-        <input
-          autoComplete="off"
-          name="options"
-          type="radio"
-          value={isTruncate}
-          size="small"
-        />
-        Yes
-      </Button>
-    </ButtonGroup>
-    </>
-  );
-}
 
 const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate}) => {
   console.log("MetadataTable", metadata);
@@ -317,7 +268,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
                 <FormControlLabel control={
                   <Switch defaultChecked 
                     value={isTruncate}
-                    onChange={(e) => {e.preventDefault(); setIsTruncate(e.target.checked)}}
+                    onChange={(e) => {setIsTruncate(e.target.checked)}}
                   />} 
                   label="Truncate Large Values?" 
                 />
@@ -536,3 +487,51 @@ TablePaginationActions.propTypes = {
   page: PropTypes.number.isRequired,
   rowsPerPage: PropTypes.number.isRequired,
 };
+
+
+// const TruncateSwitch = ({isTruncate, setIsTruncate}) => {
+  //   return(
+  //     <>
+  //     <label
+  //       className="form-control-label"
+  //       htmlFor="input-truncate"
+  //     >
+  //       Truncate Large Values?
+  //     </label>
+  //     <br/>
+  //     <ButtonGroup 
+  //       className="btn-group-toggle" 
+  //       data-toggle="buttons"
+  //     >
+  //       <Button 
+  //         className={classnames({ active: isTruncate })} 
+  //         color="danger" 
+  //         onClick={() => setIsTruncate(!isTruncate)}
+  //       >
+  //         <input
+  //           autoComplete="off"
+  //           name="options"
+  //           type="radio"
+  //           value={!isTruncate}
+  //           size="small"
+  //         />
+  //         No
+  //       </Button>
+  //       <Button 
+  //         className={classnames({ active: isTruncate })} 
+  //         color="danger" 
+  //         onClick={() => setIsTruncate(true)}
+  //       >
+  //         <input
+  //           autoComplete="off"
+  //           name="options"
+  //           type="radio"
+  //           value={isTruncate}
+  //           size="small"
+  //         />
+  //         Yes
+  //       </Button>
+  //     </ButtonGroup>
+  //     </>
+  //   );
+  // }
