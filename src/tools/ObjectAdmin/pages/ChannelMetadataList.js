@@ -41,7 +41,7 @@ import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-// import TableFooter from '@mui/material/TableFooter';
+import TableFooter from '@mui/material/TableFooter';
 import TablePagination from '@mui/material/TablePagination';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
@@ -52,8 +52,6 @@ import { useTheme } from '@mui/material/styles';
 // import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import PropTypes from 'prop-types';
-
-
 
 // // core components
 import { useKeySetData } from "../../KeySetProvider";
@@ -86,12 +84,45 @@ const ChannelMetadataList = () => {
 
   // page state
   const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
-  // const [metadataResults, setMetadataResults] = useState(objectAdminContext.metadataResults || {});
+  const [maxRows, setMaxRows] = useState(objectAdminContext.maxRows);
 
-
-  const retrieveMetadata = () => {
+  async function retrieveMetadata() {
     console.log("channelFilter", channelFilter);
 
+    let more = true;
+    let results = [];
+    let next = null;
+// debugger;
+    do {
+      try {
+        const result = await keySetContext.pubnub.objects.getAllChannelMetadata({
+          filter : channelFilter,
+          include: {
+            totalCount: true,
+            customFields: true
+          },
+          page: {next: next}
+        });
+
+        if (result != null && result.data.length > 0) {
+          results = results.concat(result.data);
+          next = result.next;
+          more = next != null;
+        }
+        else {
+          more = false;
+        }
+      } 
+      catch (status) {
+        console.log("  fail", JSON.stringify(status));
+      }
+    } while (more);
+debugger;
+    objectAdminContext.setChannelMetadataResults(results);
+  }
+
+
+  const getAllChannelMetadata = () => {
     keySetContext.pubnub.objects.getAllChannelMetadata(
       {
         filter : channelFilter,
@@ -101,7 +132,7 @@ const ChannelMetadataList = () => {
         }
       },
       function (status, result) {
-        console.log(status, result);
+        console.log("getAllChannelMetadata status/results", status, result);
         objectAdminContext.setChannelFilter(channelFilter);
 
         if (!status.error) {
@@ -134,7 +165,7 @@ const ChannelMetadataList = () => {
                 <Form>
                   <div className="pl-lg-4">
                     <Row>
-                      <Col>
+                      <Col sm="6">
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -148,8 +179,34 @@ const ChannelMetadataList = () => {
                             placeholder="Input a filter expression"
                             type="text"
                             value={channelFilter}
-                            defaultValue='name LIKE "team.*"'
                             onChange={(e) => setChannelFilter(e.target.value)}
+                          />
+                        </FormGroup>
+                      </Col>
+                      <Col lg="3" className="text-center">
+              
+                      </Col>
+                    </Row>
+                  </div>
+                  <div className="pl-lg-4">
+                    <Row>
+                      <Col sm="1">
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-channel-filter"
+                          >
+                            Max Rows
+                          </label>
+                          <Input
+                            className="form-control-alternative"
+                            id="input-max-rows"
+                            type="text"
+                            value={maxRows}
+                            max="5000"
+                            min="5"
+                            maxLength="5"
+                            onChange={(e) => setMaxRows(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -162,7 +219,7 @@ const ChannelMetadataList = () => {
               </CardBody>
               <CardFooter>
                 <Row>
-                  <Col className="text-right">
+                  <Col  sm="6" className="text-right">
                     <Button
                       color="danger"
                       onClick={retrieveMetadata}
@@ -242,7 +299,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
         <Table stickyHeader>
 
           <TableHead>
-          <TableRow>
+            <TableRow>
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
                 colSpan={6}
@@ -284,6 +341,26 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               </TableRow>
             )}
           </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                colSpan={6}
+                count={metadata.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                SelectProps={{
+                  inputProps: {
+                    'aria-label': 'rows per page',
+                  },
+                  native: true,
+                }}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+              />
+            </TableRow>
+          </TableFooter>
         </Table>
       </TableContainer>
     </Paper>
@@ -319,7 +396,8 @@ const MetadataRow = ({row}) => {
             {open ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
           </IconButton>
         </TableCell>
-        <TableCell component="th" scope="row">{row.id.substring(0, 100)}</TableCell>
+        {/* <TableCell component="th" scope="row">{row.id.substring(0, 100)}</TableCell> */}
+        <TableCell component="th" scope="row">{row.id}</TableCell>
         <TableCell>{truncate(row.name, 100)}</TableCell>
         <TableCell>{truncate(row.description, 60)}</TableCell>
         {/* <TableCell>{row.description}</TableCell> */}
@@ -351,7 +429,7 @@ const MetadataRow = ({row}) => {
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell colspan="2" component="th" width="5%"><strong>Custom Fields</strong></TableCell>
+                    <TableCell colSpan="2" component="th" width="5%"><strong>Custom Fields</strong></TableCell>
                   </TableRow>
                   {Object.keys(row.custom).map((key) => (
                     // <CustomFieldRow name={key} value={row.custom[key]} />

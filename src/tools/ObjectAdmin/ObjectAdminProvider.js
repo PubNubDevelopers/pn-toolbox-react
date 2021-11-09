@@ -14,7 +14,9 @@ export const ObjectAdminProvider = ({ children }) => {
   const [channelUpdated, setChannelUpdated] = useState([]);
   const [channelEtag, setChannelEtag] = useState([]);
 
+  // ChannelMetadataList State
   const [channelFilter, setChannelFilter] = useState('name LIKE "*"');
+  const [maxRows, setMaxRows] = useState(500);
   const [channelMetadataResults, setChannelMetadataResults] = useState([]);
 
   // expose data/functions to context users
@@ -32,6 +34,7 @@ export const ObjectAdminProvider = ({ children }) => {
 
     // ChannelMetadataList State
     channelFilter, setChannelFilter,
+    maxRows, setMaxRows,
     channelMetadataResults, setChannelMetadataResults,
   }
 
