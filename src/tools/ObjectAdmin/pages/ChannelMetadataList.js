@@ -58,6 +58,7 @@ import PropTypes from 'prop-types';
 import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
 import { FirstPage, KeyboardArrowDown, KeyboardArrowRight, KeyboardArrowLeft, LastPage } from "@mui/icons-material";
+import { Switch, FormControlLabel } from "@mui/material";
 
 const ChannelMetadataList = () => {
   const keySetContext = useKeySetData();
@@ -139,9 +140,8 @@ const ChannelMetadataList = () => {
               </CardHeader>             
               <CardBody>
                 <Form>
-                  <div className="pl-lg-4">
                     <Row>
-                      <Col sm="6">
+                      <Col sm="4">
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -153,19 +153,15 @@ const ChannelMetadataList = () => {
                             className="form-control-alternative"
                             id="input-channel-filter"
                             placeholder="Input a filter expression"
-                            type="text"
+                            type="textarea"
+                            rows="4"
                             value={channelFilter}
                             onChange={(e) => setChannelFilter(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
-                      <Col lg="3" className="text-center">
-                      </Col>
-                    </Row>
-                  </div>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col sm="1">
+                      <Col sm="2">
+                        <Row>
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -184,14 +180,23 @@ const ChannelMetadataList = () => {
                             onChange={(e) => objectAdminContext.setMaxRows(e.target.value)}
                           />
                         </FormGroup>
+                        </Row>
+                        <Row>
+                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <Button 
+                            className="form-control-alternative text-align-right"
+                            color="danger"
+                            onClick={retrieveMetadata}
+                            disabled = {keySetContext.pubnub == null}
+                          >
+                            Get Metadata
+                          </Button>
+                        </Row>
                       </Col>
-                      <Col sm="4"></Col>
-                      <Col lg="3" className="text-center"></Col>
                     </Row>
-                  </div>
                 </Form>
               </CardBody>
-              <CardFooter>
+              {/* <CardFooter>
                 <Row>
                   <Col  sm="6" className="text-right">
                     <Button
@@ -202,11 +207,8 @@ const ChannelMetadataList = () => {
                       Get Metadata
                     </Button>
                   </Col>
-                  <Col lg="3" className="text-center">
-                    
-                  </Col>
                 </Row> 
-              </CardFooter>
+              </CardFooter> */}
             </Card>
           </Col>
         </Row>
@@ -311,7 +313,14 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
           <TableHead>
             <TableRow>
               <TableCell colSpan="4">
-                <TruncateSwitch isTruncate={isTruncate} setIsTruncate={setIsTruncate}/>
+                {/* <TruncateSwitch isTruncate={isTruncate} setIsTruncate={setIsTruncate}/> */}
+                <FormControlLabel control={
+                  <Switch defaultChecked 
+                    value={isTruncate}
+                    onChange={(e) => {e.preventDefault(); setIsTruncate(e.target.checked)}}
+                  />} 
+                  label="Truncate Large Values?" 
+                />
               </TableCell>
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25, 50, 100, { label: 'All', value: -1 }]}
