@@ -305,7 +305,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: 800 }}>
+      <TableContainer >
         <Table stickyHeader>
 
           <TableHead>
