@@ -17,11 +17,12 @@
 */
 
 import React, { useState } from "react";
-// import classnames from "classnames";
+import classnames from "classnames";
 
 // reactstrap components
 import {
   Button,
+  ButtonGroup,
   Card,
   CardHeader,
   CardBody,
@@ -41,19 +42,22 @@ import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
+import TableFooter from '@mui/material/TableFooter';
+import TablePagination from '@mui/material/TablePagination';
 import TableCell from '@mui/material/TableCell';
-// import TableContainer from '@mui/material/TableContainer';
+import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-// import Typography from '@mui/material/Typography';
-// import Paper from '@mui/material/Paper';
-import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import { useTheme } from '@mui/material/styles';
 
+// import Typography from '@mui/material/Typography';
+import Paper from '@mui/material/Paper';
+import PropTypes from 'prop-types';
 
 // // core components
 import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
+import { FirstPage, KeyboardArrowDown, KeyboardArrowRight, KeyboardArrowLeft, LastPage } from "@mui/icons-material";
 
 const ChannelMetadataList = () => {
   const keySetContext = useKeySetData();
@@ -62,34 +66,60 @@ const ChannelMetadataList = () => {
   console.log("ChannelMetadataList keySetContext: ", keySetContext);
   console.log("ChannelMetadataList objectAdminContext: ", objectAdminContext);
 
-  const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
-  // const [metadataResults, setMetadataResults] = useState(objectAdminContext.metadataResults || {});
+  // table nav controls
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  const retrieveMetadata = () => {
+  // Avoid a layout jump when reaching the last page with empty rows.
+  const emptyRows =
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - objectAdminContext.channelMetadataResults.length) : 0;
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  // page state
+  const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
+  const [isTruncate, setIsTruncate] = useState(true);
+
+  async function retrieveMetadata() {
     console.log("channelFilter", channelFilter);
 
-    keySetContext.pubnub.objects.getAllChannelMetadata(
-      {
-        filter : channelFilter,
-        include: {
-          totalCount: true,
-          customFields: true
-        },
+    let more = true;
+    let results = [];
+    let next = null;
 
-      },
-      function (status, result) {
-        console.log(status, result);
-        objectAdminContext.setChannelFilter(channelFilter);
+    do {
+      try {
+        const result = await keySetContext.pubnub.objects.getAllChannelMetadata({
+          filter : channelFilter,
+          include: {
+            totalCount: true,
+            customFields: true
+          },
+          page: {next: next}
+        });
 
-        if (!status.error) {
-          objectAdminContext.setChannelMetadataResults(result.data);
+        if (result != null && result.data.length > 0) {
+          results = results.concat(result.data);
+          next = result.next;
+          more = next != null & results.length < objectAdminContext.maxRows;
         }
         else {
-          console.log("Error: ", status);
-          alert(JSON.stringify(status, null, 4));
+          more = false;
         }
+      } 
+      catch (status) {
+        console.log("  fail", JSON.stringify(status));
       }
-    );
+    } while (more);
+
+    objectAdminContext.setChannelMetadataResults(results);
   }
 
   return (
@@ -111,7 +141,7 @@ const ChannelMetadataList = () => {
                 <Form>
                   <div className="pl-lg-4">
                     <Row>
-                      <Col>
+                      <Col sm="6">
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -125,21 +155,45 @@ const ChannelMetadataList = () => {
                             placeholder="Input a filter expression"
                             type="text"
                             value={channelFilter}
-                            defaultValue='name LIKE "team.*"'
                             onChange={(e) => setChannelFilter(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
                       <Col lg="3" className="text-center">
-              
                       </Col>
+                    </Row>
+                  </div>
+                  <div className="pl-lg-4">
+                    <Row>
+                      <Col sm="1">
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-channel-filter"
+                          >
+                            Max Rows
+                          </label>
+                          <Input
+                            className="form-control-alternative"
+                            id="input-max-rows"
+                            type="text"
+                            value={objectAdminContext.maxRows}
+                            max="5000"
+                            min="5"
+                            maxLength="5"
+                            onChange={(e) => objectAdminContext.setMaxRows(e.target.value)}
+                          />
+                        </FormGroup>
+                      </Col>
+                      <Col sm="4"></Col>
+                      <Col lg="3" className="text-center"></Col>
                     </Row>
                   </div>
                 </Form>
               </CardBody>
               <CardFooter>
                 <Row>
-                  <Col className="text-right">
+                  <Col  sm="6" className="text-right">
                     <Button
                       color="danger"
                       onClick={retrieveMetadata}
@@ -167,26 +221,24 @@ const ChannelMetadataList = () => {
                   <div className="col text-right">
                   </div>
                 </Row>
-              </CardHeader>             
+              </CardHeader>      
+
               <CardBody>
-                  <MetadataTable 
-                    metadata={objectAdminContext.channelMetadataResults} 
-                  />
+                <MetadataTable 
+                  metadata={objectAdminContext.channelMetadataResults}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  emptyRows={emptyRows}
+                  handleChangePage={handleChangePage}
+                  handleChangeRowsPerPage={handleChangeRowsPerPage}
+                  isTruncate={isTruncate}
+                  setIsTruncate={setIsTruncate}
+                />
               </CardBody>
+
               <CardFooter>
                 <Row>
-                  <Col className="text-right">
-                    {/* <Button
-                      color="danger"
-                      onClick={saveChannelObject}
-                      disabled = {keySetContext.pubnub == null || channelFilter === ""}
-                    >
-                      Save Metadata
-                    </Button> */}
-                  </Col>
-                  <Col lg="3" className="text-center">
-                    
-                  </Col>
+                  <Col lg="3" className="text-center"></Col>
                 </Row> 
               </CardFooter>
             </Card>
@@ -199,32 +251,128 @@ const ChannelMetadataList = () => {
 
 export default ChannelMetadataList;
 
+const TruncateSwitch = ({isTruncate, setIsTruncate}) => {
+  return(
+    <>
+    <label
+      className="form-control-label"
+      htmlFor="input-truncate"
+    >
+      Truncate Large Values?
+    </label>
+    <br/>
+    <ButtonGroup 
+      className="btn-group-toggle" 
+      data-toggle="buttons"
+    >
+      <Button 
+        className={classnames({ active: !isTruncate })} 
+        color="danger" 
+        onClick={() => setIsTruncate(false)}
+      >
+        <input
+          autoComplete="off"
+          name="options"
+          type="radio"
+          value={!isTruncate}
+          size="small"
+        />
+        No
+      </Button>
+      <Button 
+        className={classnames({ active: isTruncate })} 
+        color="danger" 
+        onClick={() => setIsTruncate(true)}
+      >
+        <input
+          autoComplete="off"
+          name="options"
+          type="radio"
+          value={isTruncate}
+          size="small"
+        />
+        Yes
+      </Button>
+    </ButtonGroup>
+    </>
+  );
+}
 
-const MetadataTable = ({metadata}) => {
+const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate}) => {
   console.log("MetadataTable", metadata);
 
   if (metadata == null || metadata.length ===0) return <><h2>No Results</h2></>;
 
   return (
-    // <TableContainer component={Paper}>
-      <Table aria-label="collapsible table">
-        <TableHead>
-          <TableRow>
-            <TableCell/>
-            <TableCell>Channel ID</TableCell>
-            <TableCell>Channel Name</TableCell>
-            <TableCell>Description</TableCell>
-            <TableCell>Custom Field Data</TableCell>
-            <TableCell>Last Updated</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {metadata.map((row) => (
-            <MetadataRow key={row.id} row={row} />
-          ))}
-        </TableBody>
-      </Table>
-    // </TableContainer>
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <TableContainer sx={{ maxHeight: 800 }}>
+        <Table stickyHeader>
+
+          <TableHead>
+            <TableRow>
+              <TableCell colSpan="4">
+                <TruncateSwitch isTruncate={isTruncate} setIsTruncate={setIsTruncate}/>
+              </TableCell>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, 50, 100, { label: 'All', value: -1 }]}
+                colSpan={6}
+                count={metadata.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                SelectProps={{
+                  inputProps: {'aria-label': 'rows per page',},
+                  native: true,
+                }}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+              />
+            </TableRow>
+            <TableRow>
+              <TableCell/>
+              <TableCell>Channel ID</TableCell>
+              <TableCell>Channel Name</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Custom Field Data</TableCell>
+              <TableCell>Last Updated</TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {(rowsPerPage > 0
+              ? metadata.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              : metadata
+            ).map((row) => (
+              <MetadataRow key={row.id} row={row} isTruncate={isTruncate} />
+            ))}
+
+            {emptyRows > 0 && (
+              <TableRow style={{ height: 53 * emptyRows }}>
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                colSpan={6}
+                count={metadata.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                SelectProps={{
+                  inputProps: {'aria-label': 'rows per page',},
+                  native: true,
+                }}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+              />
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TableContainer>
+    </Paper>
   );
 }
 
@@ -239,7 +387,7 @@ const truncate = (data, size, noDots) => {
   return result;
 }
 
-const MetadataRow = ({row}) => {
+const MetadataRow = ({row, isTruncate}) => {
   console.log("MetadataRow", row);
 
   // const {row} = props;
@@ -257,12 +405,23 @@ const MetadataRow = ({row}) => {
             {open ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
           </IconButton>
         </TableCell>
-        <TableCell component="th" scope="row">{row.id.substring(0, 100)}</TableCell>
-        <TableCell>{truncate(row.name, 100)}</TableCell>
-        <TableCell>{truncate(row.description, 60)}</TableCell>
-        {/* <TableCell>{row.description}</TableCell> */}
-        <TableCell>{truncate(JSON.stringify(row.custom), 60)}</TableCell>
-        {/* <TableCell>{JSON.stringify(row.custom, null, 2)}</TableCell> */}
+
+        {isTruncate && (
+          <>
+            <TableCell component="th" scope="row">{truncate(row.id.substring, 100)}</TableCell>
+            <TableCell>{truncate(row.name, 100)}</TableCell>
+            <TableCell>{truncate(row.description, 60)}</TableCell>
+            <TableCell>{truncate(JSON.stringify(row.custom), 60)}</TableCell>
+          </>
+        )}
+        {!isTruncate && (
+          <>
+            <TableCell component="th" scope="row">{row.id}</TableCell>
+            <TableCell>{row.name}</TableCell>
+            <TableCell>{row.description}</TableCell>
+            <TableCell>{JSON.stringify(row.custom, null, 2)}</TableCell>
+          </>
+        )}
         <TableCell>{row.updated}</TableCell>
       </TableRow>
 
@@ -274,21 +433,29 @@ const MetadataRow = ({row}) => {
                 <TableBody>
                 <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell>Channel ID</TableCell>
+                    <TableCell><strong>Channel ID</strong></TableCell>
                     <TableCell width="95%">{row.id}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell>Channel Name</TableCell>
+                    <TableCell><strong>Channel Name</strong></TableCell>
                     <TableCell width="95%">{row.name}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell>Description</TableCell>
+                    <TableCell><strong>Description</strong></TableCell>
                     <TableCell width="95%">{row.description}</TableCell>
                   </TableRow>
+                  <TableRow>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell colSpan="2" component="th" width="5%"><strong>Custom Fields</strong></TableCell>
+                  </TableRow>
                   {Object.keys(row.custom).map((key) => (
-                    <CustomFieldRow name={key} value={row.custom[key]} />
+                    <TableRow>
+                      <TableCell width="5%"></TableCell>
+                      <TableCell>{key}</TableCell>
+                      <TableCell width="95%" colSpan="2">{row.custom[key]}</TableCell>
+                    </TableRow>
                   ))}
                 </TableBody>
               </Table>
@@ -300,17 +467,63 @@ const MetadataRow = ({row}) => {
   );
 }
 
-const CustomFieldRow = (props) => {
-  console.log('CustomFieldRows', props);
+function TablePaginationActions(props) {
+  const theme = useTheme();
+  const { count, page, rowsPerPage, onPageChange } = props;
 
-  // assumption: flat custom field json data
-  //   can compensate for nested json in future, if needed
+  const handleFirstPageButtonClick = (event) => {
+    onPageChange(event, 0);
+  };
+
+  const handleBackButtonClick = (event) => {
+    onPageChange(event, page - 1);
+  };
+
+  const handleNextButtonClick = (event) => {
+    onPageChange(event, page + 1);
+  };
+
+  const handleLastPageButtonClick = (event) => {
+    onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+  };
 
   return (
-    <TableRow>
-      <TableCell width="5%"></TableCell>
-      <TableCell>{props.name}</TableCell>
-      <TableCell width="95%">{props.value}</TableCell>
-    </TableRow>
+    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+      <IconButton
+        onClick={handleFirstPageButtonClick}
+        disabled={page === 0}
+        aria-label="first page"
+      >
+        {theme.direction === 'rtl' ? <LastPage /> : <FirstPage />}
+      </IconButton>
+      <IconButton
+        onClick={handleBackButtonClick}
+        disabled={page === 0}
+        aria-label="previous page"
+      >
+        {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+      </IconButton>
+      <IconButton
+        onClick={handleNextButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="next page"
+      >
+        {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+      </IconButton>
+      <IconButton
+        onClick={handleLastPageButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="last page"
+      >
+        {theme.direction === 'rtl' ? <FirstPage /> : <LastPage />}
+      </IconButton>
+    </Box>
   );
 }
+
+TablePaginationActions.propTypes = {
+  count: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
+  page: PropTypes.number.isRequired,
+  rowsPerPage: PropTypes.number.isRequired,
+};

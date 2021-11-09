@@ -39,7 +39,7 @@ import {
 import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
 
-const GenerateMetadata = () => {
+const ImportMetadata = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
@@ -64,8 +64,8 @@ const GenerateMetadata = () => {
   }
   
 
-  const generateMetadata = () => {
-    console.log("generateMetadata");
+  const importMetadata = () => {
+    console.log("importMetadata");
 
     for (let i = 0; i < recordCount; ++i) {
       const record = metadataRecords[i];
@@ -119,7 +119,7 @@ const GenerateMetadata = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Generate Metadata</h3>
+                    <h3 className="mb-0">Import Metadata</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -214,10 +214,10 @@ const GenerateMetadata = () => {
                   <Col className="text-right">
                     <Button
                       color="danger"
-                      onClick={generateMetadata}
+                      onClick={importMetadata}
                       // disabled = {keySetContext.pubnub == null || metadataRecords == null || metadataRecords.length === 0}
                     >
-                      Generate Metadata
+                      Import Metadata
                     </Button>
                   </Col>
                   <Col lg="3" className="text-center">
@@ -232,4 +232,4 @@ const GenerateMetadata = () => {
   );
 };
 
-export default GenerateMetadata;
+export default ImportMetadata;

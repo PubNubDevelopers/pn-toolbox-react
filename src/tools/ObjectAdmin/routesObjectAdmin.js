@@ -5,7 +5,7 @@ import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 import { ObjectAdminProvider } from "./ObjectAdminProvider";
 import ChannelMetadata from './pages/ChannelMetadata';
 import ChannelMetadataList from './pages/ChannelMetadataList';
-import GenerateMetadata from './pages/GenerateMetadata';
+import ImportMetadata from './pages/ImportMetadata';
 
 var routesObjectAdmin = {
   collapse: true,
@@ -29,9 +29,9 @@ var routesObjectAdmin = {
       layout: "/admin",
     },
     {
-      path: "/generate-metadata",
-      name: "Generate Metadata",
-      component: GenerateMetadata,
+      path: "/import-metadata",
+      name: "Import Metadata",
+      component: ImportMetadata,
       parent: ObjectAdminProvider,
       layout: "/admin",
     },
