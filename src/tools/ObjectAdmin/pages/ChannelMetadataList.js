@@ -17,12 +17,10 @@
 */
 
 import React, { useState } from "react";
-import classnames from "classnames";
 
 // reactstrap components
 import {
   Button,
-  ButtonGroup,
   Card,
   CardHeader,
   CardBody,
@@ -32,7 +30,6 @@ import {
   Input,
   Row,
   Col,
-  // Table,
   CardFooter,
 } from "reactstrap";
 
@@ -58,6 +55,7 @@ import PropTypes from 'prop-types';
 import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
 import { FirstPage, KeyboardArrowDown, KeyboardArrowRight, KeyboardArrowLeft, LastPage } from "@mui/icons-material";
+import { Switch, FormControlLabel } from "@mui/material";
 
 const ChannelMetadataList = () => {
   const keySetContext = useKeySetData();
@@ -139,9 +137,8 @@ const ChannelMetadataList = () => {
               </CardHeader>             
               <CardBody>
                 <Form>
-                  <div className="pl-lg-4">
                     <Row>
-                      <Col sm="6">
+                      <Col sm="4">
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -153,19 +150,15 @@ const ChannelMetadataList = () => {
                             className="form-control-alternative"
                             id="input-channel-filter"
                             placeholder="Input a filter expression"
-                            type="text"
+                            type="textarea"
+                            rows="4"
                             value={channelFilter}
                             onChange={(e) => setChannelFilter(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
-                      <Col lg="3" className="text-center">
-                      </Col>
-                    </Row>
-                  </div>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col sm="1">
+                      <Col sm="2">
+                        <Row>
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -184,14 +177,23 @@ const ChannelMetadataList = () => {
                             onChange={(e) => objectAdminContext.setMaxRows(e.target.value)}
                           />
                         </FormGroup>
+                        </Row>
+                        <Row>
+                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <Button 
+                            className="form-control-alternative text-align-right"
+                            color="danger"
+                            onClick={retrieveMetadata}
+                            disabled = {keySetContext.pubnub == null}
+                          >
+                            Get Metadata
+                          </Button>
+                        </Row>
                       </Col>
-                      <Col sm="4"></Col>
-                      <Col lg="3" className="text-center"></Col>
                     </Row>
-                  </div>
                 </Form>
               </CardBody>
-              <CardFooter>
+              {/* <CardFooter>
                 <Row>
                   <Col  sm="6" className="text-right">
                     <Button
@@ -202,11 +204,8 @@ const ChannelMetadataList = () => {
                       Get Metadata
                     </Button>
                   </Col>
-                  <Col lg="3" className="text-center">
-                    
-                  </Col>
                 </Row> 
-              </CardFooter>
+              </CardFooter> */}
             </Card>
           </Col>
         </Row>
@@ -251,52 +250,6 @@ const ChannelMetadataList = () => {
 
 export default ChannelMetadataList;
 
-const TruncateSwitch = ({isTruncate, setIsTruncate}) => {
-  return(
-    <>
-    <label
-      className="form-control-label"
-      htmlFor="input-truncate"
-    >
-      Truncate Large Values?
-    </label>
-    <br/>
-    <ButtonGroup 
-      className="btn-group-toggle" 
-      data-toggle="buttons"
-    >
-      <Button 
-        className={classnames({ active: !isTruncate })} 
-        color="danger" 
-        onClick={() => setIsTruncate(false)}
-      >
-        <input
-          autoComplete="off"
-          name="options"
-          type="radio"
-          value={!isTruncate}
-          size="small"
-        />
-        No
-      </Button>
-      <Button 
-        className={classnames({ active: isTruncate })} 
-        color="danger" 
-        onClick={() => setIsTruncate(true)}
-      >
-        <input
-          autoComplete="off"
-          name="options"
-          type="radio"
-          value={isTruncate}
-          size="small"
-        />
-        Yes
-      </Button>
-    </ButtonGroup>
-    </>
-  );
-}
 
 const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate}) => {
   console.log("MetadataTable", metadata);
@@ -305,13 +258,20 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: 800 }}>
+      <TableContainer >
         <Table stickyHeader>
 
           <TableHead>
             <TableRow>
               <TableCell colSpan="4">
-                <TruncateSwitch isTruncate={isTruncate} setIsTruncate={setIsTruncate}/>
+                {/* <TruncateSwitch isTruncate={isTruncate} setIsTruncate={setIsTruncate}/> */}
+                <FormControlLabel control={
+                  <Switch defaultChecked 
+                    value={isTruncate}
+                    onChange={(e) => {setIsTruncate(e.target.checked)}}
+                  />} 
+                  label="Truncate Large Values?" 
+                />
               </TableCell>
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25, 50, 100, { label: 'All', value: -1 }]}
@@ -527,3 +487,51 @@ TablePaginationActions.propTypes = {
   page: PropTypes.number.isRequired,
   rowsPerPage: PropTypes.number.isRequired,
 };
+
+
+// const TruncateSwitch = ({isTruncate, setIsTruncate}) => {
+  //   return(
+  //     <>
+  //     <label
+  //       className="form-control-label"
+  //       htmlFor="input-truncate"
+  //     >
+  //       Truncate Large Values?
+  //     </label>
+  //     <br/>
+  //     <ButtonGroup 
+  //       className="btn-group-toggle" 
+  //       data-toggle="buttons"
+  //     >
+  //       <Button 
+  //         className={classnames({ active: isTruncate })} 
+  //         color="danger" 
+  //         onClick={() => setIsTruncate(!isTruncate)}
+  //       >
+  //         <input
+  //           autoComplete="off"
+  //           name="options"
+  //           type="radio"
+  //           value={!isTruncate}
+  //           size="small"
+  //         />
+  //         No
+  //       </Button>
+  //       <Button 
+  //         className={classnames({ active: isTruncate })} 
+  //         color="danger" 
+  //         onClick={() => setIsTruncate(true)}
+  //       >
+  //         <input
+  //           autoComplete="off"
+  //           name="options"
+  //           type="radio"
+  //           value={isTruncate}
+  //           size="small"
+  //         />
+  //         Yes
+  //       </Button>
+  //     </ButtonGroup>
+  //     </>
+  //   );
+  // }
