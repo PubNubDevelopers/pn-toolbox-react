@@ -17,6 +17,7 @@
 */
 
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 
 // reactstrap components
 import {
@@ -33,7 +34,6 @@ import {
   CardFooter,
 } from "reactstrap";
 
-// import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
@@ -46,16 +46,17 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { useTheme } from '@mui/material/styles';
-
-// import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import PropTypes from 'prop-types';
 
 // // core components
 import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
-import { FirstPage, KeyboardArrowDown, KeyboardArrowRight, KeyboardArrowLeft, LastPage } from "@mui/icons-material";
+import { DeleteForever, FirstPage, KeyboardArrowDown, KeyboardArrowRight, KeyboardArrowLeft, LastPage } from "@mui/icons-material";
 import { Switch, FormControlLabel } from "@mui/material";
+import EditIcon from '@mui/icons-material/Edit';
+import GroupIcon from '@mui/icons-material/Group';
+import ReactBSAlert from "react-bootstrap-sweetalert";
 
 const ChannelMetadataList = () => {
   const keySetContext = useKeySetData();
@@ -66,7 +67,7 @@ const ChannelMetadataList = () => {
 
   // table nav controls
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
@@ -84,6 +85,8 @@ const ChannelMetadataList = () => {
   // page state
   const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
   const [isTruncate, setIsTruncate] = useState(true);
+  const [sweetAlert, setSweetAlert] = useState(null);
+  const history = useHistory();
 
   async function retrieveMetadata() {
     console.log("channelFilter", channelFilter);
@@ -120,8 +123,90 @@ const ChannelMetadataList = () => {
     objectAdminContext.setChannelMetadataResults(results);
   }
 
+  const handleEdit = (e, record, index) => {
+    objectAdminContext.setChannelId(record.id);
+    objectAdminContext.setChannelName(record.name);
+    objectAdminContext.setChannelDesc(record.description);
+    objectAdminContext.setChannelCustom(JSON.stringify(record.custom, null, 2));
+    objectAdminContext.setChannelUpdated(record.updated);
+    objectAdminContext.setChannelEtag(record.eTag);
+
+    history.push("/admin/channel-metadata");
+  }
+
+
+  const handleRemove = (e, channel, index) => {
+    e.preventDefault();
+    confirmAlert("Confirm Remove Metadata?", 
+      `${index} - ${channel}`,
+      "Confirm", ()=>removeMetadata(channel, index), "Cancel", ()=>hideAlert()
+    );
+  }
+
+  async function removeMetadata(channel, index) {
+    // console.log("removeChannelMetadata", channel);
+    hideAlert();
+
+    try {
+      const result = await keySetContext.pubnub.objects.removeChannelMetadata({channel : channel});
+      timerAlert("Remove Success!", "ChannelMetadata removed.", 2);
+      
+      let temp = Array.from(objectAdminContext.channelMetadataResults);
+      temp.splice(index, 1);
+
+      objectAdminContext.setChannelMetadataResults(temp);
+    } 
+    catch (status) {
+      confirmAlert("Remove Failed", 
+        `Error: ${status.message}`,
+        "Done", ()=>hideAlert()
+      );
+    }
+  }
+
+  const hideAlert = () => {
+    console.log("hideAlert");
+    setSweetAlert(null);
+  };
+
+  const timerAlert = (title, message, delay) => {
+    setSweetAlert(
+        <ReactBSAlert
+          style={{ display: "block", marginTop: "100px" }}
+          title={title}
+          onConfirm={() => hideAlert()}
+          showConfirm={true}
+        >
+          {message}
+        </ReactBSAlert>
+    );
+    setTimeout(function() {hideAlert()}, delay*1000);
+  };
+
+  const confirmAlert = (title, message, confirmButton, confirmFn, cancelButton, cancelFn) => {
+    setSweetAlert(
+        <ReactBSAlert
+          question
+          style={{ display: "block", marginTop: "100px" }}
+          title={title}
+          onConfirm={confirmFn}
+          onCancel={cancelFn}
+          showCancel
+          confirmBtnBsStyle="danger"
+          confirmBtnText={confirmButton}
+          cancelBtnBsStyle="secondary"
+          cancelBtnText={cancelButton}
+          reverseButtons={true}
+          btnSize=""
+        >
+          {message}
+        </ReactBSAlert>
+    );
+  };
+
   return (
     <>
+      {sweetAlert}
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -129,14 +214,14 @@ const ChannelMetadataList = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Enter Channel Filter</h3>
+                    <h3 className="mb-0">Enter Search Filter</h3>
                   </div>
                   <div className="col text-right">
                   </div>
                 </Row>
               </CardHeader>             
               <CardBody>
-                <Form>
+                <Form onSubmit={(e) => e.preventDefault()}>
                     <Row>
                       <Col sm="4">
                         <FormGroup>
@@ -193,19 +278,6 @@ const ChannelMetadataList = () => {
                     </Row>
                 </Form>
               </CardBody>
-              {/* <CardFooter>
-                <Row>
-                  <Col  sm="6" className="text-right">
-                    <Button
-                      color="danger"
-                      onClick={retrieveMetadata}
-                      disabled = {keySetContext.pubnub == null || channelFilter === ""}
-                    >
-                      Get Metadata
-                    </Button>
-                  </Col>
-                </Row> 
-              </CardFooter> */}
             </Card>
           </Col>
         </Row>
@@ -232,6 +304,8 @@ const ChannelMetadataList = () => {
                   handleChangeRowsPerPage={handleChangeRowsPerPage}
                   isTruncate={isTruncate}
                   setIsTruncate={setIsTruncate}
+                  handleRemove={handleRemove}
+                  handleEdit={handleEdit}
                 />
               </CardBody>
 
@@ -251,7 +325,7 @@ const ChannelMetadataList = () => {
 export default ChannelMetadataList;
 
 
-const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate}) => {
+const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {
   console.log("MetadataTable", metadata);
 
   if (metadata == null || metadata.length ===0) return <><h2>No Results</h2></>;
@@ -264,7 +338,6 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
           <TableHead>
             <TableRow>
               <TableCell colSpan="4">
-                {/* <TruncateSwitch isTruncate={isTruncate} setIsTruncate={setIsTruncate}/> */}
                 <FormControlLabel control={
                   <Switch defaultChecked 
                     value={isTruncate}
@@ -290,11 +363,13 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
             </TableRow>
             <TableRow>
               <TableCell/>
+              <TableCell align="right">#</TableCell>
               <TableCell>Channel ID</TableCell>
               <TableCell>Channel Name</TableCell>
               <TableCell>Description</TableCell>
               <TableCell>Custom Field Data</TableCell>
               <TableCell>Last Updated</TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
 
@@ -302,8 +377,13 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
             {(rowsPerPage > 0
               ? metadata.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               : metadata
-            ).map((row) => (
-              <MetadataRow key={row.id} row={row} isTruncate={isTruncate} />
+            ).map((row, index) => (
+
+              <MetadataRow index={(index + (page * rowsPerPage))} row={row} isTruncate={isTruncate} 
+                handleRemove={handleRemove} 
+                handleEdit={handleEdit}
+              />
+            
             ))}
 
             {emptyRows > 0 && (
@@ -347,7 +427,7 @@ const truncate = (data, size, noDots) => {
   return result;
 }
 
-const MetadataRow = ({row, isTruncate}) => {
+const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
   console.log("MetadataRow", row);
 
   // const {row} = props;
@@ -366,12 +446,13 @@ const MetadataRow = ({row, isTruncate}) => {
           </IconButton>
         </TableCell>
 
+        <TableCell align="right">{index}</TableCell>
         {isTruncate && (
           <>
-            <TableCell component="th" scope="row">{truncate(row.id.substring, 100)}</TableCell>
-            <TableCell>{truncate(row.name, 100)}</TableCell>
-            <TableCell>{truncate(row.description, 60)}</TableCell>
-            <TableCell>{truncate(JSON.stringify(row.custom), 60)}</TableCell>
+            <TableCell>{truncate(row.id, 40)}</TableCell>
+            <TableCell>{truncate(row.name, 40)}</TableCell>
+            <TableCell>{truncate(row.description, 40)}</TableCell>
+            <TableCell>{truncate(JSON.stringify(row.custom), 40)}</TableCell>
           </>
         )}
         {!isTruncate && (
@@ -382,9 +463,25 @@ const MetadataRow = ({row, isTruncate}) => {
             <TableCell>{JSON.stringify(row.custom, null, 2)}</TableCell>
           </>
         )}
+
         <TableCell>{row.updated}</TableCell>
+
+        <TableCell align="center">
+          <IconButton aria-label="edit" size="small" onClick={(e) => handleEdit(e, row, index)}>
+            <EditIcon/>
+          </IconButton>
+          <IconButton aria-label="members" size="small" 
+            // onClick={(e) => handleMembership(e, row.id, index)}
+            >
+            <GroupIcon/>
+          </IconButton>
+          <IconButton aria-label="delete" size="small" onClick={(e) => handleRemove(e, row.id, index)}>
+            <DeleteForever/>
+          </IconButton>
+        </TableCell>
       </TableRow>
 
+      {/* Expandable Detail Data */}
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>

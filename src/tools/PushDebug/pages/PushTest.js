@@ -31,7 +31,7 @@ const PushTest = () => {
   const [message, setMessage] = useState(pushDebugContext.message);
   const [inputRows, setInputRows] = useState(28);
 
-  const [alert, setAlert] = useState(null);
+  const [sweetAlert, setSweetAlert] = useState(null);
 
   const outputMessage = useRef([]);
   const outputFeedback = useRef([]);
@@ -210,11 +210,11 @@ const PushTest = () => {
 
   const hideAlert = () => {
     console.log("hideAlert");
-    setAlert(null);
+    setSweetAlert(null);
   };
 
   const timerAlert = (title, message, delay) => {
-    setAlert(
+    setSweetAlert(
         <ReactBSAlert
           style={{ display: "block", marginTop: "100px" }}
           title={title}
@@ -228,7 +228,7 @@ const PushTest = () => {
   };
 
   const confirmAlert = (title, alertMessage) => {
-    setAlert(
+    setSweetAlert(
         <ReactBSAlert
           question
           style={{ display: "block", marginTop: "100px" }}
@@ -250,7 +250,7 @@ const PushTest = () => {
 
   return (
     <>
-      {alert}
+      {sweetAlert}
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
