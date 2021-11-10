@@ -44,8 +44,8 @@ const ChannelMetadata = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
-  console.log("Page1 keySetContext: ", keySetContext);
-  console.log("Page1 objectAdminContext: ", objectAdminContext);
+  console.log("ChannelMetadata keySetContext: ", keySetContext);
+  console.log("ChannelMetadata objectAdminContext: ", objectAdminContext);
 
   const [channelId, setChannelId] = useState(objectAdminContext.channelId);
   const [sweetAlert, setSweetAlert] = useState(null);
@@ -63,6 +63,10 @@ const ChannelMetadata = () => {
       objectAdminContext.setChannelUpdated(result.data.updated);
       objectAdminContext.setChannelCustom(JSON.stringify(result.data.custom, null, 4));
       objectAdminContext.setChannelEtag(result.data.eTag);
+
+      (result != null && result.data.length > 0) 
+        ? timerAlert("Save Success!", "ChannelMetadata saved.", 2)
+        : timerAlert("No Records Found!", "Your filter found 0 records.", 3);
     }
     catch (status) {
       confirmAlert("Get Metadata Failed", 
@@ -169,7 +173,7 @@ const ChannelMetadata = () => {
                           <Input
                             className="form-control-alternative"
                             id="input-channel-id"
-                            placeholder="Input channel object name"
+                            placeholder="Enter channel ID"
                             type="text"
                             value={channelId}
                             onChange={(e) => setChannelId(e.target.value)}

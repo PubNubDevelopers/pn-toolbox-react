@@ -58,7 +58,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
 
-const ChannelMetadataList = () => {
+const ChannelMembersList = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
@@ -83,31 +83,53 @@ const ChannelMetadataList = () => {
   };
 
   // page state
+  const [channelId, setChannelId] = useState(objectAdminContext.channelId);
   const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
+
   const [isTruncate, setIsTruncate] = useState(true);
   const [sweetAlert, setSweetAlert] = useState(null);
   const history = useHistory();
 
+
+  const getParams = () => {
+    let next = null;
+
+    let params = {
+      channel: channelId,
+      filter : channelFilter || 'id = channel"*"',
+      include: {
+        totalCount: true,
+        customFields: true,
+        UUIDFields: true
+      },
+      page: {next: next}
+    };
+  }
+
+
   async function retrieveMetadata() {
-    console.log("channelFilter", channelFilter);
+    console.log("retrieveMetadata", channelId, channelFilter);
 
     let more = true;
     let results = [];
     let next = null;
     const limit = objectAdminContext.maxRows < 100 ? objectAdminContext.maxRows : 100;
+    
+    // const critria = 
 
     do {
       try {
-        const result = await keySetContext.pubnub.objects.getAllChannelMetadata({
-          filter : channelFilter, // || 'id = channel"*"',
-          limit: limit,
+        const result = await keySetContext.pubnub.objects.getChannelMembers({
+          channel: channelId,
+          filter : null, // channelFilter || 'id = channel"*"',
           include: {
             totalCount: true,
-            customFields: true
+            customFields: true,
+            UUIDFields: true
           },
           page: {next: next}
         });
-        
+
         if (result != null && result.data.length > 0) {
           results = results.concat(result.data);
           more = result.data.length >= limit;
@@ -200,10 +222,10 @@ const ChannelMetadataList = () => {
           style={{ display: "block", marginTop: "100px" }}
           title={title}
           onConfirm={confirmFn}
+          onCancel={cancelFn}
+          showCancel
           confirmBtnBsStyle="danger"
           confirmBtnText={confirmButton}
-          onCancel={cancelFn}
-          showCancel={cancelButton != null}
           cancelBtnBsStyle="secondary"
           cancelBtnText={cancelButton}
           reverseButtons={true}
@@ -229,9 +251,29 @@ const ChannelMetadataList = () => {
                   <div className="col text-right">
                   </div>
                 </Row>
-              </CardHeader>             
+              </CardHeader>
               <CardBody>
                 <Form onSubmit={(e) => e.preventDefault()}>
+                    <Row>
+                      <Col sm="4">
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-channel-id"
+                          >
+                            Channel ID *
+                          </label>
+                          <Input
+                            className="form-control-alternative"
+                            id="input-channel-id"
+                            placeholder="Enter a channel ID"
+                            type="text"
+                            value={channelId}
+                            onChange={(e) => setChannelId(e.target.value)}
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
                     <Row>
                       <Col sm="4">
                         <FormGroup>
@@ -279,7 +321,7 @@ const ChannelMetadataList = () => {
                             className="form-control-alternative text-align-right"
                             color="danger"
                             onClick={retrieveMetadata}
-                            disabled = {keySetContext.pubnub == null}
+                            disabled = {keySetContext.pubnub == null || channelId == null}
                           >
                             Get Metadata
                           </Button>
@@ -332,7 +374,8 @@ const ChannelMetadataList = () => {
   );
 };
 
-export default ChannelMetadataList;
+export default ChannelMembersList
+;
 
 
 const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {
