@@ -17,6 +17,7 @@
 */
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // reactstrap components
 import {
@@ -91,8 +92,8 @@ const ChannelMetadataList = () => {
   // page state
   const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
   const [isTruncate, setIsTruncate] = useState(true);
-  
   const [sweetAlert, setSweetAlert] = useState(null);
+  const navigate = useNavigate();
 
   async function retrieveMetadata() {
     console.log("channelFilter", channelFilter);
@@ -128,6 +129,13 @@ const ChannelMetadataList = () => {
 
     objectAdminContext.setChannelMetadataResults(results);
   }
+
+  const handleEdit = (e, channel, index) => {
+    e.preventDefault();
+    objectAdminContext.setChannelId(channel);
+    navigate("/admin/channel-metadata");
+  }
+
 
   const handleRemove = (e, channel, index) => {
     e.preventDefault();
@@ -218,7 +226,7 @@ const ChannelMetadataList = () => {
                 </Row>
               </CardHeader>             
               <CardBody>
-                <Form>
+                <Form onSubmit={(e) => e.preventDefault()}>
                     <Row>
                       <Col sm="4">
                         <FormGroup>
@@ -302,6 +310,7 @@ const ChannelMetadataList = () => {
                   isTruncate={isTruncate}
                   setIsTruncate={setIsTruncate}
                   handleRemove={handleRemove}
+                  handleEdit={handleEdit}
                 />
               </CardBody>
 
@@ -423,7 +432,7 @@ const truncate = (data, size, noDots) => {
   return result;
 }
 
-const MetadataRow = ({index, row, isTruncate, handleRemove}) => {
+const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
   console.log("MetadataRow", row);
 
   // const {row} = props;
@@ -464,12 +473,12 @@ const MetadataRow = ({index, row, isTruncate, handleRemove}) => {
 
         <TableCell align="center">
           <IconButton aria-label="edit" size="small"
-            // onClick={() => editChannelMetadata(row.id)}
+            onClick={() => handleEdit(row.id, index)}
           >
             <EditIcon/>
           </IconButton>
           <IconButton aria-label="members" size="small"
-            // onClick={() => getMemberMetadata(row.id)}
+            // onClick={() => handleMember(row.id)}
           >
             <GroupIcon/>
           </IconButton>

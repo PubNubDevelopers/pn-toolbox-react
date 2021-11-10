@@ -127,7 +127,7 @@ const ChannelMetadata = () => {
                 </Row>
               </CardHeader>             
               <CardBody>
-                <Form>
+                <Form onSubmit={(e) => e.preventDefault()}>
                   <div className="pl-lg-4">
                     <Row>
                       <Col>
