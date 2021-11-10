@@ -6,8 +6,6 @@ export const ObjectAdminProvider = ({ children }) => {
 
   // ChannelMetadata State
   const [channelId, setChannelId] = useState();
-  const [customFieldRadios, setCustomFieldRadios] = useState(1);
-  
   const [channelName, setChannelName] = useState([]);
   const [channelDesc, setChannelDesc] = useState([]);
   const [channelCustom, setChannelCustom] = useState([]);
@@ -25,7 +23,6 @@ export const ObjectAdminProvider = ({ children }) => {
   const useObjectAdminData = {
     // ChannelMetadata State
     channelId, setChannelId,
-    customFieldRadios, setCustomFieldRadios,
     channelName, setChannelName,
     channelDesc, setChannelDesc,
     channelUpdated, setChannelUpdated,
