@@ -34,7 +34,6 @@ import {
   CardFooter,
 } from "reactstrap";
 
-// import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
@@ -47,8 +46,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { useTheme } from '@mui/material/styles';
-
-// import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import PropTypes from 'prop-types';
 
@@ -59,10 +56,6 @@ import { DeleteForever, FirstPage, KeyboardArrowDown, KeyboardArrowRight, Keyboa
 import { Switch, FormControlLabel } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import GroupIcon from '@mui/icons-material/Group';
-
-// import { ToastContainer, toast } from 'react-toastify';
-// import 'react-toastify/dist/ReactToastify.css';
-
 import ReactBSAlert from "react-bootstrap-sweetalert";
 
 const ChannelMetadataList = () => {
@@ -130,28 +123,32 @@ const ChannelMetadataList = () => {
     objectAdminContext.setChannelMetadataResults(results);
   }
 
-  const handleEdit = (e, channel, index) => {
-    // e.preventDefault();
-    objectAdminContext.setChannelId(channel);
+  const handleEdit = (e, record, index) => {
+    objectAdminContext.setChannelId(record.id);
+    objectAdminContext.setChannelName(record.name);
+    objectAdminContext.setChannelDesc(record.description);
+    objectAdminContext.setChannelCustom(JSON.stringify(record.custom, null, 2));
+    objectAdminContext.setChannelUpdated(record.updated);
+    objectAdminContext.setChannelEtag(record.eTag);
+
     history.push("/admin/channel-metadata");
   }
 
 
   const handleRemove = (e, channel, index) => {
     e.preventDefault();
-    confirmAlert("Remove Channel Metadata", 
-      `Are you sure you want to remove this record? \n\r ${index} - ${channel}`,
+    confirmAlert("Confirm Remove Metadata?", 
+      `${index} - ${channel}`,
       "Confirm", ()=>removeMetadata(channel, index), "Cancel", ()=>hideAlert()
     );
   }
 
   async function removeMetadata(channel, index) {
-    console.log("removeChannelMetadata", channel);
+    // console.log("removeChannelMetadata", channel);
     hideAlert();
 
     try {
       const result = await keySetContext.pubnub.objects.removeChannelMetadata({channel : channel});
-
       timerAlert("Remove Success!", "ChannelMetadata removed.", 2);
       
       let temp = Array.from(objectAdminContext.channelMetadataResults);
@@ -160,10 +157,8 @@ const ChannelMetadataList = () => {
       objectAdminContext.setChannelMetadataResults(temp);
     } 
     catch (status) {
-      console.log("  fail", JSON.stringify(status));
-
       confirmAlert("Remove Failed", 
-        `Something went wrong with the Remove operation: ${status.message}`,
+        `Error: ${status.message}`,
         "Done", ()=>hideAlert()
       );
     }
@@ -384,7 +379,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               : metadata
             ).map((row, index) => (
 
-              <MetadataRow index={index} row={row} isTruncate={isTruncate} 
+              <MetadataRow index={(index + (page * rowsPerPage))} row={row} isTruncate={isTruncate} 
                 handleRemove={handleRemove} 
                 handleEdit={handleEdit}
               />
@@ -472,7 +467,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
         <TableCell>{row.updated}</TableCell>
 
         <TableCell align="center">
-          <IconButton aria-label="edit" size="small" onClick={(e) => handleEdit(e, row.id, index)}>
+          <IconButton aria-label="edit" size="small" onClick={(e) => handleEdit(e, row, index)}>
             <EditIcon/>
           </IconButton>
           <IconButton aria-label="members" size="small" 

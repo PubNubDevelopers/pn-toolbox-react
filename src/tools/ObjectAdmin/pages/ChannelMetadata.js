@@ -38,6 +38,7 @@ import {
 // // core components
 import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
+import ReactBSAlert from "react-bootstrap-sweetalert";
 
 const ChannelMetadata = () => {
   const keySetContext = useKeySetData();
@@ -47,72 +48,99 @@ const ChannelMetadata = () => {
   console.log("Page1 objectAdminContext: ", objectAdminContext);
 
   const [channelId, setChannelId] = useState(objectAdminContext.channelId);
-  // const [customFieldRadios, setCustomFieldRadios] = useState(objectAdminContext.customFieldRadios);
+  const [sweetAlert, setSweetAlert] = useState(null);
 
-  // const handleCustomFieldClick = (value) => {
-  //   setCustomFieldRadios(value);
-  // }
-
-  const getChannelObject = () => {
-    console.log("channelId", channelId);
-
-    keySetContext.pubnub.objects.getChannelMetadata(
-      {
+  async function getChannelObject() {
+    // console.log("channelId", channelId);
+    try {
+      const result = await keySetContext.pubnub.objects.getChannelMetadata({
         channel : channelId,
-      },
-      function (status, result) {
-        console.log(status, result);
-
-        if (!status.error) {
-          objectAdminContext.setChannelId(result.data.id);
-          objectAdminContext.setChannelName(result.data.name);
-          objectAdminContext.setChannelDesc(result.data.description);
-          objectAdminContext.setChannelUpdated(result.data.updated);
-          objectAdminContext.setChannelCustom(JSON.stringify(result.data.custom, null, 4));
-          objectAdminContext.setChannelEtag(result.data.eTag);
-        }
-        else {
-          console.log("Error: ", status);
-          alert(JSON.stringify(status, null, 4));
-        }
-      }
-    );
+      });
+        
+      objectAdminContext.setChannelId(result.data.id);
+      objectAdminContext.setChannelName(result.data.name);
+      objectAdminContext.setChannelDesc(result.data.description);
+      objectAdminContext.setChannelUpdated(result.data.updated);
+      objectAdminContext.setChannelCustom(JSON.stringify(result.data.custom, null, 4));
+      objectAdminContext.setChannelEtag(result.data.eTag);
+    }
+    catch (status) {
+      confirmAlert("Get Metadata Failed", 
+        `Error: ${status.message}`,
+        "Done", ()=>hideAlert()
+      );
+    }
   }
 
-  const saveChannelObject = () => {
-    console.log("channelId", channelId);
-
-    keySetContext.pubnub.objects.setChannelMetadata(
-      {
-        channel : objectAdminContext.channelId,
+  async function saveChannelObject() {
+    // console.log("channelId", channelId);
+    try {
+      const result = await keySetContext.pubnub.objects.setChannelMetadata({
+        channel : channelId,
         data: {
-            name: objectAdminContext.channelName,
-            description: objectAdminContext.channelDesc,
-            custom: JSON.parse(objectAdminContext.channelCustom)
+          name: objectAdminContext.channelName,
+          description: objectAdminContext.channelDesc,
+          custom: JSON.parse(objectAdminContext.channelCustom)
         },
         include: {
-            customFields: true
+          customFields: true
         }
-      },
-      function (status) {
-        console.log(status);
+      });
 
-        if (!status.error) {
-          console.log("Success: ", status);
-          
-        }
-        else {
-          console.log("Error: ", status);
-          alert(JSON.stringify(status, null, 4));
-        }
+      timerAlert("Save Success!", "ChannelMetadata saved.", 2);
+    } 
+    catch (status) {
+      confirmAlert("Save Failed", 
+        `Error: ${status.message}`,
+        "Done", ()=>hideAlert()
+      );
+    }
 
-        alert(JSON.stringify(status, null, 4));
-      }
-    );
   }
+
+  const hideAlert = () => {
+    console.log("hideAlert");
+    setSweetAlert(null);
+  };
+
+  const timerAlert = (title, message, delay) => {
+    setSweetAlert(
+      <ReactBSAlert
+        style={{ display: "block", marginTop: "100px" }}
+        title={title}
+        onConfirm={() => hideAlert()}
+        showConfirm={true}
+      >
+        {message}
+      </ReactBSAlert>
+    );
+    setTimeout(function() {hideAlert()}, delay*1000);
+  };
+
+  const confirmAlert = (title, message, confirmButton, confirmFn, cancelButton, cancelFn) => {
+    setSweetAlert(
+      <ReactBSAlert
+        question
+        style={{ display: "block", marginTop: "100px" }}
+        title={title}
+        onConfirm={confirmFn}
+        onCancel={cancelFn}
+        showCancel
+        confirmBtnBsStyle="danger"
+        confirmBtnText={confirmButton}
+        cancelBtnBsStyle="secondary"
+        cancelBtnText={cancelButton}
+        reverseButtons={true}
+        btnSize=""
+      >
+        {message}
+      </ReactBSAlert>
+    );
+  };
 
   return (
     <>
+      {sweetAlert}
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -147,51 +175,6 @@ const ChannelMetadata = () => {
                             onChange={(e) => setChannelId(e.target.value)}
                           />
                         </FormGroup>
-                      </Col>
-                      <Col lg="3" className="text-center">
-                        {/*                         
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-custom-fields"
-                          >
-                            Include Custom Fields?
-                          </label>
-                          <div >
-                            <ButtonGroup 
-                              className="btn-group-toggle" 
-                              data-toggle="buttons"
-                            >
-                              <Button 
-                                className={classnames({ active: customFieldRadios === 0})} 
-                                color="danger" 
-                                onClick={() => handleCustomFieldClick(0)}
-                              >
-                                <input
-                                  autoComplete="off"
-                                  name="options"
-                                  type="radio"
-                                  value={customFieldRadios === 0}
-                                />
-                                No
-                              </Button>
-                              <Button 
-                                className={classnames({ active: customFieldRadios === 1 })} 
-                                color="danger" 
-                                onClick={() => handleCustomFieldClick(1)}
-                              >
-                                <input
-                                  autoComplete="off"
-                                  name="options"
-                                  type="radio"
-                                  value={customFieldRadios === 1}
-                                />
-                                Yes
-                              </Button>
-                            </ButtonGroup>
-                          </div>
-                        </FormGroup>
-                         */}
                       </Col>
                     </Row>
                   </div>
