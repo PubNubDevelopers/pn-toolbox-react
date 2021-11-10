@@ -89,6 +89,8 @@ const ChannelMetadataList = () => {
   const history = useHistory();
 
   async function retrieveMetadata() {
+    // TODO: BUG - when filter is invalid it goes into endless loop of 400s. 
+    // Need to exit the loop on exeception
     console.log("channelFilter", channelFilter);
 
     let more = true;
