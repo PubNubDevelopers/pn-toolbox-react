@@ -17,7 +17,7 @@
 */
 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 // reactstrap components
 import {
@@ -93,7 +93,7 @@ const ChannelMetadataList = () => {
   const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
   const [isTruncate, setIsTruncate] = useState(true);
   const [sweetAlert, setSweetAlert] = useState(null);
-  const navigate = useNavigate();
+  const history = useHistory();
 
   async function retrieveMetadata() {
     console.log("channelFilter", channelFilter);
@@ -131,9 +131,9 @@ const ChannelMetadataList = () => {
   }
 
   const handleEdit = (e, channel, index) => {
-    e.preventDefault();
+    // e.preventDefault();
     objectAdminContext.setChannelId(channel);
-    navigate("/admin/channel-metadata");
+    history.push("/admin/channel-metadata");
   }
 
 
@@ -330,7 +330,7 @@ const ChannelMetadataList = () => {
 export default ChannelMetadataList;
 
 
-const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove}) => {
+const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {
   console.log("MetadataTable", metadata);
 
   if (metadata == null || metadata.length ===0) return <><h2>No Results</h2></>;
@@ -343,7 +343,6 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
           <TableHead>
             <TableRow>
               <TableCell colSpan="4">
-                {/* <TruncateSwitch isTruncate={isTruncate} setIsTruncate={setIsTruncate}/> */}
                 <FormControlLabel control={
                   <Switch defaultChecked 
                     value={isTruncate}
@@ -387,6 +386,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
 
               <MetadataRow index={index} row={row} isTruncate={isTruncate} 
                 handleRemove={handleRemove} 
+                handleEdit={handleEdit}
               />
             
             ))}
@@ -472,14 +472,12 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
         <TableCell>{row.updated}</TableCell>
 
         <TableCell align="center">
-          <IconButton aria-label="edit" size="small"
-            onClick={() => handleEdit(row.id, index)}
-          >
+          <IconButton aria-label="edit" size="small" onClick={(e) => handleEdit(e, row.id, index)}>
             <EditIcon/>
           </IconButton>
-          <IconButton aria-label="members" size="small"
-            // onClick={() => handleMember(row.id)}
-          >
+          <IconButton aria-label="members" size="small" 
+            // onClick={(e) => handleMembership(e, row.id, index)}
+            >
             <GroupIcon/>
           </IconButton>
           <IconButton aria-label="delete" size="small" onClick={(e) => handleRemove(e, row.id, index)}>
