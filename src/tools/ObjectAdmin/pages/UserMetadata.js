@@ -166,7 +166,7 @@ const UserMetadata = () => {
                 <Form onSubmit={(e) => e.preventDefault()}>
                   <div className="pl-lg-4">
                     <Row>
-                      <Col>
+                      <Col sm="4">
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -184,26 +184,23 @@ const UserMetadata = () => {
                           />
                         </FormGroup>
                       </Col>
+                      <Col sm="2">
+                        <Row>&nbsp;</Row>
+                        <Row>
+                          
+                          <Button
+                            color="danger"
+                            onClick={getUserObject}
+                            disabled = {keySetContext.pubnub == null || userId === ""}
+                          >
+                            Get User
+                          </Button>
+                        </Row>
+                      </Col>
                     </Row>
                   </div>
                 </Form>
               </CardBody>
-              <CardFooter>
-                <Row>
-                  <Col className="text-right">
-                    <Button
-                      color="danger"
-                      onClick={getUserObject}
-                      disabled = {keySetContext.pubnub == null || userId === ""}
-                    >
-                      Get Metadata
-                    </Button>
-                  </Col>
-                  <Col lg="3" className="text-center">
-                    
-                  </Col>
-                </Row> 
-              </CardFooter>
             </Card>
           </Col>
         </Row>
@@ -220,195 +217,197 @@ const UserMetadata = () => {
                 </Row>
               </CardHeader>             
               <CardBody>
-                <Form>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-user-id"
-                          >
-                            User ID
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-user-id"
-                            type="text"
-                            value={objectAdminContext.userId}
-                            onChange={(e) => objectAdminContext.setUserId(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                </Form>
-              <Row>
-                <Col>
-                  <Form>
-                    <div className="pl-lg-4">
-                      <Row>
-                        <Col>
-                          <FormGroup>
-                            <label
-                              className="form-control-label"
-                              htmlFor="input-user-name"
-                            >
-                              User Name
-                            </label>
-                            <Input
-                              className="form-control-alternative"
-                              id="input-user-name"
-                              type="text"
-                              value={objectAdminContext.userName}
-                              onChange={(e) => objectAdminContext.setUserName(e.target.value)}
-                            />
-                          </FormGroup>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Form>
-                  <Form>
-                    <div className="pl-lg-4">
-                      <Row>
-                        <Col>
-                          <FormGroup>
-                            <label
-                              className="form-control-label"
-                              htmlFor="input-extenral-id"
-                            >
-                              External ID
-                            </label>
-                            <Input
-                              className="form-control-alternative"
-                              id="input-external-id"
-                              type="text"
-                              value={objectAdminContext.externalId}
-                              onChange={(e) => objectAdminContext.setExternalId(e.target.value)}
-                            />
-                          </FormGroup>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Form>
-                  <Form>
-                    <div className="pl-lg-4">
-                      <Row>
-                        <Col>
-                          <FormGroup>
-                            <label
-                              className="form-control-label"
-                              htmlFor="input-profile-url"
-                            >
-                              Profile URL
-                            </label>
-                            <Input
-                              className="form-control-alternative"
-                              id="input-profile-url"
-                              type="text"
-                              value={objectAdminContext.profileUrl}
-                              onChange={(e) => objectAdminContext.setProfileUrl(e.target.value)}
-                            />
-                          </FormGroup>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Form>
-                  <Form>
-                    <div className="pl-lg-4">
-                      <Row>
-                        <Col>
-                          <FormGroup>
-                            <label
-                              className="form-control-label"
-                              htmlFor="input-email"
-                            >
-                              Email
-                            </label>
-                            <Input
-                              className="form-control-alternative"
-                              id="input-email"
-                              type="text"
-                              value={objectAdminContext.userEmail}
-                              onChange={(e) => objectAdminContext.setUserEmail(e.target.value)}
-                            />
-                          </FormGroup>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Form>
-                </Col>
-                <Col>
-                <Form>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-user-custom"
-                          >
-                            Custom Fields 
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-user-custom"
-                            type="textarea"
-                            rows="10"
-                            value={objectAdminContext.userCustom}
-                            onChange={(e) => objectAdminContext.setUserCustom(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  </div>
-                </Form>
                 <Row>
+                  <Col>
                     <Form>
                       <div className="pl-lg-4">
+                        <Row>
                           <Col>
                             <FormGroup>
                               <label
                                 className="form-control-label"
-                                htmlFor="input-user-updated"
+                                htmlFor="input-user-id"
                               >
-                                Last Updated
+                                User ID
                               </label>
                               <Input
                                 className="form-control-alternative"
-                                id="input-user-updated"
+                                id="input-user-id"
                                 type="text"
-                                disabled={true}
-                                value={objectAdminContext.userUpdated}
-                                onChange={(e) => objectAdminContext.setUserUpdated(e.target.value)}
+                                value={objectAdminContext.userId}
+                                onChange={(e) => objectAdminContext.setUserId(e.target.value)}
                               />
                             </FormGroup>
                           </Col>
+                        </Row>
                       </div>
                     </Form>
                     <Form>
                       <div className="pl-lg-4">
+                        <Row>
                           <Col>
                             <FormGroup>
                               <label
                                 className="form-control-label"
-                                htmlFor="input-user-etag"
+                                htmlFor="input-user-name"
                               >
-                                ETag
+                                User Name
                               </label>
                               <Input
                                 className="form-control-alternative"
-                                id="input-user-etag"
+                                id="input-user-name"
                                 type="text"
-                                disabled={true}
-                                value={objectAdminContext.userEtag}
-                                onChange={(e) => objectAdminContext.setUserEtag(e.target.value)}
+                                value={objectAdminContext.userName}
+                                onChange={(e) => objectAdminContext.setUserName(e.target.value)}
                               />
                             </FormGroup>
                           </Col>
+                        </Row>
                       </div>
                     </Form>
-                  </Row>
-                </Col>
-              </Row>
+                    <Form>
+                      <div className="pl-lg-4">
+                        <Row>
+                          <Col>
+                            <FormGroup>
+                              <label
+                                className="form-control-label"
+                                htmlFor="input-extenral-id"
+                              >
+                                External ID
+                              </label>
+                              <Input
+                                className="form-control-alternative"
+                                id="input-external-id"
+                                type="text"
+                                value={objectAdminContext.externalId}
+                                onChange={(e) => objectAdminContext.setExternalId(e.target.value)}
+                              />
+                            </FormGroup>
+                          </Col>
+                        </Row>
+                      </div>
+                    </Form>
+                    <Form>
+                      <div className="pl-lg-4">
+                        <Row>
+                          <Col>
+                            <FormGroup>
+                              <label
+                                className="form-control-label"
+                                htmlFor="input-profile-url"
+                              >
+                                Profile URL
+                              </label>
+                              <Input
+                                className="form-control-alternative"
+                                id="input-profile-url"
+                                type="text"
+                                value={objectAdminContext.profileUrl}
+                                onChange={(e) => objectAdminContext.setProfileUrl(e.target.value)}
+                              />
+                            </FormGroup>
+                          </Col>
+                        </Row>
+                      </div>
+                    </Form>
+                    <Form>
+                      <div className="pl-lg-4">
+                        <Row>
+                          <Col>
+                            <FormGroup>
+                              <label
+                                className="form-control-label"
+                                htmlFor="input-email"
+                              >
+                                Email
+                              </label>
+                              <Input
+                                className="form-control-alternative"
+                                id="input-email"
+                                type="text"
+                                value={objectAdminContext.userEmail}
+                                onChange={(e) => objectAdminContext.setUserEmail(e.target.value)}
+                              />
+                            </FormGroup>
+                          </Col>
+                        </Row>
+                      </div>
+                    </Form>
+                  </Col>
+                  <Col>
+                    <Form>
+                      <div className="pl-lg-4">
+                        <Row>
+                          <Col>
+                            <FormGroup>
+                              <label
+                                className="form-control-label"
+                                htmlFor="input-user-custom"
+                              >
+                                Custom Fields 
+                              </label>
+                              <Input
+                                className="form-control-alternative"
+                                id="input-user-custom"
+                                type="textarea"
+                                rows="14"
+                                value={objectAdminContext.userCustom}
+                                onChange={(e) => objectAdminContext.setUserCustom(e.target.value)}
+                              />
+                            </FormGroup>
+                          </Col>
+                        </Row>
+                      </div>
+                    </Form>
+                    <Row>
+                      <Form>
+                        <div className="pl-lg-4">
+                            <Col>
+                              <FormGroup>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-user-updated"
+                                >
+                                  Last Updated
+                                </label>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-user-updated"
+                                  type="text"
+                                  disabled={true}
+                                  value={objectAdminContext.userUpdated}
+                                  onChange={(e) => objectAdminContext.setUserUpdated(e.target.value)}
+                                />
+                              </FormGroup>
+                            </Col>
+                        </div>
+                      </Form>
+                      <Form>
+                        <div className="pl-lg-4">
+                            <Col>
+                              <FormGroup>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-user-etag"
+                                >
+                                  ETag
+                                </label>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-user-etag"
+                                  type="text"
+                                  disabled={true}
+                                  value={objectAdminContext.userEtag}
+                                  onChange={(e) => objectAdminContext.setUserEtag(e.target.value)}
+                                />
+                              </FormGroup>
+                            </Col>
+                        </div>
+                      </Form>
+                    </Row>
+                  </Col>
+                </Row>
               </CardBody>
               <CardFooter>
                 <Row>

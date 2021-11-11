@@ -162,7 +162,7 @@ const ChannelMetadata = () => {
                 <Form onSubmit={(e) => e.preventDefault()}>
                   <div className="pl-lg-4">
                     <Row>
-                      <Col>
+                      <Col sm="4">
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -180,26 +180,23 @@ const ChannelMetadata = () => {
                           />
                         </FormGroup>
                       </Col>
+                      <Col sm="2">
+                        <Row>&nbsp;</Row>
+                        <Row>
+                          
+                          <Button
+                            color="danger"
+                            onClick={getChannelObject}
+                            disabled = {keySetContext.pubnub == null || channelId === ""}
+                          >
+                            Get Channel
+                          </Button>
+                        </Row>
+                      </Col>
                     </Row>
                   </div>
                 </Form>
               </CardBody>
-              <CardFooter>
-                <Row>
-                  <Col className="text-right">
-                    <Button
-                      color="danger"
-                      onClick={getChannelObject}
-                      disabled = {keySetContext.pubnub == null || channelId === ""}
-                    >
-                      Get Metadata
-                    </Button>
-                  </Col>
-                  <Col lg="3" className="text-center">
-                    
-                  </Col>
-                </Row> 
-              </CardFooter>
             </Card>
           </Col>
         </Row>
@@ -216,154 +213,152 @@ const ChannelMetadata = () => {
                 </Row>
               </CardHeader>             
               <CardBody>
-                <Form>
+                <Row>
+                  <Col>
+                    <Form>
+                      <div className="pl-lg-4">
+                        <Row>
+                          <Col>
+                            <FormGroup>
+                              <label
+                                className="form-control-label"
+                                htmlFor="input-channel-id"
+                              >
+                                Channel ID
+                              </label>
+                              <Input
+                                className="form-control-alternative"
+                                id="input-channel-id"
+                                type="text"
+                                value={objectAdminContext.channelId}
+                                onChange={(e) => objectAdminContext.setChannelId(e.target.value)}
+                              />
+                            </FormGroup>
+                          </Col>
+                        </Row>
+                      </div>
+                    </Form>
+                    <Form>
+                      <div className="pl-lg-4">
+                        <Row>
+                          <Col>
+                            <FormGroup>
+                              <label
+                                className="form-control-label"
+                                htmlFor="input-channel-name"
+                              >
+                                Channel Name
+                              </label>
+                              <Input
+                                className="form-control-alternative"
+                                id="input-channel-name"
+                                type="text"
+                                value={objectAdminContext.channelName}
+                                onChange={(e) => objectAdminContext.setChannelName(e.target.value)}
+                              />
+                            </FormGroup>
+                          </Col>
+                        </Row>
+                      </div>
+                    </Form>
+                    <Form>
+                      <div className="pl-lg-4">
+                        <Row>
+                          <Col>
+                            <FormGroup>
+                              <label
+                                className="form-control-label"
+                                htmlFor="input-channel-desc"
+                              >
+                                Channel Description
+                              </label>
+                              <Input
+                                className="form-control-alternative"
+                                id="input-channel-desc"
+                                type="textarea"
+                                rows="4"
+                                value={objectAdminContext.channelDesc}
+                                onChange={(e) => objectAdminContext.setChannelDesc(e.target.value)}
+                              />
+                            </FormGroup>
+                          </Col>
+                        </Row>
+                      </div>
+                    </Form>
+                  </Col>
+                  <Col>
+                    <Form>
+                      <div className="pl-lg-4">
+                        <Row>
+                          <Col>
+                            <FormGroup>
+                              <label
+                                className="form-control-label"
+                                htmlFor="input-channel-custom"
+                              >
+                                Custom Fields 
+                              </label>
+                              <Input
+                                className="form-control-alternative"
+                                id="input-channel-custom"
+                                type="textarea"
+                                rows="8"
+                                value={objectAdminContext.channelCustom}
+                                onChange={(e) => objectAdminContext.setChannelCustom(e.target.value)}
+                              />
+                            </FormGroup>
+                          </Col>
+                        </Row>
+                      </div>
+                    </Form>
                     <Row>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-channel-id"
-                          >
-                            Channel ID
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-channel-id"
-                            type="text"
-                            value={objectAdminContext.channelId}
-                            onChange={(e) => objectAdminContext.setChannelId(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
+                      <Form>
+                        <div className="pl-lg-4">
+                            <Col>
+                              <FormGroup>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-channel-updated"
+                                >
+                                  Last Updated
+                                </label>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-channel-updated"
+                                  type="text"
+                                  disabled={true}
+                                  value={objectAdminContext.channelUpdated}
+                                  onChange={(e) => objectAdminContext.setChannelUpdated(e.target.value)}
+                                />
+                              </FormGroup>
+                            </Col>
+                        </div>
+                      </Form>
+                      <Form>
+                        <div className="pl-lg-4">
+                            <Col>
+                              <FormGroup>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-channel-etag"
+                                >
+                                  ETag
+                                </label>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-channel-etag"
+                                  type="text"
+                                  disabled={true}
+                                  value={objectAdminContext.channelEtag}
+                                  onChange={(e) => objectAdminContext.setChannelEtag(e.target.value)}
+                                />
+                              </FormGroup>
+                            </Col>
+                        </div>
+                      </Form>
                     </Row>
-                </Form>
-              <Row>
-                <Col>
-                <Form>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-channel-name"
-                          >
-                            Channel Name
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-channel-name"
-                            type="text"
-                            value={objectAdminContext.channelName}
-                            onChange={(e) => objectAdminContext.setChannelName(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  </div>
-                </Form>
-                <Form>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-channel-desc"
-                          >
-                            Channel Description
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-channel-desc"
-                            type="textarea"
-                            rows="4"
-                            value={objectAdminContext.channelDesc}
-                            onChange={(e) => objectAdminContext.setChannelDesc(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  </div>
-                </Form>
-                <Form>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-channel-updated"
-                          >
-                            Last Updated
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-channel-updated"
-                            type="text"
-                            disabled={true}
-                            value={objectAdminContext.channelUpdated}
-                            onChange={(e) => objectAdminContext.setChannelUpdated(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  </div>
-                </Form>
-
-                <Form>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-channel-etag"
-                          >
-                            ETag
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-channel-etag"
-                            type="text"
-                            disabled={true}
-                            value={objectAdminContext.channelEtag}
-                            onChange={(e) => objectAdminContext.setChannelEtag(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  </div>
-                </Form>
-
-                </Col>
-                <Col>
-                <Form>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-channel-custom"
-                          >
-                            Custom Fields 
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-channel-custom"
-                            type="textarea"
-                            rows="18"
-                            value={objectAdminContext.channelCustom}
-                            onChange={(e) => objectAdminContext.setChannelCustom(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  </div>
-                </Form>
-                </Col>
-              </Row>
+                  </Col>
+                </Row>
               </CardBody>
               <CardFooter>
                 <Row>
@@ -376,9 +371,7 @@ const ChannelMetadata = () => {
                       Save Metadata
                     </Button>
                   </Col>
-                  <Col lg="3" className="text-center">
-                    
-                  </Col>
+                  <Col lg="3" className="text-center"></Col>
                 </Row> 
               </CardFooter>
             </Card>
