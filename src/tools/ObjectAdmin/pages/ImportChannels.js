@@ -39,7 +39,7 @@ import {
 import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
 
-const ImportMetadata = () => {
+const ImportChannels = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
@@ -64,8 +64,8 @@ const ImportMetadata = () => {
   }
   
 
-  const importMetadata = () => {
-    console.log("importMetadata");
+  const importChannels = () => {
+    console.log("importChannels");
 
     for (let i = 0; i < recordCount; ++i) {
       const record = metadataRecords[i];
@@ -86,12 +86,12 @@ const ImportMetadata = () => {
         }
       } // for-in
 
-      createMetadata(record.channel_id, data);
+      createChannel(record.channel_id, data);
     } // for
   }
 
-  async function createMetadata(channelId, data) {
-    console.log("createMetadata", data);
+  async function createChannel(channelId, data) {
+    console.log("createChannel", data);
 
     try {
       const result = await keySetContext.pubnub.objects.setChannelMetadata({
@@ -214,10 +214,10 @@ const ImportMetadata = () => {
                   <Col className="text-right">
                     <Button
                       color="danger"
-                      onClick={importMetadata}
+                      onClick={importChannels}
                       // disabled = {keySetContext.pubnub == null || metadataRecords == null || metadataRecords.length === 0}
                     >
-                      Import Metadata
+                      Import Channels
                     </Button>
                   </Col>
                   <Col lg="3" className="text-center">
@@ -232,4 +232,4 @@ const ImportMetadata = () => {
   );
 };
 
-export default ImportMetadata;
+export default ImportChannels;

@@ -51,22 +51,22 @@ const UserMetadata = () => {
   const [sweetAlert, setSweetAlert] = useState(null);
 
   async function getUserObject() {
-    // console.log("channelId", channelId);
+    // console.log("getUserObject", userId);
     try {
-      const result = await keySetContext.pubnub.objects.getChannelMetadata({
-        channel : userId,
+      const result = await keySetContext.pubnub.objects.getUUIDMetadata({
+        uuid : userId,
       });
-        
-      objectAdminContext.setUserId(result.data.uuid);
+
+      objectAdminContext.setUserId(result.data.id);
       objectAdminContext.setUserName(result.data.name);
-      objectAdminContext.setUserExternalId(result.data.externalId);
+      objectAdminContext.setUserExternalId(result.data.userExternalId);
       objectAdminContext.setUserProfileUrl(result.data.profileUrl);
       objectAdminContext.setUserEmail(result.data.email);
       objectAdminContext.setUserCustom(JSON.stringify(result.data.custom, null, 2));
       objectAdminContext.setUserUpdated(result.data.updated);
       objectAdminContext.setUserEtag(result.data.eTag);
-
-      (result != null && result.data.length > 0) 
+debugger;
+      (result != null && result.data != null) 
         ? timerAlert("Save Success!", "Metadata saved.", 2)
         : timerAlert("No Records Found!", "Your filter found 0 records.", 3);
     }
@@ -85,7 +85,7 @@ const UserMetadata = () => {
         uuid : userId,
         data: {
           name: objectAdminContext.userName,
-          externalId: objectAdminContext.externalId,
+          externalId: objectAdminContext.userExternalId,
           profileUrl: objectAdminContext.userProfileUrl,
           email: objectAdminContext.userEmail,
           custom: JSON.parse(objectAdminContext.userCustom)
@@ -156,7 +156,7 @@ const UserMetadata = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Enter Channel ID</h3>
+                    <h3 className="mb-0">Enter User ID</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -170,14 +170,14 @@ const UserMetadata = () => {
                         <FormGroup>
                           <label
                             className="form-control-label"
-                            htmlFor="input-channel-id"
+                            htmlFor="input-user-id"
                           >
-                            Channel ID
+                            User ID
                           </label>
                           <Input
                             className="form-control-alternative"
-                            id="input-channel-id"
-                            placeholder="Enter channel ID"
+                            id="input-user-id"
+                            placeholder="Enter User ID"
                             type="text"
                             value={userId}
                             onChange={(e) => setUserId(e.target.value)}
@@ -272,7 +272,7 @@ const UserMetadata = () => {
                             <FormGroup>
                               <label
                                 className="form-control-label"
-                                htmlFor="input-extenral-id"
+                                htmlFor="input-external-id"
                               >
                                 External ID
                               </label>
@@ -280,8 +280,8 @@ const UserMetadata = () => {
                                 className="form-control-alternative"
                                 id="input-external-id"
                                 type="text"
-                                value={objectAdminContext.externalId}
-                                onChange={(e) => objectAdminContext.setExternalId(e.target.value)}
+                                value={objectAdminContext.userExternalId}
+                                onChange={(e) => objectAdminContext.setUserExternalId(e.target.value)}
                               />
                             </FormGroup>
                           </Col>
@@ -303,8 +303,9 @@ const UserMetadata = () => {
                                 className="form-control-alternative"
                                 id="input-profile-url"
                                 type="text"
-                                value={objectAdminContext.profileUrl}
-                                onChange={(e) => objectAdminContext.setProfileUrl(e.target.value)}
+                                value={objectAdminContext.userProfileUrl}
+
+                                onChange={(e) => objectAdminContext.setUserProfileUrl(e.target.value)}
                               />
                             </FormGroup>
                           </Col>

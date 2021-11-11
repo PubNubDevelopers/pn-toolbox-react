@@ -15,7 +15,7 @@ export const ObjectAdminProvider = ({ children }) => {
    // UserMetadata State
    const [userId, setUserId] = useState();
    const [userName, setUserName] = useState([]);
-   const [externalId, setUserExternalId] = useState([]);
+   const [userExternalId, setUserExternalId] = useState([]);
    const [userProfileUrl, setUserProfileUrl] = useState([]);
    const [userEmail, setUserEmail] = useState([]);
    const [userCustom, setUserCustom] = useState([]);
@@ -42,7 +42,7 @@ export const ObjectAdminProvider = ({ children }) => {
     // UserMetadata State
     userId, setUserId,
     userName, setUserName,
-    externalId, setUserExternalId,
+    userExternalId, setUserExternalId,
     userProfileUrl, setUserProfileUrl,
     userEmail, setUserEmail,
     userCustom, setUserCustom,
