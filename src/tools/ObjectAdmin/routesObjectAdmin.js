@@ -3,12 +3,12 @@ import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 
 // app pages
 import { ObjectAdminProvider } from "./ObjectAdminProvider";
-import ChannelMetadata from './pages/ChannelMetadata';
-import ChannelMetadataList from './pages/ChannelMetadataList';
+import ChannelForm from './pages/ChannelForm';
+import ChannelMetadataList from './pages/ChannelsList';
+import UserForm from './pages/UserForm';
+import MembersList from './pages/MembersList';
 import ImportChannels from './pages/ImportChannels';
 import ImportUsers from './pages/ImportUsers';
-import UserMetadata from './pages/UserMetadata';
-import MembersList from './pages/MembersList';
 
 var routesObjectAdmin = {
   collapse: true,
@@ -18,14 +18,14 @@ var routesObjectAdmin = {
   state: "objectAdminCollapse",
   views: [
     {
-      path: "/objects/channel-metadata",
+      path: "/objects/channel-form",
       name: "Channel Form",
-      component: ChannelMetadata,
+      component: ChannelForm,
       parent: ObjectAdminProvider,
       layout: "/admin",
     },
     {
-      path: "/objects/channel-metadata-list",
+      path: "/objects/channels-list",
       name: "Get Channels",
       component: ChannelMetadataList,
       parent: ObjectAdminProvider,
@@ -33,9 +33,9 @@ var routesObjectAdmin = {
     },
     {divider: true,},
     {
-      path: "/objects/user-metadata",
+      path: "/objects/user-form",
       name: "User Form",
-      component: UserMetadata,
+      component: UserForm,
       parent: ObjectAdminProvider,
       layout: "/admin",
     },

@@ -40,12 +40,12 @@ import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
 import ReactBSAlert from "react-bootstrap-sweetalert";
 
-const UserMetadata = () => {
+const UserForm = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
-  console.log("UserMetadata keySetContext: ", keySetContext);
-  console.log("UserMetadata objectAdminContext: ", objectAdminContext);
+  console.log("UserForm keySetContext: ", keySetContext);
+  console.log("UserForm objectAdminContext: ", objectAdminContext);
 
   const [userId, setUserId] = useState(objectAdminContext.userId);
   const [sweetAlert, setSweetAlert] = useState(null);
@@ -65,7 +65,7 @@ const UserMetadata = () => {
       objectAdminContext.setUserCustom(JSON.stringify(result.data.custom, null, 2));
       objectAdminContext.setUserUpdated(result.data.updated);
       objectAdminContext.setUserEtag(result.data.eTag);
-debugger;
+
       (result != null && result.data != null) 
         ? timerAlert("Save Success!", "Metadata saved.", 2)
         : timerAlert("No Records Found!", "Your filter found 0 records.", 3);
@@ -432,4 +432,4 @@ debugger;
   );
 };
 
-export default UserMetadata;
+export default UserForm;

@@ -58,12 +58,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
 
-const ChannelMetadataList = () => {
+const ChannelsList = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
-  console.log("ChannelMetadataList keySetContext: ", keySetContext);
-  console.log("ChannelMetadataList objectAdminContext: ", objectAdminContext);
+  console.log("ChannelsList keySetContext: ", keySetContext);
+  console.log("ChannelsList objectAdminContext: ", objectAdminContext);
 
   // table nav controls
   const [page, setPage] = React.useState(0);
@@ -332,7 +332,7 @@ const ChannelMetadataList = () => {
   );
 };
 
-export default ChannelMetadataList;
+export default ChannelsList;
 
 
 const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {

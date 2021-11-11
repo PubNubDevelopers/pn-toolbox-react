@@ -40,12 +40,12 @@ import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
 import ReactBSAlert from "react-bootstrap-sweetalert";
 
-const ChannelMetadata = () => {
+const ChannelForm = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
-  console.log("ChannelMetadata keySetContext: ", keySetContext);
-  console.log("ChannelMetadata objectAdminContext: ", objectAdminContext);
+  console.log("ChannelForm keySetContext: ", keySetContext);
+  console.log("ChannelForm objectAdminContext: ", objectAdminContext);
 
   const [channelId, setChannelId] = useState(objectAdminContext.channelId);
   const [sweetAlert, setSweetAlert] = useState(null);
@@ -64,7 +64,7 @@ const ChannelMetadata = () => {
       objectAdminContext.setChannelCustom(JSON.stringify(result.data.custom, null, 4));
       objectAdminContext.setChannelEtag(result.data.eTag);
 
-      (result != null && result.data.length > 0) 
+      (result != null && result.data > 0) 
         ? timerAlert("Save Success!", "ChannelMetadata saved.", 2)
         : timerAlert("No Records Found!", "Your filter found 0 records.", 3);
     }
@@ -382,4 +382,4 @@ const ChannelMetadata = () => {
   );
 };
 
-export default ChannelMetadata;
+export default ChannelForm;
