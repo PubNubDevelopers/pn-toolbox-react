@@ -254,24 +254,24 @@ const ChannelMetadataList = () => {
                       </Col>
                       <Col sm="2">
                         <Row>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-channel-filter"
-                          >
-                            Max Rows
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-max-rows"
-                            type="text"
-                            value={objectAdminContext.maxRows}
-                            max="5000"
-                            min="5"
-                            maxLength="5"
-                            onChange={(e) => objectAdminContext.setMaxRows(e.target.value)}
-                          />
-                        </FormGroup>
+                          <FormGroup>
+                            <label
+                              className="form-control-label"
+                              htmlFor="input-channel-filter"
+                            >
+                              Max Rows
+                            </label>
+                            <Input
+                              className="form-control-alternative"
+                              id="input-max-rows"
+                              type="text"
+                              value={objectAdminContext.maxRows}
+                              max="5000"
+                              min="5"
+                              maxLength="5"
+                              onChange={(e) => objectAdminContext.setMaxRows(e.target.value)}
+                            />
+                          </FormGroup>
                         </Row>
                         <Row>
                           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
