@@ -115,7 +115,7 @@ const ChannelsList = () => {
         }
         else {
           more = false;
-          timerAlert("No Records Found!", "Your filter found 0 records.", 3);
+          timerAlert("No Records Found!", "Your filter found none records.", 3);
         }
       } 
       catch (status) {
@@ -140,7 +140,7 @@ const ChannelsList = () => {
     objectAdminContext.setChannelUpdated(record.updated);
     objectAdminContext.setChannelEtag(record.eTag);
 
-    history.push("/admin/channel-metadata");
+    history.push("/admin/objects/channel-form");
   }
 
 
@@ -224,7 +224,7 @@ const ChannelsList = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Enter Search Filter</h3>
+                    <h3 className="mb-0">Channels Search</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -257,7 +257,7 @@ const ChannelsList = () => {
                           <FormGroup>
                             <label
                               className="form-control-label"
-                              htmlFor="input-channel-filter"
+                              htmlFor="input-max-rows"
                             >
                               Max Rows
                             </label>
@@ -281,7 +281,7 @@ const ChannelsList = () => {
                             onClick={retrieveMetadata}
                             disabled = {keySetContext.pubnub == null}
                           >
-                            Get Metadata
+                            Search Channels
                           </Button>
                         </Row>
                       </Col>
@@ -297,7 +297,7 @@ const ChannelsList = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Channel Metadata Results</h3>
+                    <h3 className="mb-0">Channel Search Results</h3>
                   </div>
                   <div className="col text-right">
                   </div>

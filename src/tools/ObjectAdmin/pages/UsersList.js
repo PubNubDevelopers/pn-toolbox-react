@@ -58,12 +58,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
 
-const ChannelsList = () => {
+const UsersList = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
-  console.log("ChannelsList keySetContext: ", keySetContext);
-  console.log("ChannelsList objectAdminContext: ", objectAdminContext);
+  console.log("UsersList keySetContext: ", keySetContext);
+  console.log("UsersList objectAdminContext: ", objectAdminContext);
 
   // table nav controls
   const [page, setPage] = React.useState(0);
@@ -83,13 +83,13 @@ const ChannelsList = () => {
   };
 
   // page state
-  const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
+  const [userFilter, setUserFilter] = useState(objectAdminContext.userFilter);
   const [isTruncate, setIsTruncate] = useState(true);
   const [sweetAlert, setSweetAlert] = useState(null);
   const history = useHistory();
 
   async function retrieveMetadata() {
-    console.log("channelFilter", channelFilter);
+    console.log("channelFilter", userFilter);
 
     let more = true;
     let results = [];
@@ -98,8 +98,8 @@ const ChannelsList = () => {
 
     do {
       try {
-        const result = await keySetContext.pubnub.objects.getAllChannelMetadata({
-          filter : channelFilter, // || 'id = channel"*"',
+        const result = await keySetContext.pubnub.objects.getAllUUIDMetadata({
+          filter : userFilter, 
           limit: limit,
           include: {
             totalCount: true,
@@ -115,7 +115,7 @@ const ChannelsList = () => {
         }
         else {
           more = false;
-          timerAlert("No Records Found!", "Your filter found 0 records.", 3);
+          timerAlert("No Records Found!", "Your filter found none records.", 3);
         }
       } 
       catch (status) {
@@ -133,14 +133,16 @@ const ChannelsList = () => {
   }
 
   const handleEdit = (e, record, index) => {
-    objectAdminContext.setChannelId(record.id);
-    objectAdminContext.setChannelName(record.name);
-    objectAdminContext.setChannelDesc(record.description);
-    objectAdminContext.setChannelCustom(JSON.stringify(record.custom, null, 2));
-    objectAdminContext.setChannelUpdated(record.updated);
-    objectAdminContext.setChannelEtag(record.eTag);
+    objectAdminContext.setUserId(record.id);
+    objectAdminContext.setUserName(record.name);
+    objectAdminContext.setUserExternalId(record.externalId);
+    objectAdminContext.setUserProfileUrl(record.profileUrl);
+    objectAdminContext.setUserEmail(record.email);
+    objectAdminContext.setUserCustom(JSON.stringify(record.custom, null, 2));
+    objectAdminContext.setUserUpdated(record.updated);
+    objectAdminContext.setUserEtag(record.eTag);
 
-    history.push("/admin/channel-metadata");
+    history.push("/admin/objects/user-form");
   }
 
 
@@ -154,17 +156,17 @@ const ChannelsList = () => {
   }
 
   async function removeMetadata(channel, index) {
-    // console.log("removeChannelMetadata", channel);
+    // console.log("removeUserMetadata", channel);
     hideAlert();
 
     try {
-      const result = await keySetContext.pubnub.objects.removeChannelMetadata({channel : channel});
-      timerAlert("Remove Success!", "ChannelMetadata removed.", 2);
+      const result = await keySetContext.pubnub.objects.removeUUIDMetadata({channel : channel});
+      timerAlert("Remove Success!", "UserMetadata removed.", 2);
       
-      let temp = Array.from(objectAdminContext.channelMetadataResults);
+      let temp = Array.from(objectAdminContext.userMetadataResults);
       temp.splice(index, 1);
 
-      objectAdminContext.setChannelMetadataResults(temp);
+      objectAdminContext.setUserMetadataResults(temp);
     } 
     catch (status) {
       confirmAlert(status.status.errorData.error.message, 
@@ -224,7 +226,7 @@ const ChannelsList = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Enter Search Filter</h3>
+                    <h3 className="mb-0">Users Search</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -237,18 +239,18 @@ const ChannelsList = () => {
                         <FormGroup>
                           <label
                             className="form-control-label"
-                            htmlFor="input-channel-filter"
+                            htmlFor="input-user-filter"
                           >
-                            Channel Filter Expression
+                            User Filter Expression
                           </label>
                           <Input
                             className="form-control-alternative"
-                            id="input-channel-filter"
+                            id="input-user-filter"
                             placeholder="Enter a filter expression"
                             type="textarea"
                             rows="4"
-                            value={channelFilter}
-                            onChange={(e) => setChannelFilter(e.target.value)}
+                            value={userFilter}
+                            onChange={(e) => setUserFilter(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -257,7 +259,7 @@ const ChannelsList = () => {
                           <FormGroup>
                             <label
                               className="form-control-label"
-                              htmlFor="input-channel-filter"
+                              htmlFor="input-max-rows"
                             >
                               Max Rows
                             </label>
@@ -281,7 +283,7 @@ const ChannelsList = () => {
                             onClick={retrieveMetadata}
                             disabled = {keySetContext.pubnub == null}
                           >
-                            Get Metadata
+                            Search Users
                           </Button>
                         </Row>
                       </Col>
@@ -297,7 +299,7 @@ const ChannelsList = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Channel Metadata Results</h3>
+                    <h3 className="mb-0">User Search Results</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -306,7 +308,7 @@ const ChannelsList = () => {
 
               <CardBody>
                 <MetadataTable 
-                  metadata={objectAdminContext.channelMetadataResults}
+                  metadata={objectAdminContext.userMetadataResults}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   emptyRows={emptyRows}
@@ -332,7 +334,7 @@ const ChannelsList = () => {
   );
 };
 
-export default ChannelsList;
+export default UsersList;
 
 
 const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {
@@ -374,9 +376,9 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
             <TableRow>
               <TableCell/>
               <TableCell align="right">#</TableCell>
-              <TableCell>Channel ID</TableCell>
-              <TableCell>Channel Name</TableCell>
-              <TableCell>Description</TableCell>
+              <TableCell>User ID</TableCell>
+              <TableCell>User Name</TableCell>
+              <TableCell>Email</TableCell>
               <TableCell>Custom Field Data</TableCell>
               <TableCell>Last Updated</TableCell>
               <TableCell align="center">Actions</TableCell>
@@ -461,7 +463,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
           <>
             <TableCell>{truncate(row.id, 40)}</TableCell>
             <TableCell>{truncate(row.name, 40)}</TableCell>
-            <TableCell>{truncate(row.description, 40)}</TableCell>
+            <TableCell>{truncate(row.email, 40)}</TableCell>
             <TableCell>{truncate(JSON.stringify(row.custom), 40)}</TableCell>
           </>
         )}
@@ -469,7 +471,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
           <>
             <TableCell component="th" scope="row">{row.id}</TableCell>
             <TableCell>{row.name}</TableCell>
-            <TableCell>{row.description}</TableCell>
+            <TableCell>{row.email}</TableCell>
             <TableCell>{JSON.stringify(row.custom, null, 2)}</TableCell>
           </>
         )}
@@ -500,18 +502,28 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
                 <TableBody>
                 <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell><strong>Channel ID</strong></TableCell>
+                    <TableCell><strong>User ID</strong></TableCell>
                     <TableCell width="95%">{row.id}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell><strong>Channel Name</strong></TableCell>
+                    <TableCell><strong>User Name</strong></TableCell>
                     <TableCell width="95%">{row.name}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell><strong>Description</strong></TableCell>
+                    <TableCell><strong>Email</strong></TableCell>
                     <TableCell width="95%">{row.description}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell><strong>External ID</strong></TableCell>
+                    <TableCell width="95%">{row.externalId}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell><strong>Profile URL</strong></TableCell>
+                    <TableCell width="95%">{row.profileUrl}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
@@ -594,51 +606,3 @@ TablePaginationActions.propTypes = {
   page: PropTypes.number.isRequired,
   rowsPerPage: PropTypes.number.isRequired,
 };
-
-
-// const TruncateSwitch = ({isTruncate, setIsTruncate}) => {
-  //   return(
-  //     <>
-  //     <label
-  //       className="form-control-label"
-  //       htmlFor="input-truncate"
-  //     >
-  //       Truncate Large Values?
-  //     </label>
-  //     <br/>
-  //     <ButtonGroup 
-  //       className="btn-group-toggle" 
-  //       data-toggle="buttons"
-  //     >
-  //       <Button 
-  //         className={classnames({ active: isTruncate })} 
-  //         color="danger" 
-  //         onClick={() => setIsTruncate(!isTruncate)}
-  //       >
-  //         <input
-  //           autoComplete="off"
-  //           name="options"
-  //           type="radio"
-  //           value={!isTruncate}
-  //           size="small"
-  //         />
-  //         No
-  //       </Button>
-  //       <Button 
-  //         className={classnames({ active: isTruncate })} 
-  //         color="danger" 
-  //         onClick={() => setIsTruncate(true)}
-  //       >
-  //         <input
-  //           autoComplete="off"
-  //           name="options"
-  //           type="radio"
-  //           value={isTruncate}
-  //           size="small"
-  //         />
-  //         Yes
-  //       </Button>
-  //     </ButtonGroup>
-  //     </>
-  //   );
-  // }
