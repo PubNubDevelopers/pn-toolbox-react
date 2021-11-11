@@ -12,6 +12,16 @@ export const ObjectAdminProvider = ({ children }) => {
   const [channelUpdated, setChannelUpdated] = useState([]);
   const [channelEtag, setChannelEtag] = useState([]);
 
+   // UserMetadata State
+   const [userId, setUserId] = useState();
+   const [userName, setUserName] = useState([]);
+   const [externalId, setUserExternalId] = useState([]);
+   const [userProfileUrl, setUserProfileUrl] = useState([]);
+   const [userEmail, setUserEmail] = useState([]);
+   const [userCustom, setUserCustom] = useState([]);
+   const [userUpdated, setUserUpdated] = useState([]);
+   const [userEtag, setUserEtag] = useState([]); 
+
   // ChannelMetadataList State
   const [channelFilter, setChannelFilter] = useState('name LIKE "*"');
   const [maxRows, setMaxRows] = useState(500);
@@ -28,6 +38,16 @@ export const ObjectAdminProvider = ({ children }) => {
     channelUpdated, setChannelUpdated,
     channelCustom, setChannelCustom,
     channelEtag, setChannelEtag,
+
+    // UserMetadata State
+    userId, setUserId,
+    userName, setUserName,
+    externalId, setUserExternalId,
+    userProfileUrl, setUserProfileUrl,
+    userEmail, setUserEmail,
+    userCustom, setUserCustom,
+    userUpdated, setUserUpdated,
+    userEtag, setUserEtag,
 
     // ChannelMetadataList State
     channelFilter, setChannelFilter,

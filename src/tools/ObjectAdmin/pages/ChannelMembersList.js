@@ -90,23 +90,6 @@ const ChannelMembersList = () => {
   const [sweetAlert, setSweetAlert] = useState(null);
   const history = useHistory();
 
-
-  const getParams = () => {
-    let next = null;
-
-    let params = {
-      channel: channelId,
-      filter : channelFilter || 'id = channel"*"',
-      include: {
-        totalCount: true,
-        customFields: true,
-        UUIDFields: true
-      },
-      page: {next: next}
-    };
-  }
-
-
   async function retrieveMetadata() {
     console.log("retrieveMetadata", channelId, channelFilter);
 
@@ -114,14 +97,12 @@ const ChannelMembersList = () => {
     let results = [];
     let next = null;
     const limit = objectAdminContext.maxRows < 100 ? objectAdminContext.maxRows : 100;
-    
-    // const critria = 
 
     do {
       try {
         const result = await keySetContext.pubnub.objects.getChannelMembers({
           channel: channelId,
-          filter : null, // channelFilter || 'id = channel"*"',
+          filter : channelFilter, // || 'id = channel"*"',
           include: {
             totalCount: true,
             customFields: true,
@@ -222,10 +203,10 @@ const ChannelMembersList = () => {
           style={{ display: "block", marginTop: "100px" }}
           title={title}
           onConfirm={confirmFn}
-          onCancel={cancelFn}
-          showCancel
           confirmBtnBsStyle="danger"
           confirmBtnText={confirmButton}
+          onCancel={cancelFn}
+          showCancel={cancelButton != null}
           cancelBtnBsStyle="secondary"
           cancelBtnText={cancelButton}
           reverseButtons={true}

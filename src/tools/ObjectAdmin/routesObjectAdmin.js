@@ -7,6 +7,7 @@ import ChannelMembersList from './pages/ChannelMembersList';
 import ChannelMetadata from './pages/ChannelMetadata';
 import ChannelMetadataList from './pages/ChannelMetadataList';
 import ImportMetadata from './pages/ImportMetadata';
+import UserMetadata from './pages/UserMetadata';
 
 var routesObjectAdmin = {
   collapse: true,
@@ -16,19 +17,28 @@ var routesObjectAdmin = {
   state: "objectAdminCollapse",
   views: [
     {
-      path: "/channel-metadata",
+      path: "/objects/channel-metadata",
       name: "Channel Form",
       component: ChannelMetadata,
       parent: ObjectAdminProvider,
       layout: "/admin",
     },
     {
-      path: "/channel-metadata-list",
+      path: "/objects/channel-metadata-list",
       name: "Get Channels",
       component: ChannelMetadataList,
       parent: ObjectAdminProvider,
       layout: "/admin",
     },
+    {divider: true,},
+    {
+      path: "/objects/user-metadata",
+      name: "User Form",
+      component: UserMetadata,
+      parent: ObjectAdminProvider,
+      layout: "/admin",
+    },
+    {divider: true,},
     {
       path: "/channel-members-list",
       name: "Get Channel Members",
@@ -36,6 +46,7 @@ var routesObjectAdmin = {
       parent: ObjectAdminProvider,
       layout: "/admin",
     },
+    {divider: true,},
     {
       path: "/import-metadata",
       name: "Import Metadata",
