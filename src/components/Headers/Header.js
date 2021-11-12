@@ -30,43 +30,54 @@ const Header = () => {
       <div className="header bg-gradient-red pb-8 pt-5 pt-md-4">
         <Container fluid>
           <div className="header-body">
-            {/* Card stats */}
             <Row>
-              <Col lg="3" xl="4">
-              {/* <Col lg="6" xl="3"> */}
-                <Card className="card-stats mb- mb-xl-0">
+              <Col sm="10">
+                <Card className="card-stats mb- mb-xl-0" >
                   <CardBody>
                     <Row>
                       <div className="col">
-                        <CardTitle
-                          tag="h5"
-                          className="text-uppercase text-muted mb-0"
-                        >
+                        <CardTitle tag="h4" className="text-uppercase text-muted mb-0">
                           Active Key Set
                         </CardTitle>
-                        {/* <span className="font-weight-bold mb-0">{props.keySetStatus.keySetName}</span> */}
                         <span className="font-weight-bold mb-0">{keySetContext.keySetName}</span>
-                        
                       </div>
                     </Row>
-                    <p className="mt-1 mb-0 text-muted text-sm">
-                    <span className="text-nowrap">Sub Key: {`${keySetContext.subKey}`}</span>
-                    </p>
-                    <p className="mt-1 mb-0 text-muted text-sm">
-                    <span className="text-nowrap">UUID: {`${keySetContext.uuid}`}</span>
-                    </p>
-                    <p className="mt-1 mb-0 text-muted text-sm">
-                    <span className="text-nowrap">Status: {`${keySetContext.status}`}</span>
-                    </p>
-                    {/* <p className="mt-1 mb-0 text-muted text-sm">
-                    <span className="text-nowrap">Sub Key: {`${props.keySetStatus.subKey}`}</span>
-                    </p>
-                    <p className="mt-1 mb-0 text-muted text-sm">
-                    <span className="text-nowrap">UUID: {`${props.keySetStatus.uuid}`}</span>
-                    </p>
-                    <p className="mt-1 mb-0 text-muted text-sm">
-                    <span className="text-nowrap">Status: {`${props.keySetStatus.status}`}</span>
-                    </p> */}
+                    <Row>
+                      <Col sm="5">
+                        <Row className="mt-1 mb-0 text-muted text-sm">
+                          <Col sm="2">
+                            <span className="text-nowrap"><strong>Sub Key:</strong> </span>
+                          </Col>
+                          <Col sm="8">{`${keySetContext.subKey}`}</Col>
+                        </Row>
+                        <Row className="mt-1 mb-0 text-muted text-sm">
+                          <Col sm="2">
+                            <span className="text-nowrap"><strong>UUID:</strong> </span>
+                          </Col>
+                          <Col sm="8">{`${keySetContext.uuid}`}</Col>
+                        </Row>
+                        <Row className="mt-1 mb-0 text-muted text-sm">
+                          <Col sm="2">
+                            <span className="text-nowrap"><strong>Status:</strong> </span>
+                          </Col>
+                          <Col sm="8">{`${keySetContext.status}`}</Col>
+                        </Row>
+                      </Col>
+                      <Col sm="6">
+                        <Row className="mt-1 mb-0 text-muted text-sm">
+                          <Col sm="2">
+                            <span className="text-nowrap"><strong>Pub Key:</strong> </span>
+                          </Col>
+                          <Col sm="8">{`${keySetContext.pubKey}`.substr(0,6)}</Col>
+                        </Row>
+                        <Row className="mt-1 mb-0 text-muted text-sm">
+                          <Col sm="2">
+                            <span className="text-nowrap"><strong>Secret Key:</strong> </span>
+                          </Col>
+                          <Col sm="8">{`${keySetContext.secKey}`.substr(0,6)}</Col>
+                        </Row>
+                      </Col>
+                    </Row>
                   </CardBody>
                 </Card>
               </Col>
