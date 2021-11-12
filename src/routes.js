@@ -20,21 +20,13 @@ var routes = [
     parent: ToolboxApp,
     index: 0,
   },
-  {
-    divider: true,
-  },
+  {divider: true,},
   routesPushDebug,
-  {
-    divider: true,
-  },
+  {divider: true,},
   routesAuthAdmin,
-  {
-    divider: true,
-  },
+  {divider: true,},
   routesObjectAdmin,
-  {
-    divider: true,
-  },
+  {divider: true,},
   // {
   //   title: "Documentation",
   // },

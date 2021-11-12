@@ -16,8 +16,13 @@
 
 */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // import classnames from "classnames";
+
+import PropTypes from 'prop-types';
+import LinearProgress from '@mui/material/LinearProgress';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 
 // reactstrap components
 import {
@@ -39,17 +44,28 @@ import {
 import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
 
-const ImportMetadata = () => {
+const ImportUsers = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
-  console.log("GenerateMetadata keySetContext: ", keySetContext);
-  console.log("GenerateMetadata objectAdminContext: ", objectAdminContext);
+  console.log("ImportUsers keySetContext: ", keySetContext);
+  console.log("ImportUsers objectAdminContext: ", objectAdminContext);
 
   const [recordCount, setRecordCount] = useState(0);
   const [metadataRecords, setMetadataRecords] = useState([]);
   const [importedCount, setImportedCount] = useState(0);
   const [failedCount, setFailedCount] = useState(0);
+
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress((prevProgress) => (prevProgress >= 100 ? 10 : prevProgress + 10));
+    }, 800);
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
 
   const openFile = (theFile) => {
     const propFileReader = new FileReader();
@@ -64,54 +80,51 @@ const ImportMetadata = () => {
   }
   
 
-  const importMetadata = () => {
+  // const importMetadata = () => {
+  async function importMetadata() {
     console.log("importMetadata");
+
+    let percent = 0;
 
     for (let i = 0; i < recordCount; ++i) {
       const record = metadataRecords[i];
       
       let data = {};
-      data.name = record.channel_name;
-      data.description = record.description;
+      data.name = record.name;
+      data.externalId = record.externalId;
+      data.profileUrl = record.profileUrl;
+      data.email = record.email;
+
       data.custom = {};
 
       for (const name in record) {
-        const value = record[name];
-
-        if (name !== "channel_id" && 
-            name !== "channel_name" && 
-            name !== "description") 
+        if (name.substr(0, 2) === "c_") 
         {
-          data.custom[name] = value;
+          data.custom[name] = record[name.substr(2)];
         }
       } // for-in
 
-      createMetadata(record.channel_id, data);
-    } // for
-  }
+      try {
+        const result = await keySetContext.pubnub.objects.setUUIDMetadata({
+          uuid: record.id,
+          data: data
+          // include : {customFields: true}
+        });
 
-  async function createMetadata(channelId, data) {
-    console.log("createMetadata", data);
-
-    try {
-      const result = await keySetContext.pubnub.objects.setChannelMetadata({
-        channel: channelId,
-        data: data, 
-        include : {customFields: true},
-      });
-
-      console.log("  success");
-      // setImportedCount(() => importedCount + 1);
-    } 
-    catch (status) {
-      console.log("  fail", JSON.stringify(status));
-      // setFailedCount(() => failedCount + 1);
+        console.log(percent + "%");
+        setProgress(() => (percent));
+      } 
+      catch (status) {
+        console.log("  fail", JSON.stringify(status));
+      }
     }
   }
 
-
   return (
     <>
+      <Box sx={{ width: '100%' }}>
+        <LinearProgressWithLabel value={progress} />
+      </Box>
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -232,4 +245,28 @@ const ImportMetadata = () => {
   );
 };
 
-export default ImportMetadata;
+export default ImportUsers;
+
+
+LinearProgressWithLabel.propTypes = {
+  /**
+   * The value of the progress indicator for the determinate and buffer variants.
+   * Value between 0 and 100.
+   */
+  value: PropTypes.number.isRequired,
+};
+
+function LinearProgressWithLabel(props) {
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ width: '100%', mr: 1 }}>
+        <LinearProgress variant="determinate" {...props} />
+      </Box>
+      <Box sx={{ minWidth: 35 }}>
+        <Typography variant="body2" color="text.secondary">{`${Math.round(
+          props.value,
+        )}%`}</Typography>
+      </Box>
+    </Box>
+  );
+}

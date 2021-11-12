@@ -58,12 +58,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
 
-const ChannelMetadataList = () => {
+const ChannelsSearch = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
-  console.log("ChannelMetadataList keySetContext: ", keySetContext);
-  console.log("ChannelMetadataList objectAdminContext: ", objectAdminContext);
+  console.log("ChannelsList keySetContext: ", keySetContext);
+  console.log("ChannelsList objectAdminContext: ", objectAdminContext);
 
   // table nav controls
   const [page, setPage] = React.useState(0);
@@ -88,19 +88,23 @@ const ChannelMetadataList = () => {
   const [sweetAlert, setSweetAlert] = useState(null);
   const history = useHistory();
 
-  async function retrieveMetadata() {
-    // TODO: BUG - when filter is invalid it goes into endless loop of 400s. 
-    // Need to exit the loop on exeception
+  async function retrieveChannels() {
     console.log("channelFilter", channelFilter);
 
     let more = true;
     let results = [];
     let next = null;
+    let totalRecords = 0;
+
+    const limit = objectAdminContext.maxRows < 100 ? objectAdminContext.maxRows : 100;
+
+    confirmAlert("Searching Channels", "Searching for Channels, please wait...");
 
     do {
       try {
         const result = await keySetContext.pubnub.objects.getAllChannelMetadata({
-          filter : channelFilter,
+          filter : channelFilter, // || 'id = channel"*"',
+          limit: limit,
           include: {
             totalCount: true,
             customFields: true
@@ -108,19 +112,32 @@ const ChannelMetadataList = () => {
           page: {next: next}
         });
 
+        totalRecords = result.totalCount;
+        
         if (result != null && result.data.length > 0) {
           results = results.concat(result.data);
+          more = result.data.length >= limit;
           next = result.next;
-          more = next != null & results.length < objectAdminContext.maxRows;
         }
-        else {
-          more = false;
-        }
+        else more = false;
       } 
       catch (status) {
-        console.log("  fail", JSON.stringify(status));
+        hideAlert(); // hide the please wait dialog
+        confirmAlert(status.status.errorData.error.message, 
+          status.status.errorData.error.details[0].message,
+          "Dismiss", ()=>hideAlert()
+        );
+
+        // exit loop on error
+        more = false;
       }
     } while (more);
+
+    hideAlert(); // hide the "searching please wait" dialog
+    
+    totalRecords === 0 
+      ? timerAlert("No Channels Found!", "Your filter found none channels.", 3)
+      : timerAlert("Channels Found!", `${totalRecords} Channels Found.`, 2);
 
     objectAdminContext.setChannelMetadataResults(results);
   }
@@ -133,25 +150,26 @@ const ChannelMetadataList = () => {
     objectAdminContext.setChannelUpdated(record.updated);
     objectAdminContext.setChannelEtag(record.eTag);
 
-    history.push("/admin/channel-metadata");
+    history.push("/admin/objects/channel-form");
   }
 
 
   const handleRemove = (e, channel, index) => {
     e.preventDefault();
-    confirmAlert("Confirm Remove Metadata?", 
+
+    confirmAlert("Confirm Remove Channel?", 
       `${index} - ${channel}`,
-      "Confirm", ()=>removeMetadata(channel, index), "Cancel", ()=>hideAlert()
+      "Confirm", ()=>removeChannel(channel, index), "Cancel", ()=>hideAlert()
     );
   }
 
-  async function removeMetadata(channel, index) {
-    // console.log("removeChannelMetadata", channel);
+  async function removeChannel(channel, index) {
+    // console.log("removeChannel", channel);
     hideAlert();
 
     try {
       const result = await keySetContext.pubnub.objects.removeChannelMetadata({channel : channel});
-      timerAlert("Remove Success!", "ChannelMetadata removed.", 2);
+      timerAlert("Remove Success!", "Channel removed.", 2);
       
       let temp = Array.from(objectAdminContext.channelMetadataResults);
       temp.splice(index, 1);
@@ -159,9 +177,9 @@ const ChannelMetadataList = () => {
       objectAdminContext.setChannelMetadataResults(temp);
     } 
     catch (status) {
-      confirmAlert("Remove Failed", 
-        `Error: ${status.message}`,
-        "Done", ()=>hideAlert()
+      confirmAlert(status.status.errorData.error.message, 
+        status.status.errorData.error.details[0].message,
+        "Dismiss", ()=>hideAlert()
       );
     }
   }
@@ -192,10 +210,11 @@ const ChannelMetadataList = () => {
           style={{ display: "block", marginTop: "100px" }}
           title={title}
           onConfirm={confirmFn}
-          onCancel={cancelFn}
-          showCancel
+          showConfirm={confirmButton != null}
           confirmBtnBsStyle="danger"
           confirmBtnText={confirmButton}
+          onCancel={cancelFn}
+          showCancel={cancelButton != null}
           cancelBtnBsStyle="secondary"
           cancelBtnText={cancelButton}
           reverseButtons={true}
@@ -216,7 +235,7 @@ const ChannelMetadataList = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Enter Search Filter</h3>
+                    <h3 className="mb-0">Channels Search</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -236,7 +255,7 @@ const ChannelMetadataList = () => {
                           <Input
                             className="form-control-alternative"
                             id="input-channel-filter"
-                            placeholder="Input a filter expression"
+                            placeholder="Enter a filter expression"
                             type="textarea"
                             rows="4"
                             value={channelFilter}
@@ -246,34 +265,34 @@ const ChannelMetadataList = () => {
                       </Col>
                       <Col sm="2">
                         <Row>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-channel-filter"
-                          >
-                            Max Rows
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-max-rows"
-                            type="text"
-                            value={objectAdminContext.maxRows}
-                            max="5000"
-                            min="5"
-                            maxLength="5"
-                            onChange={(e) => objectAdminContext.setMaxRows(e.target.value)}
-                          />
-                        </FormGroup>
+                          <FormGroup>
+                            <label
+                              className="form-control-label"
+                              htmlFor="input-max-rows"
+                            >
+                              Max Rows
+                            </label>
+                            <Input
+                              className="form-control-alternative"
+                              id="input-max-rows"
+                              type="text"
+                              value={objectAdminContext.maxRows}
+                              max="5000"
+                              min="5"
+                              maxLength="5"
+                              onChange={(e) => objectAdminContext.setMaxRows(e.target.value)}
+                            />
+                          </FormGroup>
                         </Row>
                         <Row>
                           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                           <Button 
                             className="form-control-alternative text-align-right"
                             color="danger"
-                            onClick={retrieveMetadata}
+                            onClick={retrieveChannels}
                             disabled = {keySetContext.pubnub == null}
                           >
-                            Get Metadata
+                            Search Channels
                           </Button>
                         </Row>
                       </Col>
@@ -289,7 +308,7 @@ const ChannelMetadataList = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Channel Metadata Results</h3>
+                    <h3 className="mb-0">Channel Search Results</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -324,11 +343,11 @@ const ChannelMetadataList = () => {
   );
 };
 
-export default ChannelMetadataList;
+export default ChannelsSearch;
 
 
 const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {
-  console.log("MetadataTable", metadata);
+  // console.log("MetadataTable", metadata);
 
   if (metadata == null || metadata.length ===0) return <><h2>No Results</h2></>;
 
@@ -380,25 +399,23 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               ? metadata.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               : metadata
             ).map((row, index) => (
-
               <MetadataRow index={(index + (page * rowsPerPage))} row={row} isTruncate={isTruncate} 
                 handleRemove={handleRemove} 
                 handleEdit={handleEdit}
               />
-            
             ))}
-
             {emptyRows > 0 && (
               <TableRow style={{ height: 53 * emptyRows }}>
                 <TableCell colSpan={6} />
               </TableRow>
             )}
           </TableBody>
+
           <TableFooter>
             <TableRow>
               <TablePagination
-                rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                colSpan={6}
+                rowsPerPageOptions={[5, 10, 25, 50, 100, { label: 'All', value: -1 }]}
+                colSpan={8}
                 count={metadata.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
@@ -430,7 +447,7 @@ const truncate = (data, size, noDots) => {
 }
 
 const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
-  console.log("MetadataRow", row);
+  // console.log("MetadataRow", row);
 
   // const {row} = props;
   const [open, setOpen] = React.useState(false);
