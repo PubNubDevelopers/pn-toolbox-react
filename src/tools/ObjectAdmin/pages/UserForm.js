@@ -57,29 +57,26 @@ const UserForm = () => {
         uuid : userId,
       });
 
-      objectAdminContext.setUserId(result.data.id);
-      objectAdminContext.setUserName(result.data.name);
-      objectAdminContext.setUserExternalId(result.data.userExternalId);
-      objectAdminContext.setUserProfileUrl(result.data.profileUrl);
-      objectAdminContext.setUserEmail(result.data.email);
-      objectAdminContext.setUserCustom(JSON.stringify(result.data.custom, null, 2));
-      objectAdminContext.setUserUpdated(result.data.updated);
-      objectAdminContext.setUserEtag(result.data.eTag);
+      updateFieldValues(result);
 
       (result != null && result.data != null) 
-        ? timerAlert("Save Success!", "Metadata saved.", 2)
+        ? timerAlert("Record Found!", `User ${userId} retrieved.`, 2)
+        // this shouldn't happen because 0 records is a 404 (see catch below)
         : timerAlert("No Records Found!", "Your filter found 0 records.", 3);
     }
     catch (status) {
-      confirmAlert("Get Metadata Failed", 
-        `Error: ${status.message}`,
+      confirmAlert("Get User Failed", 
+        // for some reason, the status.errorData.error is null
+        // even though the console shows it has a value????
+        // `${status.errorData.error.message}`,
+        JSON.stringify(status, null, 2),
         "Done", ()=>hideAlert()
       );
     }
   }
 
   async function saveUserObject() {
-    // console.log("channelId", channelId);
+    // console.log("saveUserObject", userId);
     try {
       const result = await keySetContext.pubnub.objects.setUUIDMetadata({
         uuid : userId,
@@ -95,7 +92,9 @@ const UserForm = () => {
         }
       });
 
-      timerAlert("Save Success!", "Metadata saved.", 2);
+      updateFieldValues(result);
+
+      timerAlert("Save Success!", "User saved.", 2);
     } 
     catch (status) {
       confirmAlert("Save Failed", 
@@ -104,6 +103,17 @@ const UserForm = () => {
       );
     }
 
+  }
+
+  const updateFieldValues = (record) => {
+    objectAdminContext.setUserId(record.data.id);
+    objectAdminContext.setUserName(record.data.name);
+    objectAdminContext.setUserExternalId(record.data.userExternalId);
+    objectAdminContext.setUserProfileUrl(record.data.profileUrl);
+    objectAdminContext.setUserEmail(record.data.email);
+    objectAdminContext.setUserCustom(JSON.stringify(record.data.custom, null, 2));
+    objectAdminContext.setUserUpdated(record.data.updated);
+    objectAdminContext.setUserEtag(record.data.eTag);
   }
 
   const hideAlert = () => {
@@ -133,7 +143,7 @@ const UserForm = () => {
         title={title}
         onConfirm={confirmFn}
         onCancel={cancelFn}
-        showCancel
+        showCancel={cancelButton != null && cancelButton !== ""}
         confirmBtnBsStyle="danger"
         confirmBtnText={confirmButton}
         cancelBtnBsStyle="secondary"

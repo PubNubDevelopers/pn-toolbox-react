@@ -57,20 +57,20 @@ const ChannelForm = () => {
         channel : channelId,
       });
         
-      objectAdminContext.setChannelId(result.data.id);
-      objectAdminContext.setChannelName(result.data.name);
-      objectAdminContext.setChannelDesc(result.data.description);
-      objectAdminContext.setChannelUpdated(result.data.updated);
-      objectAdminContext.setChannelCustom(JSON.stringify(result.data.custom, null, 4));
-      objectAdminContext.setChannelEtag(result.data.eTag);
+      updateRecord(result);
 
-      (result != null && result.data > 0) 
-        ? timerAlert("Save Success!", "ChannelMetadata saved.", 2)
+      (result != null && result.data != null) 
+        ? timerAlert("Record Found!", `Channel ${channelId} retrieved.`, 2)
+        // this shouldn't happen because 0 records is a 404 (see catch below)
         : timerAlert("No Records Found!", "Your filter found 0 records.", 3);
     }
     catch (status) {
-      confirmAlert("Get Metadata Failed", 
-        `Error: ${status.message}`,
+
+      confirmAlert("Get Channel Failed", 
+        // for some reason, the status.errorData.error is null
+        // even though the console shows it has a value????
+        // `${status.errorData.error.message}`,
+        JSON.stringify(status, null, 2),
         "Done", ()=>hideAlert()
       );
     }
@@ -91,6 +91,8 @@ const ChannelForm = () => {
         }
       });
 
+      updateRecord(result);
+
       timerAlert("Save Success!", "ChannelMetadata saved.", 2);
     } 
     catch (status) {
@@ -101,6 +103,16 @@ const ChannelForm = () => {
     }
 
   }
+
+  const updateRecord = (record) => {
+    objectAdminContext.setChannelId(record.data.id);
+    objectAdminContext.setChannelName(record.data.name);
+    objectAdminContext.setChannelDesc(record.data.description);
+    objectAdminContext.setChannelUpdated(record.data.updated);
+    objectAdminContext.setChannelCustom(JSON.stringify(record.data.custom, null, 4));
+    objectAdminContext.setChannelEtag(record.data.eTag);
+  }
+
 
   const hideAlert = () => {
     console.log("hideAlert");
@@ -129,7 +141,7 @@ const ChannelForm = () => {
         title={title}
         onConfirm={confirmFn}
         onCancel={cancelFn}
-        showCancel
+        showCancel={cancelButton != null && cancelButton !== ""}
         confirmBtnBsStyle="danger"
         confirmBtnText={confirmButton}
         cancelBtnBsStyle="secondary"
