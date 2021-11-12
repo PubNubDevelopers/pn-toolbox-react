@@ -60,7 +60,7 @@ var routesObjectAdmin = {
     //   parent: ObjectAdminProvider,
     //   layout: "/admin",
     // },
-    {divider: true,},
+    // {divider: true,},
     {
       path: "/objects/import-channels",
       name: "Import Channels",
