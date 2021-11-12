@@ -284,7 +284,7 @@ const KeySet = () => {
                 <TabContent activeTab={"tabs" + tab}>
                   <TabPane tabId="tabs2">
                     <Row className="mt-0">
-                      <Col className="mb-5 mb-xl-0" xl="12">
+                      <Col className="mb-5 mb-xl-0" xl="8">
                         <Card className="shadow">
                           <Form>
                             <CardHeader className="border-0">
