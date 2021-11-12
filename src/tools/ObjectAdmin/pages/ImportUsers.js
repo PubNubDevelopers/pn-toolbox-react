@@ -92,7 +92,7 @@ const ImportUsers = () => {
       let data = {};
       data.name = record.name;
       data.externalId = record.externalId;
-      data.profileUrl = record.externalId;
+      data.profileUrl = record.profileUrl;
       data.email = record.email;
 
       data.custom = {};

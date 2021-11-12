@@ -88,8 +88,8 @@ const UsersList = () => {
   const [sweetAlert, setSweetAlert] = useState(null);
   const history = useHistory();
 
-  async function retrieveMetadata() {
-    console.log("channelFilter", userFilter);
+  async function retrieveUser() {
+    console.log("userFilter", userFilter);
 
     let more = true;
     let results = [];
@@ -112,10 +112,12 @@ const UsersList = () => {
           results = results.concat(result.data);
           more = result.data.length >= limit;
           next = result.next;
+
+          timerAlert("Users Found!", "Your filter found some users.", 2);
         }
         else {
           more = false;
-          timerAlert("No Records Found!", "Your filter found none records.", 3);
+          timerAlert("No Users Found!", "Your filter found none users.", 3);
         }
       } 
       catch (status) {
@@ -129,7 +131,7 @@ const UsersList = () => {
       }
     } while (more);
 
-    objectAdminContext.setChannelMetadataResults(results);
+    objectAdminContext.setUserMetadataResults(results);
   }
 
   const handleEdit = (e, record, index) => {
@@ -280,7 +282,7 @@ const UsersList = () => {
                           <Button 
                             className="form-control-alternative text-align-right"
                             color="danger"
-                            onClick={retrieveMetadata}
+                            onClick={retrieveUser}
                             disabled = {keySetContext.pubnub == null}
                           >
                             Search Users
