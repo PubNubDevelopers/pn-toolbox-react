@@ -58,7 +58,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
 
-const ChannelsList = () => {
+const ChannelsSearch = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
@@ -88,7 +88,7 @@ const ChannelsList = () => {
   const [sweetAlert, setSweetAlert] = useState(null);
   const history = useHistory();
 
-  async function retrieveMetadata() {
+  async function retrieveChannels() {
     console.log("channelFilter", channelFilter);
 
     let more = true;
@@ -147,19 +147,19 @@ const ChannelsList = () => {
   const handleRemove = (e, channel, index) => {
     e.preventDefault();
 
-    confirmAlert("Confirm Remove Metadata?", 
+    confirmAlert("Confirm Remove Channel?", 
       `${index} - ${channel}`,
-      "Confirm", ()=>removeMetadata(channel, index), "Cancel", ()=>hideAlert()
+      "Confirm", ()=>removeChannel(channel, index), "Cancel", ()=>hideAlert()
     );
   }
 
-  async function removeMetadata(channel, index) {
-    // console.log("removeChannelMetadata", channel);
+  async function removeChannel(channel, index) {
+    // console.log("removeChannel", channel);
     hideAlert();
 
     try {
       const result = await keySetContext.pubnub.objects.removeChannelMetadata({channel : channel});
-      timerAlert("Remove Success!", "ChannelMetadata removed.", 2);
+      timerAlert("Remove Success!", "Channel removed.", 2);
       
       let temp = Array.from(objectAdminContext.channelMetadataResults);
       temp.splice(index, 1);
@@ -278,7 +278,7 @@ const ChannelsList = () => {
                           <Button 
                             className="form-control-alternative text-align-right"
                             color="danger"
-                            onClick={retrieveMetadata}
+                            onClick={retrieveChannels}
                             disabled = {keySetContext.pubnub == null}
                           >
                             Search Channels
@@ -332,11 +332,11 @@ const ChannelsList = () => {
   );
 };
 
-export default ChannelsList;
+export default ChannelsSearch;
 
 
 const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {
-  console.log("MetadataTable", metadata);
+  // console.log("MetadataTable", metadata);
 
   if (metadata == null || metadata.length ===0) return <><h2>No Results</h2></>;
 
@@ -436,7 +436,7 @@ const truncate = (data, size, noDots) => {
 }
 
 const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
-  console.log("MetadataRow", row);
+  // console.log("MetadataRow", row);
 
   // const {row} = props;
   const [open, setOpen] = React.useState(false);

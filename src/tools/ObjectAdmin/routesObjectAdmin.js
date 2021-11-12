@@ -5,12 +5,13 @@ import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 import { ObjectAdminProvider } from "./ObjectAdminProvider";
 
 import ChannelForm from './pages/ChannelForm';
-import ChannelsList from './pages/ChannelsList';
+import ChannelsSearch from './pages/ChannelsSearch';
 
 import UserForm from './pages/UserForm';
-import UsersList from './pages/UsersList';
+import UsersSearch from './pages/UsersSearch';
 
-import MembersList from './pages/MembersList';
+// import MembersList from './pages/MembersList';
+
 import ImportChannels from './pages/ImportChannels';
 import ImportUsers from './pages/ImportUsers';
 
@@ -32,7 +33,7 @@ var routesObjectAdmin = {
     {
       path: "/objects/search-channels",
       name: "Search Channels",
-      component: ChannelsList,
+      component: ChannelsSearch,
       parent: ObjectAdminProvider,
       layout: "/admin",
     },
@@ -47,18 +48,18 @@ var routesObjectAdmin = {
     {
       path: "/objects/search-users",
       name: "Search Users",
-      component: UsersList,
+      component: UsersSearch,
       parent: ObjectAdminProvider,
       layout: "/admin",
     },
     {divider: true,},
-    {
-      path: "/objects/members-list",
-      name: "Get Members",
-      component: MembersList,
-      parent: ObjectAdminProvider,
-      layout: "/admin",
-    },
+    // {
+    //   path: "/objects/members-list",
+    //   name: "Get Members",
+    //   component: MembersList,
+    //   parent: ObjectAdminProvider,
+    //   layout: "/admin",
+    // },
     {divider: true,},
     {
       path: "/objects/import-channels",

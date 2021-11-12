@@ -58,7 +58,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
 
-const UsersList = () => {
+const UsersSearch = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
@@ -335,7 +335,7 @@ const UsersList = () => {
   );
 };
 
-export default UsersList;
+export default UsersSearch;
 
 
 const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {
