@@ -96,6 +96,10 @@ const ChannelsSearch = () => {
     let next = null;
     const limit = objectAdminContext.maxRows < 100 ? objectAdminContext.maxRows : 100;
 
+    confirmAlert("Searching Channels", 
+      "Searching for Channels, please wait..."
+    );
+
     do {
       try {
         const result = await keySetContext.pubnub.objects.getAllChannelMetadata({
@@ -115,10 +119,12 @@ const ChannelsSearch = () => {
         }
         else {
           more = false;
+          hideAlert(); // hide the please wait dialog
           timerAlert("No Records Found!", "Your filter found none records.", 3);
         }
       } 
       catch (status) {
+        hideAlert(); // hide the please wait dialog
         confirmAlert(status.status.errorData.error.message, 
           status.status.errorData.error.details[0].message,
           "Dismiss", ()=>hideAlert()
@@ -128,6 +134,9 @@ const ChannelsSearch = () => {
         more = false;
       }
     } while (more);
+
+    hideAlert(); // hide the please wait dialog
+    timerAlert("Channels Found!", `${objectAdminContext.channelMetadataResults.length} Channels Found.`, 2);
 
     objectAdminContext.setChannelMetadataResults(results);
   }
