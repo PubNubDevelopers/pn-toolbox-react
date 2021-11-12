@@ -388,25 +388,23 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               ? metadata.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               : metadata
             ).map((row, index) => (
-
               <MetadataRow index={(index + (page * rowsPerPage))} row={row} isTruncate={isTruncate} 
                 handleRemove={handleRemove} 
                 handleEdit={handleEdit}
               />
-            
             ))}
-
             {emptyRows > 0 && (
               <TableRow style={{ height: 53 * emptyRows }}>
                 <TableCell colSpan={6} />
               </TableRow>
             )}
           </TableBody>
+
           <TableFooter>
             <TableRow>
               <TablePagination
-                rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                colSpan={6}
+                rowsPerPageOptions={[5, 10, 25, 50, 100, { label: 'All', value: -1 }]}
+                colSpan={8}
                 count={metadata.length}
                 rowsPerPage={rowsPerPage}
                 page={page}

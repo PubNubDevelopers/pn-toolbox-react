@@ -100,7 +100,7 @@ const ImportUsers = () => {
       for (const name in record) {
         if (name.substr(0, 2) === "c_") 
         {
-          data.custom[name] = record[name];
+          data.custom[name] = record[name.substr(2)];
         }
       } // for-in
 

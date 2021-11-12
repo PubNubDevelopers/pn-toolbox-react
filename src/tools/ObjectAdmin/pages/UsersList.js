@@ -71,7 +71,7 @@ const UsersList = () => {
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - objectAdminContext.channelMetadataResults.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - objectAdminContext.userMetadataResults.length) : 0;
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -148,22 +148,21 @@ const UsersList = () => {
   }
 
 
-  const handleRemove = (e, channel, index) => {
+  const handleRemove = (e, userId, index) => {
     e.preventDefault();
 
     confirmAlert("Confirm Remove Metadata?", 
-      `${index} - ${channel}`,
-      "Confirm", ()=>removeMetadata(channel, index), "Cancel", ()=>hideAlert()
+      `${index} - ${userId}`,
+      "Confirm", ()=>removeUser(userId, index), "Cancel", ()=>hideAlert()
     );
   }
 
-  async function removeMetadata(channel, index) {
-    // console.log("removeUserMetadata", channel);
+  async function removeUser(userId, index) {
+    // console.log("removeUser", userId);
     hideAlert();
-
     try {
-      const result = await keySetContext.pubnub.objects.removeUUIDMetadata({channel : channel});
-      timerAlert("Remove Success!", "UserMetadata removed.", 2);
+      const result = await keySetContext.pubnub.objects.removeUUIDMetadata({uuid : userId});
+      timerAlert("Remove Success!", "User removed.", 2);
       
       let temp = Array.from(objectAdminContext.userMetadataResults);
       temp.splice(index, 1);
@@ -340,7 +339,7 @@ export default UsersList;
 
 
 const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {
-  console.log("MetadataTable", metadata);
+  // console.log("MetadataTable", metadata);
 
   if (metadata == null || metadata.length ===0) return <><h2>No Results</h2></>;
 
@@ -392,25 +391,23 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               ? metadata.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               : metadata
             ).map((row, index) => (
-
               <MetadataRow index={(index + (page * rowsPerPage))} row={row} isTruncate={isTruncate} 
                 handleRemove={handleRemove} 
                 handleEdit={handleEdit}
               />
-            
             ))}
-
             {emptyRows > 0 && (
               <TableRow style={{ height: 53 * emptyRows }}>
                 <TableCell colSpan={6} />
               </TableRow>
             )}
           </TableBody>
+
           <TableFooter>
             <TableRow>
               <TablePagination
-                rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                colSpan={6}
+                rowsPerPageOptions={[5, 10, 25, 50, 100, { label: 'All', value: -1 }]}
+                colSpan={8}
                 count={metadata.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
@@ -424,6 +421,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               />
             </TableRow>
           </TableFooter>
+
         </Table>
       </TableContainer>
     </Paper>
@@ -442,9 +440,7 @@ const truncate = (data, size, noDots) => {
 }
 
 const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
-  console.log("MetadataRow", row);
-
-  // const {row} = props;
+  // console.log("MetadataRow", row);
   const [open, setOpen] = React.useState(false);
 
   return (
