@@ -298,7 +298,7 @@ export default function Sidebar({
           'fontSize': "24px",
         }}
       >
-        &lt;tool_box/&gt;
+        &lt;the_toolbox/&gt;
       </Box>
       <List classes={{ root: classes.listRoot }}>{createLinks(routes)}</List>
     </>
