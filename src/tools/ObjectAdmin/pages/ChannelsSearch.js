@@ -94,11 +94,11 @@ const ChannelsSearch = () => {
     let more = true;
     let results = [];
     let next = null;
+    let totalRecords = 0;
+
     const limit = objectAdminContext.maxRows < 100 ? objectAdminContext.maxRows : 100;
 
-    confirmAlert("Searching Channels", 
-      "Searching for Channels, please wait..."
-    );
+    confirmAlert("Searching Channels", "Searching for Channels, please wait...");
 
     do {
       try {
@@ -111,17 +111,15 @@ const ChannelsSearch = () => {
           },
           page: {next: next}
         });
+
+        totalRecords = result.totalCount;
         
         if (result != null && result.data.length > 0) {
           results = results.concat(result.data);
           more = result.data.length >= limit;
           next = result.next;
         }
-        else {
-          more = false;
-          hideAlert(); // hide the please wait dialog
-          timerAlert("No Records Found!", "Your filter found none records.", 3);
-        }
+        else more = false;
       } 
       catch (status) {
         hideAlert(); // hide the please wait dialog
@@ -135,8 +133,11 @@ const ChannelsSearch = () => {
       }
     } while (more);
 
-    hideAlert(); // hide the please wait dialog
-    timerAlert("Channels Found!", `${objectAdminContext.channelMetadataResults.length} Channels Found.`, 2);
+    hideAlert(); // hide the "searching please wait" dialog
+    
+    totalRecords === 0 
+      ? timerAlert("No Channels Found!", "Your filter found none channels.", 3)
+      : timerAlert("Channels Found!", `${totalRecords} Channels Found.`, 2);
 
     objectAdminContext.setChannelMetadataResults(results);
   }
@@ -209,6 +210,7 @@ const ChannelsSearch = () => {
           style={{ display: "block", marginTop: "100px" }}
           title={title}
           onConfirm={confirmFn}
+          showConfirm={confirmButton != null}
           confirmBtnBsStyle="danger"
           confirmBtnText={confirmButton}
           onCancel={cancelFn}

@@ -94,7 +94,11 @@ const UsersSearch = () => {
     let more = true;
     let results = [];
     let next = null;
+    let totalRecords = 0;
+
     const limit = objectAdminContext.maxRows < 100 ? objectAdminContext.maxRows : 100;
+
+    confirmAlert("Searching Channels", "Searching for Users, please wait...");
 
     do {
       try {
@@ -107,20 +111,18 @@ const UsersSearch = () => {
           },
           page: {next: next}
         });
-        
+
+        totalRecords = result.totalCount;
+
         if (result != null && result.data.length > 0) {
           results = results.concat(result.data);
           more = result.data.length >= limit;
           next = result.next;
-
-          timerAlert("Users Found!", "Your filter found some users.", 2);
         }
-        else {
-          more = false;
-          timerAlert("No Users Found!", "Your filter found none users.", 3);
-        }
+        else more = false;
       } 
       catch (status) {
+        hideAlert(); // hide the please wait dialog
         confirmAlert(status.status.errorData.error.message, 
           status.status.errorData.error.details[0].message,
           "Dismiss", ()=>hideAlert()
@@ -130,6 +132,12 @@ const UsersSearch = () => {
         more = false;
       }
     } while (more);
+
+    hideAlert(); // hide the "searching please wait" dialog
+    
+    totalRecords === 0 
+      ? timerAlert("No Users Found!", "Your filter found none users.", 3)
+      : timerAlert("Users Found!", `${totalRecords} Users Found.`, 2);
 
     objectAdminContext.setUserMetadataResults(results);
   }
@@ -203,6 +211,7 @@ const UsersSearch = () => {
           style={{ display: "block", marginTop: "100px" }}
           title={title}
           onConfirm={confirmFn}
+          showConfirm={confirmButton != null}
           confirmBtnBsStyle="danger"
           confirmBtnText={confirmButton}
           onCancel={cancelFn}
