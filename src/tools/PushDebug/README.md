@@ -10,13 +10,13 @@ After years of talking about how great it would be have a tool to automate much 
 
 Subscribe to a channel (subscribes to `-pndebug`, automatically), enter the proper payload, publish and receive the message and feedback from PubNub and the push vendor systems (APNs and FCM).
 
-![Push Test](docs/pnpush-pushtest.png)
+![Push Test](assets/pnpush-pushtest.png)
 
 ## Manage Device
 
 Enter a device token and required push parameters (push type, environment, bundle id) and list the channels registered to that device and add and remove channels, as needed.
 
-![Manage Device](docs/pnpush-inspectdevice.png)
+![Manage Device](assets/pnpush-inspectdevice.png)
 
 ## Manage Channel
 

@@ -14,14 +14,14 @@ var routesAuthAdmin = {
   state: "appNameCollapse",
   views: [
     {
-      path: "/parse-token",
+      path: "/auth/parse-token",
       name: "ParseToken",
       component: ParseToken,
       parent: AuthAdminProvider,
       layout: "/admin",
     },
     {
-      path: "/grant-token",
+      path: "/auth/grant-token",
       name: "Grant Token",
       component: GrantToken,
       parent: AuthAdminProvider,
