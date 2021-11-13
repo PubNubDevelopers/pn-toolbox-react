@@ -246,6 +246,24 @@ export const use_AppName_Data = () => {
 
 If you know JavaScript, you know what this is. If you don't, read about it. It's standard *CommonJS* stuff.
 
-#### Summary
+#### Context Provider Summary
 
 That's really all there is to a creating a simple context. Even if you don't understand the mechanics at first, you will as you work with it. Just follow the rules above for creating it very strictly and it will all workout just fine. If it doesn't, treat it as a learning opportunity and search the webs for explanations or consult your React mentor.
+
+### Page Components
+
+Now we're onto the real meat of your tool: the page components that actually do stuff. This is where things get a little more complex. Maybe not complex but definitely more involve: UI, state data, functionality and more fun stuff. The stuff included in the page component template (`Page1.js`), is just one example of what you might implement. This template is just code from an actual page component in one of the existing tools. 
+
+You might find it useful to look at all the other tools' pages (at runtime and the code files) and use one that most closely represents what you want to do in your page component, mainly with respect to the UI layout. You can move the JSX components around to make it look the way you need it. Play with the various attributes of those UI components to get the look and feel you are going for. But do try to stay inline with what other pages look like as much as possible.
+
+There are no hard standards on UI layout and they even vary a bit from page to page but they are close enough without getting to bogged down in compliance and standards and branding. The most important thing is to provide a useful tool that make something tedious or hard, faster and easier.
+
+Another option is to visit the *Creative Tim* application template on which this app was built. There are many examples of component UIs that you might like or be inspired by for something you hadn't thought of.
+
+For a live, running example of all the cools stuff this template has to offer, visit the [Creative Time Argon Reach Material UI Pro Dashboard live app](https://demos.creative-tim.com/argon-dashboard-pro-material-ui/?_ga=2.244911813.1385515968.1636776979-1440299092.1631136566#/admin/dashboard).
+
+See the [documentation on the Material UI components](https://www.creative-tim.com/learning-lab/material-ui/overview/argon-dashboard?ref=admui-admin-sidebar) that are use in this template.
+
+WARNING: Some of the default structure of the template has been modified for the purpose of The Toolbox to simplify things a bit. For example, the origin template included the `<Header>` component in every page component. The Toolbox app removes this header from the page components and puts it one level higher in the pages parent component (`src/components/layouts/Admin.js`). There is no requirement to understand this design but if you're curious, go look at the source code of this file and you will learn a lot about React, though it may take some focus and some time to absorb it all. There could be some other small details that are different but hopefully they won't cause any real issues for you. If they do, say so in the *Issues* of this repo.
+
+Because the page component template has so much content, we will just refer to portions of the template as required, especially around the use of your tool's context and The Toolbox's context, `KeySetProvider`.
