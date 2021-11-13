@@ -40,17 +40,17 @@
 
 // // core components
 // import { useKeySetData } from "../../KeySetProvider";
-// import { useAppNameData } from "../AppNameProvider";
+// import { useAppNameData } from "../_AppName_Provider";
 
 // const Page1 = () => {
 //   const keySetContext = useKeySetData();
-//   const useAppNameContext = useAppNameData();
+//   const _appName_Context = use_AppName_Data();
 
 //   console.log("Page1 keySetContext: ", keySetContext);
-//   console.log("Page1 pushDebugContext: ", useAppNameContext);
+//   console.log("Page1 _appName_Context: ", use_AppName_Context);
 
-//   const [stateVar1, setStateVar1] = useState(pushDebugContext.stateVar1);
-//   const [stateVar2, setStateVar2] = useState(pushDebugContext.stateVar2);
+//   const [foo, setFoo] = useState(_appName_Context.foo);
+//   const [bar, setBar] = useState(_appName_Context.bar);
 
 
 //   return (
@@ -261,7 +261,7 @@
 //                     </h4>
 //                   </div>
 //                   </Col>
-//                   <Col>{appNameContext.token}</Col>
+//                   <Col>{_appNameContext_.token}</Col>
 //                 </Row>
 //                 <Row>
 //                   <Col lg="2">
@@ -271,9 +271,9 @@
 //                     </h4>
 //                   </div>
 //                   </Col>
-//                   <Col>{appNameContext.pushType}</Col>
+//                   <Col>{_appNameContext_.pushType}</Col>
 //                 </Row>
-//                 <Row hidden={appNameContext.pushType !== "apns2"}>
+//                 <Row hidden={_appNameContext_.pushType !== "apns2"}>
 //                   <Col lg="2">
 //                   <div className="col">
 //                     <h4 className="mb-0">
@@ -281,9 +281,9 @@
 //                     </h4>
 //                   </div>
 //                   </Col>
-//                   <Col>{appNameContext.environment}</Col>
+//                   <Col>{_appNameContext_.environment}</Col>
 //                 </Row>
-//                 <Row hidden={appNameContext.pushType !== "apns2"}>
+//                 <Row hidden={_appNameContext_.pushType !== "apns2"}>
 //                   <Col lg="2">
 //                   <div className="col">
 //                     <h4 className="mb-0">
@@ -291,13 +291,13 @@
 //                     </h4>
 //                   </div>
 //                   </Col>
-//                   <Col>{appNameContext.topic}</Col>
+//                   <Col>{_appNameContext_.topic}</Col>
 //                 </Row>
 //                 <p></p>
 //                 <Row>
 //                   <div className="col">
 //                     <h3 className="mb-0">
-//                       Registered Channels: {appNameContext.registeredChannels.length}
+//                       Registered Channels: {_appNameContext_.registeredChannels.length}
 //                     </h3>
 //                   </div>
 //                 </Row>
@@ -305,7 +305,7 @@
 //                 <CardBody>
 //                   <div className="pl-lg-4">
 //                     <Table className="align-items-center table-flush" responsive >
-//                       <XyzRows channels={appNameContext.registeredChannels} handleRemoveChannel={handleRemoveChannel}/>
+//                       <Rows channels={_appNameContext_.registeredChannels} handleRemoveChannel={handleRemoveChannel}/>
 //                     </Table>
 //                   </div>
 //               </CardBody>
@@ -320,7 +320,7 @@
 // export default Page1;
 
 
-// function XyzRows(props) {
+// function Rows(props) {
 //   const channels = props.channels;
 
 //   const rows = channels.map((ch, index) =>

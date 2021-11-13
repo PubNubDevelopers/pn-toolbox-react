@@ -1,23 +1,30 @@
 // import { createContext, useContext, useState } from 'react'
 
-// const Context = createContext()
+// const Context = createContext();
 
-// export const AppNameProvider = ({ children }) => {
+// export const _AppName_Provider = ({ children }) => {
 
-//   const [stateVar1, setStateVar1] = useState();
-//   const [stateVar2, setStateVar2] = useState();
+//   // Page1 state
+//   const [foo, setFoo] = useState();
+//   const [bar, setBar] = useState();
+
+//   // Page2 state
+//   const [bing, setBing] = useState();
 
 //   // provide data/functions to context users
-//   ////////////////////////////////////////
-//   const useAuthAdminData = {
-//     // ManageDevice State
-//     stateVar1, setStateVar1,
-//     stateVar2, setStateVar2,
+//   //////////////////////////////////////
+//   const use_AppName_Data = {
+//     // Page1 State
+//     foo, setFoo,
+//     bar, setBar,
+
+//     // Page2 State
+//     bing, setBing,
 //   }
 
-//   return <Context.Provider value={useAppNameData}> {children} </Context.Provider>
+//   return <Context.Provider value={use_AppName_Data}> {children} </Context.Provider>
 // }
 
-// export const useAppNameData = () => {
+// export const use_AppName_Data = () => {
 //     return useContext(Context)
 // }

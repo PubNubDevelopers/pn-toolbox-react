@@ -1,34 +1,39 @@
 // @mui/icons-material
+//////////////////////
 // look for icon names here: https://mui.com/components/material-icons/ 
 //   and replace "ExtensionIcon" with that icon name
+
 // import ExtensionIcon from '@mui/icons-material/Extension';
 
-// app pages
+// tool components
+//////////////////
+
+// import _AppName_Provider from "./_AppName_Provider.js"
 // import Page1 from "pages/Page1.js";
 // import Page2 from "pages/Page2.js";
 
-// var routesAppName = {
+// var routes_AppName_ = {
 //   collapse: true,
-//   name: "App Name",
+//   name: "_App Name_",
 //   icon: ExtensionIcon,
 //   iconColor: "Primary",
-//   state: "appNameCollapse",
+//   state: "_appName_Collapse",
 //   views: [
 //     {
-//       path: "/page1",
+//       path: "/_topic_/page1",
 //       name: "Page 1",
 //       component: Page1,
-//       parent: AppNameProvider,
+//       parent: _AppName_Provider,
 //       layout: "/admin",
 //     },
 //     {
-//       path: "/page2",
+//       path: "/_topic_/page2",
 //       name: "Page 2",
 //       component: Page2,
-//       parent: AppNameProvider,
+//       parent: _AppName_Provider,
 //       layout: "/admin",
 //     },
 //   ]
 // };
 
-// export default routesAppName;
+// export default routes_AppName_;
