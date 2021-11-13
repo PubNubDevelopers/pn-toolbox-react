@@ -15,21 +15,21 @@ var routesPushDebug = {
   state: "pushDebugCollapse",
   views: [
     {
-      path: "/push-test",
+      path: "/push/push-test",
       name: "Push Test",
       component: PushTest,
       parent: PushDebugProvider,
       layout: "/admin",
     },
     {
-      path: "/manage-device",
+      path: "/push/manage-device",
       name: "Manage Device",
       component: ManageDevice,
       parent: PushDebugProvider,
       layout: "/admin",
     },
     {
-      path: "/manage-channel",
+      path: "/push/manage-channel",
       name: "Manage Channel",
       component: ManageChannel,
       parent: PushDebugProvider,

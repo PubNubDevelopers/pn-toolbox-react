@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useRef } from 'react'
 
-const Context = createContext()
+const Context = createContext();
 
 export const PushDebugProvider = ({ children }) => {
 

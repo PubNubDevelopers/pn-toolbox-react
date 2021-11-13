@@ -4,10 +4,10 @@ import ToolboxApp from "tools/ToolboxApp";
 // @mui/icons-material
 import { VpnKey } from "@mui/icons-material";
 
-// app routes
+// tool routes
 import routesPushDebug from "tools/PushDebug/routesPushDebug";
-import routesAuthAdmin from "tools/AuthAdmin/routesAuthAdmin"
 import routesObjectAdmin from "tools/ObjectAdmin/routesObjectAdmin";
+import routesAuthAdmin from "tools/AuthAdmin/routesAuthAdmin"
 
 var routes = [
   {
@@ -20,13 +20,21 @@ var routes = [
     parent: ToolboxApp,
     index: 0,
   },
+
   {divider: true,},
   routesPushDebug,
-  {divider: true,},
-  routesAuthAdmin,
+
   {divider: true,},
   routesObjectAdmin,
+
   {divider: true,},
+  routesAuthAdmin,
+
+  // copy/past these next two items and leave one for the next tools contributor
+  // {divider: true,},
+  // routes_AppName_,
+
+  // ignore this - it's just a placeholder for future stuffs
   // {
   //   title: "Documentation",
   // },
