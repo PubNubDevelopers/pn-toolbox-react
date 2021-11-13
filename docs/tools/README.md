@@ -267,3 +267,67 @@ See the [documentation on the Material UI components](https://www.creative-tim.c
 WARNING: Some of the default structure of the template has been modified for the purpose of The Toolbox to simplify things a bit. For example, the origin template included the `<Header>` component in every page component. The Toolbox app removes this header from the page components and puts it one level higher in the pages parent component (`src/components/layouts/Admin.js`). There is no requirement to understand this design but if you're curious, go look at the source code of this file and you will learn a lot about React, though it may take some focus and some time to absorb it all. There could be some other small details that are different but hopefully they won't cause any real issues for you. If they do, say so in the *Issues* of this repo.
 
 Because the page component template has so much content, we will just refer to portions of the template as required, especially around the use of your tool's context and The Toolbox's context, `KeySetProvider`.
+
+#### import Contexts
+
+```javascript
+import { useKeySetData } from "../../KeySetProvider";
+import { useAppNameData } from "../_AppName_Provider";
+```
+
+These imports are for the two contexts that you will need in your tool (assuming you create your own tool-specific context). The *KeySetProvider* context contains the key set that the end user initializes on the main screen of The Toolbox. Much of that state is displayed in the *Header* component, which, no surprise, uses the *KeyStateProvider* context to do so.
+
+The naming conventions of importing and using contexts is one of the more confusing things (IMO) and it's not completely required that you do it this way. It's just how it was taught to me by my mentor and so I stuck with it.
+
+#### useContext
+
+```javascript
+const keySetContext = useKeySetData();
+const _appName_Context = use_AppName_Data();
+```
+
+Actually using the context in your page component is determined by this declaration. The prefix `use` is just a naming convention for React Hooks and you can get away with not using it but you'll be zigging against the zaggers. Naming conventions are a good thing and this is a really popular one in React. In the rest of your page component code, you will use state and execute functions in these contexts by referencing these `useXyzContext`s.
+
+#### Using Context State
+
+```javascript
+const [foo, setFoo] = useState(_appName_Context.foo);
+const [bar, setBar] = useState(_appName_Context.bar);
+```
+
+Notice the the above state are duplicates of the state that re declared in the Context Provider (see earlier docs). Here, we are creating local copies of this state and initializing them with the state values from the context. This is how we repopulate a page with the state it had when the user left and returned back to this page. When another page is loaded, the current page goes out of scope.
+
+The above is not necessary unless you want to keep the context state and the local page state separated until an action is performed, like a form save or data retrieve. Upon the execution (and possibly success of that action), you may then push the new local state to the context's state. There are many other use cases and scenarios for this but that is an exercise we will let you play out as you learn what works best for your tool. See the other tool pages for different implementations of this.
+
+If you wanted to change the value of state, you would just use the setter.
+
+##### Local Page State
+
+```javascript
+setFoo(newValue)
+```
+
+##### Context State
+
+```javascript
+_appName_Context.setFoo(newValue);
+keySetContext.setPubNub(myPN);
+```
+
+There is a technique for passing a function in the state setter but more a sophisticated technique and one you will need to learn on your own. It is typically the right way to do things to avoid some React strangeness. But that is beyond the scope of these docs.
+
+## Page Component UI
+
+This is the fun part, the tedious part, the sometimes painful part, but ultimately, the most important part. If your UI/UX is bad, your tool is bad. The more you tinker with this JFX the better you get at it and you'll start to enjoy it. But this part is really difficult (I just don't have the patience to do it) to document and I wish you well on your journey. Use the Create Tim live sample dashboard app and the Material UI documentation for reference and inspiration. `if (you know me) && (know how to get hold of me)` (The Toolbox architect), then feel free to do so and I can provide some assistance.
+
+### Inner Components
+
+*Inner components* is not really a standard term but I'm borrowing it from Java's (and similar languages) *inner classes*. The take away here is that you can create as many components in your `.js` file as you like. In fact, most React tutorials put all of the components in a single file which actually can be a little confusing when they release you into the world of implementing a real world app. But is just stand CommonJS and it's a convenient way to modularize your page component without getting too fancy with creating another component file, importing it and such.
+
+Whether you co-locate these helper components or put them in their own file doesn't really matter and it's not really that different, it just feels more convenient to have these *helper* components co-located and makes it easier to refactor them into their own file, if required, later. Once you have something solid, you can start thinking whether these helper components should be moved into their own component file and refactored for generic use by other components.
+
+A good example of these helper/modular components are the notification dialog components that are duplicated in the pages of existing tools (assuming they haven't been refactored and these docs are up to date). If they are still repeated in each page class that needs them, then either do the same or refactor them and submit a PR that will allow all components to use them generically. If it's [still an open issue](https://github.com/PubNubDevelopers/pn-toolbox-react/issues/22) then it hasn't been implemented, yet - you up for a React challenge?
+
+## Tool Contribution
+
+Now that you have completed version 1 of your tool, it is time to submit it to The Toolbox for review and merged in the `master` branch. Just submit a PR to merge your tool's branch into the `dev` branch. Please don't merge without review from others even if you do have the merge permission. Once it passes the review process, it will be merged into the `master` branch and become part of The Toolbox.
