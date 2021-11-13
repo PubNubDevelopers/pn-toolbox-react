@@ -5,9 +5,10 @@
 
 // import ExtensionIcon from '@mui/icons-material/Extension';
 
-// app pages
-////////////
+// tool components
+//////////////////
 
+// import _AppName_Provider from "./_AppName_Provider.js"
 // import Page1 from "pages/Page1.js";
 // import Page2 from "pages/Page2.js";
 
