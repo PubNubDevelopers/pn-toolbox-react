@@ -74,7 +74,7 @@ Proceed to the following sections for guidance with implementing each portion of
 
 Assuming you have at least a basic grasp of React: Hooks, State, JSX, Functional vs Class Components (and that you will never need a Class component in any new React app you create), let's describe each of the files that you need to implement your custom tool code and the existing Toolbox components that you can leverage.
 
-### The Tool Routes File
+### The Tool's Routes File
 
 This routes files serve two purposes:
 
@@ -139,4 +139,113 @@ If you do need a tool specific *Context Provider* or you are not ready to implem
 
 #### layout
 
-Just leave this as it is. This is expected to be `/admin` by the components that are building the sidebar menu and loading your page. Any other value will fail.
+Just leave this as it is. This is expected to be `/admin` by the components that are building the sidebar menu and loading your page. Any other value will lead to unexpected behavior.
+
+### The Context Provider Component
+
+This component will make your life easier because it will enable you to easily share data across your page components and reload UI fields and execute functions when you reload a page that you navigated away from earlier.
+
+#### What is a Context Provider?
+
+The prerequisite for using this component in your tool is understanding what it is and why you would use it. The alternative is *passing props*. Passing props is just fine for most cases, it just becomes a bit tedious, especially when you have a deep component tree structure (Page1 loads *SubpageFoo* which loads *SubpageBar*, and then *Page2* load *SubpageThis*, then loads *SubpageThat*, and so on). Using a Context Provider allows you to put all of the common properties (aka, state variables and other similar resources) in a single component, and you can just include that component in any other component (your pages, for example) that is in your component structure. There are rules for how this works so getting a base understanding of this is important.
+
+Another benefit of storing a page component's state in the context component is that the state is preserved when you navigate away from that page and then back to it again. This is form of *raising the state* that you may have come across in your React learning path. It's one of those key things you need to know about React if you are to become proficient at reading and writing React code. It's similar to refactoring common functionality to a parent class in object oriented design, but sort of the opposite philosophy because even data/behavior that is specific to a single page may be *raised* in order to preserve it for when you come back to that page, though there are better practices for this that are not implemented (yet) in The Toolbox.
+
+If you understand Context Providers, then you'll know that you need to make it the parent component of all the components that will consume it. If you just wrap your context component around the top level of your component tree, then all the child components inherit that context and can consume it. But in The Toolbox, you do not have to create a parent component for your pages because The Toolbox automatically wraps each of your page components in this context when the page is loaded... dynamically during runtime (sort of). This is why you declare your tool's Context Provider component as the `parent` value in your tool's *routes* file (documented above in case you skipped it).
+
+If you don't need a Context Provider (you will eventually... you'll see) then you can ignore this component (delete it if you like and you can copy/paste from another one or the template file, later) then you must use the `ToolboxApp` component as the `parent` of your pages. It's basically just a *no-op* parent component placeholder that provides no additional benefit to your tool's page components. But a parent (that follows the rules of The Toolbox) is required, so this is your *easy out* until come over to the ways of the Context Provider.
+
+#### The _AppName_Provider File
+
+So you've decided to use the Context Provider in your tool. Awesome! Let's light this fire. Let's start by looking at the default code in this component.
+
+```javascript
+import { createContext, useContext, useState } from 'react'
+
+const Context = createContext();
+
+export const _AppName_Provider = ({ children }) => {
+
+  // Page1 state
+  const [foo, setFoo] = useState();
+  const [bar, setBar] = useState();
+
+  // Page2 state
+  const [bing, setBing] = useState();
+
+  // provide data/functions to context users
+  //////////////////////////////////////
+  const use_AppName_Data = {
+    // Page1 State
+    foo, setFoo,
+    bar, setBar,
+
+    // Page2 State
+    bing, setBing,
+  }
+
+  return <Context.Provider value={use_AppName_Data}> {children} </Context.Provider>
+}
+
+export const use_AppName_Data = () => {
+    return useContext(Context)
+}
+```
+
+##### Imports
+
+To implement your Context Provider (context), you'll need to import `createContext` and `useContext`. I'm not going to explain the details of all of this so you will need to research and learn on your own but it's not that complicated. But what about `useState`? That isn't necessarily required for the context, but state is typically what goes in a context and pretty much every component. But there can be other things that get including in here like `useRef`, for example, and much more.
+
+##### createContext
+
+`const Context = createContext();`
+
+Nothing to say about this other then, you need it. It's what literally creates the context that your child page components will use (`useContext` - yes, it's another type of hook);
+
+##### The children parameter
+
+`export const _AppName_Provider = ({ children }) => {`
+
+Again, this something that you'll need to learn, but it's required. In short, it's all of the child components that this context will be the parent of so it can pass all of its state and functional goodness onto them and used within them.
+
+##### State variable useState
+
+`const [foo, setFoo] = useState();`
+
+I said state *variables* but as you can see, they are `const`ants. If you are still learning about all this, you might ask, "What good is state if it can't be changed?". But it can... and you will... and it works. Once you understand the "magic trick", it'll all make sense. Another "what's that" question you might have is, "What is `useState` returning to that couple on the left side of the assigment?". Once again, read up on the `useState` hook to get a grasp on all this before you proceed. I'll stop speaking to the absolute React newb from now on... you've been warned ;)
+
+When you create your page components, without this context component, you will include all of your `useState` declarations directly in your page component. Any of that state that needs to be preserved for future page revisits or shared with other page components will need to go in your context. But you might duplicate some (maybe all) of that state in your page for various reasons. As you gain experience with state and contexts, you'll develop your own usage of it or you'll learn how to do it with best practices (Disclaimer: there's no claims of best practices in The Toolbox).
+
+Create state as required for your pages and move it here as needed. Often you will want to preserve the values of your page's UI fields or the results of an API so you can repoplulate them when you come back to the page. See the pages and context of other existing tools for some guidance.
+
+##### The use_AppName_Data
+
+```javascript
+const use_AppName_Data = {
+  // Page1 State
+  foo, setFoo,
+...
+}
+```
+
+This is where you declare all of the state (and other things) from above that will be passed to all child pages that might need it (or not). You will notice the `value` key of the next construct that uses this as the value.
+
+##### The Context.Provider
+
+`return <Context.Provider value={use_AppName_Data}> {children} </Context.Provider>`
+
+This is what creates the *Context* component (the JSX) which wraps all child (`children`) components so that those children can use this context (via a `useContext` hook). Make sure you use the name `value` for the key or it will break. And make sure you use the name `{children}` or it will break. That's all I got to say about that. Moving on...
+
+##### The export
+
+```javascript
+export const use_AppName_Data = () => {
+    return useContext(Context)
+}
+```
+
+If you know JavaScript, you know what this is. If you don't, read about it. It's standard *CommonJS* stuff.
+
+##### Context Provider Summary
+
+That's really all there is to a simple context. Even if you don't understand the mechanics at first, you will as you work with it. Just follow the rules above for creating it very strictly and it will all workout just fine. If it doesn't, treat it as a learning opportunity and search the webs for explanations or consult your React mentor.
