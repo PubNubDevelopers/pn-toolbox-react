@@ -74,12 +74,12 @@ Proceed to the following sections for guidance with implementing each portion of
 
 Assuming you have at least a basic grasp of React: Hooks, State, JSX, Functional vs Class Components (and that you will never need a Class component in any new React app you create), let's describe each of the files that you need to implement your custom tool code and the existing Toolbox components that you can leverage.
 
-### The Tool's Routes File
+### The routes_AppName_ File
 
-This routes files serve two purposes:
+This routes files serves two purposes:
 
-1. adds your tool and pages to the left sidebar menu
-2. provides the means for those menu items to load your pages (Routes/Links)
+1. add your tool and pages to the left sidebar menu
+2. provide the means for those menu items to load your pages (React Routes & Links)
 
 This is pretty trivial to implement. Just follow the recipe of the template code within.
 
@@ -192,7 +192,7 @@ export const use_AppName_Data = () => {
 }
 ```
 
-##### Imports
+##### imports
 
 To implement your Context Provider (context), you'll need to import `createContext` and `useContext`. I'm not going to explain the details of all of this so you will need to research and learn on your own but it's not that complicated. But what about `useState`? That isn't necessarily required for the context, but state is typically what goes in a context and pretty much every component. But there can be other things that get including in here like `useRef`, for example, and much more.
 
@@ -202,13 +202,13 @@ To implement your Context Provider (context), you'll need to import `createConte
 
 Nothing to say about this other then, you need it. It's what literally creates the context that your child page components will use (`useContext` - yes, it's another type of hook);
 
-##### The children parameter
+##### children
 
 `export const _AppName_Provider = ({ children }) => {`
 
 Again, this something that you'll need to learn, but it's required. In short, it's all of the child components that this context will be the parent of so it can pass all of its state and functional goodness onto them and used within them.
 
-##### State variable useState
+##### useState
 
 `const [foo, setFoo] = useState();`
 
@@ -218,7 +218,7 @@ When you create your page components, without this context component, you will i
 
 Create state as required for your pages and move it here as needed. Often you will want to preserve the values of your page's UI fields or the results of an API so you can repoplulate them when you come back to the page. See the pages and context of other existing tools for some guidance.
 
-##### The use_AppName_Data
+##### use_AppName_Data
 
 ```javascript
 const use_AppName_Data = {
@@ -230,13 +230,13 @@ const use_AppName_Data = {
 
 This is where you declare all of the state (and other things) from above that will be passed to all child pages that might need it (or not). You will notice the `value` key of the next construct that uses this as the value.
 
-##### The Context.Provider
+##### Context.Provider
 
 `return <Context.Provider value={use_AppName_Data}> {children} </Context.Provider>`
 
 This is what creates the *Context* component (the JSX) which wraps all child (`children`) components so that those children can use this context (via a `useContext` hook). Make sure you use the name `value` for the key or it will break. And make sure you use the name `{children}` or it will break. That's all I got to say about that. Moving on...
 
-##### The export
+##### export
 
 ```javascript
 export const use_AppName_Data = () => {
@@ -246,6 +246,6 @@ export const use_AppName_Data = () => {
 
 If you know JavaScript, you know what this is. If you don't, read about it. It's standard *CommonJS* stuff.
 
-##### Context Provider Summary
+#### Summary
 
-That's really all there is to a simple context. Even if you don't understand the mechanics at first, you will as you work with it. Just follow the rules above for creating it very strictly and it will all workout just fine. If it doesn't, treat it as a learning opportunity and search the webs for explanations or consult your React mentor.
+That's really all there is to a creating a simple context. Even if you don't understand the mechanics at first, you will as you work with it. Just follow the rules above for creating it very strictly and it will all workout just fine. If it doesn't, treat it as a learning opportunity and search the webs for explanations or consult your React mentor.
