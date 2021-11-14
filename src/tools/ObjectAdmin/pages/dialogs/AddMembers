@@ -1,0 +1,61 @@
+// import { useState, useRef } from "react";
+
+// reactstrap components
+import {
+  Button,
+  Input,
+  Modal, 
+  ModalHeader, 
+  ModalBody, 
+  ModalFooter,
+} from "reactstrap";
+
+// core components
+
+
+const AddMembers = (props) => {
+
+  const handleClick = (e, isConfirmed) => {
+    e.preventDefault();
+    props.addChannels(isConfirmed);
+  }
+
+  return (
+    <div>
+      <Modal 
+        isOpen={props.modal} 
+        className="modal-dialog-centered"
+      >
+        <ModalHeader>
+          <h2>Add New Channels</h2>
+        </ModalHeader>
+        <ModalBody>
+          {/* TODO: allow comma separated values */}
+          <div>
+            <label
+              className="form-control-label"
+              htmlFor="input-new-channels"
+            >
+              New Channels (one per line)
+            </label>
+          </div>
+          <Input
+            className="form-control-alternative"
+            id="input-new-channels"
+            placeholder="Add one channel name per line"
+            type="textarea"
+            defaultValue={props.newChannels.current}
+            onChange={(e) => props.newChannels.current = e.target.value}
+            rows="10"
+          />
+        </ModalBody>
+        <ModalFooter>
+          <Button color="danger" onClick={(e) => handleClick(e, true)}>Submit</Button>{' '}
+          <Button color="secondary" onClick={(e) => handleClick(e, false)}>Cancel</Button>
+        </ModalFooter>
+      </Modal>
+    </div>
+  );
+}
+
+export default AddMembers;
