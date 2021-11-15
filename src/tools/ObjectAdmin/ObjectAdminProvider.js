@@ -12,7 +12,7 @@ export const ObjectAdminProvider = ({ children }) => {
   const [channelUpdated, setChannelUpdated] = useState([]);
   const [channelEtag, setChannelEtag] = useState([]);
 
-   // UserMetadata State
+   // UserForm State
    const [userId, setUserId] = useState();
    const [userName, setUserName] = useState([]);
    const [userExternalId, setUserExternalId] = useState([]);
@@ -22,15 +22,21 @@ export const ObjectAdminProvider = ({ children }) => {
    const [userUpdated, setUserUpdated] = useState([]);
    const [userEtag, setUserEtag] = useState([]); 
 
-  // ChannelsList State
+  // ChannelsSearch State
   const [channelFilter, setChannelFilter] = useState('name LIKE "*"');
   const [maxRows, setMaxRows] = useState(500);
   const [channelMetadataResults, setChannelMetadataResults] = useState([]);
 
-  // UsersList State
+  // UsersSearch State
   const [userFilter, setUserFilter] = useState('name LIKE "*"');
   // share ChannelsList state: const [maxRows, setMaxRows] = useState(500);
   const [userMetadataResults, setUserMetadataResults] = useState([]);
+
+  // ChannelMembersSearch State
+  // share UsersSearch state: const [userFilter, setUserFilter] = useState('name LIKE "*"');
+  // share ChannelsSearch state: const [maxRows, setMaxRows] = useState(500);
+  const [channelMembersResults, setChannelMembersResults] = useState([]);
+
 
   // expose data/functions to context users
   /////////////////////////////////////////
@@ -54,17 +60,21 @@ export const ObjectAdminProvider = ({ children }) => {
     userUpdated, setUserUpdated,
     userEtag, setUserEtag,
 
-    // ChannelsList State
+    // ChannelsSearch State
     channelFilter, setChannelFilter,
     maxRows, setMaxRows,
     channelMetadataResults, setChannelMetadataResults,
 
-    // UsersList State
+    // UsersSearch State
     userFilter, setUserFilter,
     // share ChannelsList state: maxRows, setMaxRows,
     userMetadataResults, setUserMetadataResults,
+
+    // ChannelMembersSearch State
+    channelMembersResults, setChannelMembersResults,
   }
 
+  
   return <Context.Provider value={useObjectAdminData}> {children} </Context.Provider>
 }
 

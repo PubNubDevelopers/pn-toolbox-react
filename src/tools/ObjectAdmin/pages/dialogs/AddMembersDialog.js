@@ -12,12 +12,14 @@ import {
 
 // core components
 
+const AddMembersDialog = (props) => {
 
-const AddMembers = (props) => {
-
+  let newItems = null;
   const handleClick = (e, isConfirmed) => {
+debugger;
     e.preventDefault();
-    props.addChannels(isConfirmed);
+    props.newItems.current = (newItems == null || newItems === "") ? null : newItems.split("\n");
+    props.addMembers(isConfirmed);
   }
 
   return (
@@ -27,25 +29,25 @@ const AddMembers = (props) => {
         className="modal-dialog-centered"
       >
         <ModalHeader>
-          <h2>Add New Channels</h2>
+          <h2>Add New Members</h2>
         </ModalHeader>
         <ModalBody>
           {/* TODO: allow comma separated values */}
           <div>
             <label
               className="form-control-label"
-              htmlFor="input-new-channels"
+              htmlFor="input-new-members"
             >
-              New Channels (one per line)
+              New Members (one UUID per line)
             </label>
           </div>
           <Input
             className="form-control-alternative"
-            id="input-new-channels"
-            placeholder="Add one channel name per line"
+            id="input-new-members"
+            placeholder="Add one member UUID per line"
             type="textarea"
-            defaultValue={props.newChannels.current}
-            onChange={(e) => props.newChannels.current = e.target.value}
+            // defaultValue={props.newMembers.current}
+            onChange={(e) => newItems = e.target.value}
             rows="10"
           />
         </ModalBody>
@@ -58,4 +60,4 @@ const AddMembers = (props) => {
   );
 }
 
-export default AddMembers;
+export default AddMembersDialog;

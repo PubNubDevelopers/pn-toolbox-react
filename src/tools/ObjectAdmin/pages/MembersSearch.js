@@ -58,7 +58,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
 
-const MembersList = () => {
+const MembersSearch = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
@@ -85,7 +85,7 @@ const MembersList = () => {
   // page state
   const [channelId, setChannelId] = useState(objectAdminContext.channelId);
   const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
-
+  
   const [isTruncate, setIsTruncate] = useState(true);
   const [sweetAlert, setSweetAlert] = useState(null);
   const history = useHistory();
@@ -96,6 +96,9 @@ const MembersList = () => {
     let more = true;
     let results = [];
     let next = null;
+    let totalRecords = 0;
+
+    confirmAlert("Searching Channel Members", "Searching for Channel Members, please wait...");
     const limit = objectAdminContext.maxRows < 100 ? objectAdminContext.maxRows : 100;
 
     do {
@@ -105,23 +108,24 @@ const MembersList = () => {
           filter : channelFilter, // || 'id = channel"*"',
           include: {
             totalCount: true,
-            customFields: true,
-            UUIDFields: true
+            customFields: true,            
+            UUIDFields: true,
+            customUUIDFields: true
           },
           page: {next: next}
         });
+
+        totalRecords = result.totalCount;
 
         if (result != null && result.data.length > 0) {
           results = results.concat(result.data);
           more = result.data.length >= limit;
           next = result.next;
         }
-        else {
-          more = false;
-          timerAlert("No Records Found!", "Your filter found 0 records.", 3);
-        }
+        else more = false;
       } 
       catch (status) {
+        hideAlert(); // hide the please wait dialog
         confirmAlert(status.status.errorData.error.message, 
           status.status.errorData.error.details[0].message,
           "Dismiss", ()=>hideAlert()
@@ -132,7 +136,13 @@ const MembersList = () => {
       }
     } while (more);
 
-    objectAdminContext.setChannelMetadataResults(results);
+    hideAlert(); // hide the "searching please wait" dialog
+    
+    totalRecords === 0 
+      ? timerAlert("No Members Found!", "Your filter found none Channel Members.", 3)
+      : timerAlert("Channel Members Found!", `${totalRecords} Channel Members Found.`, 2);
+
+    objectAdminContext.setChannelMembersResults(results);
   }
 
   const handleEdit = (e, record, index) => {
@@ -355,7 +365,7 @@ const MembersList = () => {
   );
 };
 
-export default MembersList;
+export default MembersSearch;
 
 
 const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {

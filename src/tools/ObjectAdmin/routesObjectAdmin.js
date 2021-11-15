@@ -10,7 +10,7 @@ import ChannelsSearch from './pages/ChannelsSearch';
 import UserForm from './pages/UserForm';
 import UsersSearch from './pages/UsersSearch';
 
-// import MembersList from './pages/MembersList';
+import MembersSearch from './pages/MembersSearch';
 
 import ImportChannels from './pages/ImportChannels';
 import ImportUsers from './pages/ImportUsers';
@@ -53,14 +53,14 @@ var routesObjectAdmin = {
       layout: "/admin",
     },
     {divider: true,},
-    // {
-    //   path: "/objects/members-list",
-    //   name: "Get Members",
-    //   component: MembersList,
-    //   parent: ObjectAdminProvider,
-    //   layout: "/admin",
-    // },
-    // {divider: true,},
+    {
+      path: "/objects/members-search",
+      name: "Members Search",
+      component: MembersSearch,
+      parent: ObjectAdminProvider,
+      layout: "/admin",
+    },
+    {divider: true,},
     {
       path: "/objects/import-channels",
       name: "Import Channels",

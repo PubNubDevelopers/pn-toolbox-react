@@ -16,8 +16,11 @@
 
 */
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 // import classnames from "classnames";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 // reactstrap components
 import {
@@ -31,14 +34,17 @@ import {
   Input,
   Row,
   Col,
-  // ButtonGroup,
   CardFooter,
 } from "reactstrap";
+
+import ReactBSAlert from "react-bootstrap-sweetalert";
 
 // // core components
 import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
-import ReactBSAlert from "react-bootstrap-sweetalert";
+
+import AddMembersDialog from "./dialogs/AddMembersDialog.js";
+
 
 const ChannelForm = () => {
   const keySetContext = useKeySetData();
@@ -49,6 +55,67 @@ const ChannelForm = () => {
 
   const [channelId, setChannelId] = useState(objectAdminContext.channelId);
   const [sweetAlert, setSweetAlert] = useState(null);
+  const [modal, setModal] = useState(false);
+  const toggle = () => setModal(!modal);
+  const newMembers = useRef([]);
+
+  async function addMembers(isConfirmed) {
+    console.log("addMembers: isConfirmed = ", isConfirmed);
+    
+    toggle(); // dismiss the modal
+    if (!isConfirmed) return;
+    
+    if (newMembers.current == null || newMembers.current.length === 0) {
+      toastNotify("info", "No New Channel Members provided.")
+      return;
+    }
+
+    console.log("    new members", newMembers);
+
+    try {
+      const result = await keySetContext.pubnub.objects.setChannelMembers({
+        channel: channelId,
+        uuids: newMembers,
+      });
+
+      console.log("    setChannelMembers result", result)
+    } 
+    catch (status) {
+      console.log("operation failed w/ error:", status);
+    }
+  
+
+    // const result = await keySetContext.pubnub.objects.setMemberships({
+    //   "channels": channels}),
+    //   (status) => {
+    //     console.log("status", status);
+
+    //     if (!status.error) {
+    //       toastNotify("success", "Channels added.");
+    //       listChannels();
+    //     }
+    //     else {
+    //       toastNotify("error", status.errorData.error);
+    //     }
+    // });
+  }
+
+  const toastNotify = (type, title) => {
+    const params = {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    };
+
+    if (type === "success") toast.success(title, params);
+    else if (type === "error") toast.error(title, params);
+    else toast.info(title, params);
+  }
+
 
   async function getChannelObject() {
     // console.log("channelId", channelId);
@@ -157,6 +224,24 @@ const ChannelForm = () => {
   return (
     <>
       {sweetAlert}
+      <AddMembersDialog
+        // toggle={toggle}
+        modal={modal}
+        newItems={newMembers}
+        addMembers={addMembers}
+      />
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -383,7 +468,15 @@ const ChannelForm = () => {
                       Save Metadata
                     </Button>
                   </Col>
-                  <Col lg="3" className="text-center"></Col>
+                  <Col lg="3" className="text-center">
+                    <Button
+                      color="info"
+                      onClick={toggle}
+                      disabled = {keySetContext.pubnub == null || channelId === ""}
+                    >
+                      Add Members
+                    </Button>
+                  </Col>
                 </Row> 
               </CardFooter>
             </Card>

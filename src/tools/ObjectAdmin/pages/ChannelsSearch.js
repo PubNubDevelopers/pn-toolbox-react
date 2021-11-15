@@ -484,7 +484,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
         )}
 
         <TableCell>{row.updated}</TableCell>
-
+        
         <TableCell align="center">
           <IconButton aria-label="edit" size="small" onClick={(e) => handleEdit(e, row, index)}>
             <EditIcon/>
