@@ -500,24 +500,6 @@ function ChannelRows(props) {
   const rows = channels.map((ch, index) =>
     <tr key={index}>
       <td width="100%">{ch}</td>
-      {/* <td>
-        <UncontrolledTooltip
-          delay={0}
-          placement="top"
-          target={index}
-        >
-          Future Feature<br/>(will nav to Inspect Channel)
-        </UncontrolledTooltip>
-        <Button
-          id={hashIt(ch)}
-          color="primary"
-          // onClick={listDevices(`${channel}`)}
-          // disabled
-          size="sm"
-        >
-          List Devices
-        </Button>
-      </td> */}
       <td>
         <Button
           color="warning"

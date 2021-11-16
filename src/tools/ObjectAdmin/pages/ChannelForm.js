@@ -31,14 +31,15 @@ import {
   Input,
   Row,
   Col,
-  // ButtonGroup,
   CardFooter,
 } from "reactstrap";
+
+import ReactBSAlert from "react-bootstrap-sweetalert";
 
 // // core components
 import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
-import ReactBSAlert from "react-bootstrap-sweetalert";
+
 
 const ChannelForm = () => {
   const keySetContext = useKeySetData();
@@ -50,7 +51,7 @@ const ChannelForm = () => {
   const [channelId, setChannelId] = useState(objectAdminContext.channelId);
   const [sweetAlert, setSweetAlert] = useState(null);
 
-  async function getChannelObject() {
+  const getChannelObject = async () => {
     // console.log("channelId", channelId);
     try {
       const result = await keySetContext.pubnub.objects.getChannelMetadata({
@@ -65,7 +66,6 @@ const ChannelForm = () => {
         : timerAlert("No Records Found!", "Your filter found 0 records.", 3);
     }
     catch (status) {
-
       confirmAlert("Get Channel Failed", 
         // for some reason, the status.errorData.error is null
         // even though the console shows it has a value????
@@ -76,7 +76,7 @@ const ChannelForm = () => {
     }
   }
 
-  async function saveChannelObject() {
+  const saveChannelObject = async () => {
     // console.log("channelId", channelId);
     try {
       const result = await keySetContext.pubnub.objects.setChannelMetadata({
@@ -383,7 +383,6 @@ const ChannelForm = () => {
                       Save Metadata
                     </Button>
                   </Col>
-                  <Col lg="3" className="text-center"></Col>
                 </Row> 
               </CardFooter>
             </Card>

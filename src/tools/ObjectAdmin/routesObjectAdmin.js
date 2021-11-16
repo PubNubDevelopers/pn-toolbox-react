@@ -1,5 +1,5 @@
 // @mui/icons-material
-import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 
 // app pages
 import { ObjectAdminProvider } from "./ObjectAdminProvider";
@@ -10,7 +10,7 @@ import ChannelsSearch from './pages/ChannelsSearch';
 import UserForm from './pages/UserForm';
 import UsersSearch from './pages/UsersSearch';
 
-// import MembersList from './pages/MembersList';
+import MembersSearch from './pages/MembersSearch';
 
 import ImportChannels from './pages/ImportChannels';
 import ImportUsers from './pages/ImportUsers';
@@ -19,7 +19,7 @@ import ImportUsers from './pages/ImportUsers';
 var routesObjectAdmin = {
   collapse: true,
   name: "Objects Admin",
-  icon: SettingsEthernetIcon,
+  icon: AccountTreeIcon,
   iconColor: "Primary",
   state: "objectAdminCollapse",
   views: [
@@ -53,14 +53,14 @@ var routesObjectAdmin = {
       layout: "/admin",
     },
     {divider: true,},
-    // {
-    //   path: "/objects/members-list",
-    //   name: "Get Members",
-    //   component: MembersList,
-    //   parent: ObjectAdminProvider,
-    //   layout: "/admin",
-    // },
-    // {divider: true,},
+    {
+      path: "/objects/members-search",
+      name: "Members Search",
+      component: MembersSearch,
+      parent: ObjectAdminProvider,
+      layout: "/admin",
+    },
+    {divider: true,},
     {
       path: "/objects/import-channels",
       name: "Import Channels",
