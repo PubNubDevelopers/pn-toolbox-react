@@ -17,8 +17,8 @@
 */
 import { useState } from "react";
 import classnames from "classnames";
-// import { ToastContainer, toast } from 'react-toastify';
-// import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // reactstrap components
 import {
@@ -33,10 +33,10 @@ import {
   Row,
   Col,
   CardFooter,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  UncontrolledDropdown,
+  // DropdownToggle,
+  // DropdownMenu,
+  // DropdownItem,
+  // UncontrolledDropdown,
   Table,
   Nav,
   NavLink,
@@ -47,6 +47,8 @@ import {
 
 // core components
 import { useKeySetData } from "./KeySetProvider";
+import { MenuItem } from "@material-ui/core";
+import { InputLabel, Select } from "@mui/material";
 
 const KeySet = () => {
   const keySetContext = useKeySetData();
@@ -57,6 +59,7 @@ const KeySet = () => {
   const [pubKey, setPubKey] = useState(keySetContext.pubKey);
   const [secKey, setSecKey] = useState(keySetContext.secKey);
   const [uuid, setUuid] = useState(keySetContext.uuid);
+  const [authToken, setAuthToken] = useState(keySetContext.authToken);
 
   // const [authKey, setAuthKey] = useState();
   const [tab, setTab] = useState(2);
@@ -77,42 +80,57 @@ const KeySet = () => {
   }
 
   const submitForm = () => {
+
     keySetContext.initKeySet({
       keySetName: keySetName,
       pubKey: pubKey,
       subKey: subKey,
       secKey: secKey,
       uuid: uuid,
-      // authKey: authKey,
+      authKey: authToken,
     });
+
+    notify("Key Set Initialized");
   }
 
   const keySetSelected = (index) => {
     console.log("keySetSelected: index: ", index);
     console.log("    keSetProps: ", keySetContext.keySetProps);
 
-    const keySet = keySetContext.keySetProps.pn_keys[index];
-    setKeySetName(keySet.name);
-    setPubKey(keySet.pub_key);
-    setSubKey(keySet.sub_key);
-    setSecKey(keySet.secret_key);
+    if (index === -1) {
+      setKeySetName("Key Set Not Selected");
+      setPubKey("");
+      setSubKey("");
+      setSecKey("");
+      setUuid("");
+      setAuthToken("");
+    }
+    else {
+      const keySet = keySetContext.keySetProps.pn_keys[index];
+      setKeySetName(keySet.name);
+      setPubKey(keySet.pub_key);
+      setSubKey(keySet.sub_key);
+      setSecKey(keySet.secret_key);
+      setUuid(keySet.uuid);
+      setAuthToken(keySet.authToken);
+    }
   }
 
-  // const notify = (title) => {
-  //   toast.success(title, {
-  //     position: "top-center",
-  //     autoClose: 3000,
-  //     hideProgressBar: false,
-  //     closeOnClick: true,
-  //     pauseOnHover: true,
-  //     draggable: true,
-  //     progress: undefined,
-  //   });
-  // }
+  const notify = (title) => {
+    toast.success(title, {
+      position: "top-center",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  }
   
   return (
     <>
-      {/* <ToastContainer
+      <ToastContainer
         position="top-center"
         autoClose={3000}
         hideProgressBar={false}
@@ -122,7 +140,7 @@ const KeySet = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-      /> */}
+      />
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -305,6 +323,15 @@ const KeySet = () => {
                                       keySetName={keySetContext.keySetName}
                                     />
                                   </Col>
+                                  <div className="col text-right">
+                                    <Button
+                                      color="danger"
+                                      disabled={subKey === ""}
+                                      onClick={submitForm}
+                                    >
+                                      Initialize
+                                    </Button>
+                                  </div>
                                 </Row>
                                 <Row>
                                   <Col>
@@ -389,19 +416,29 @@ const KeySet = () => {
                                     </FormGroup>
                                   </Col>
                                 </Row>
+                                <Row>
+                                  <Col>
+                                    <FormGroup>
+                                      <label
+                                        className="form-control-label"
+                                        htmlFor="input-auth-token"
+                                      >
+                                        Auth Token (Auth Key)
+                                      </label>
+                                      <Input
+                                        className="form-control-alternative"
+                                        id="input-auth-token"
+                                        placeholder="Enter auth token/key if required"
+                                        type="text"
+                                        name="auth-token"
+                                        onChange={(e) => setAuthToken(e.target.value)}
+                                      />
+                                    </FormGroup>
+                                  </Col>
+                                </Row>
                               </div>
                             </CardBody>
-                            <CardFooter>
-                            <div className="col text-right">
-                                <Button
-                                  color="danger"
-                                  disabled={subKey === ""}
-                                  onClick={submitForm}
-                                >
-                                  Initialize
-                                </Button>
-                              </div>
-                            </CardFooter>
+
                           </Form>
                         </Card>
                       </Col>
@@ -443,26 +480,27 @@ const KeySetSelector = (props) => {
   }
 
   const options = props.keySets.pn_keys.map((item, index) =>
-      <DropdownItem key={index} onClick={() => props.keySetSelected(index)}>
-        {item.name + ":  " + item.sub_key.substring(0,14)}
-      </DropdownItem>
-    /* <DropdownItem divider /> */
+    <MenuItem key={index} value={index} onClick={() => props.keySetSelected(index)}>
+      {item.name + ":  " + item.sub_key.substring(0,14)}
+    </MenuItem>
   );
 
   return (
-    // <div className="col text-left">
       <>
-        <UncontrolledDropdown group>
-          <DropdownToggle width="100px" caret color="danger">
-            {props.keySetName}
-          </DropdownToggle>
-          <DropdownMenu>
-            {options}
-          </DropdownMenu>
-        </UncontrolledDropdown>
+        <InputLabel htmlFor="select-key-set">Key Sets</InputLabel>
+        <Select 
+          variant="standard"
+          defaultValue={-1} 
+          id="select-key-set" 
+          label="Key Sets" 
+          autoWidth={true}
+        >
+          <MenuItem value={-1} onClick={() => props.keySetSelected(-1)}>
+            Select a Key Set
+          </MenuItem>
+          {options}
+        </Select>
         <p />
       </>
-    // </div>
-
   );
 }
