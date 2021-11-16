@@ -11,14 +11,16 @@ export const KeySetProvider = ({ children }) => {
   const [subKey, setSubKey] = useState("");
   const [secKey, setSecKey] = useState("");
   const [uuid, setUuid] = useState("");
+  const [authToken, setAuthToken] = useState("");
   const [keySetProps, setKeySetProps] = useState();
 
   const initKeySet = (keySetConfig) => {
     const pn = new PubNub({
       subscribeKey: keySetConfig.subKey,
-      publishKey: keySetConfig.pubKey,
-      secretKey: keySetConfig.secKey,
+      publishKey: keySetConfig.pubKey, // conditional null check?
+      secretKey: keySetConfig.secKey, // conditional null check?
       uuid: (keySetConfig.uuid !== null ? keySetConfig.uuid : null),
+      authKey: (keySetConfig.authToken !== null ? keySetConfig.authToken : null),
     });
 
     setKeySetName(keySetConfig.keySetName);
@@ -32,6 +34,7 @@ export const KeySetProvider = ({ children }) => {
       setSubKey(pn._config.subscribeKey);
       setSecKey(pn._config.secretKey);
       setUuid(pn.getUUID());
+      // setAuthToken(pn.getToken) no api???
       setPubNub(pn);
     }).catch((error) => {
         console.log("key set init failed:", error);
@@ -57,6 +60,7 @@ export const KeySetProvider = ({ children }) => {
     pubKey, setSubKey,
     secKey, setSecKey,
     uuid, setUuid,
+    authToken, setAuthToken,
     keySetProps, setKeySetProps,
     status,
     pubnub,

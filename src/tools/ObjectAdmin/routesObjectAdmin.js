@@ -1,5 +1,5 @@
 // @mui/icons-material
-import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 
 // app pages
 import { ObjectAdminProvider } from "./ObjectAdminProvider";
@@ -19,7 +19,7 @@ import ImportUsers from './pages/ImportUsers';
 var routesObjectAdmin = {
   collapse: true,
   name: "Objects Admin",
-  icon: SettingsEthernetIcon,
+  icon: AccountTreeIcon,
   iconColor: "Primary",
   state: "objectAdminCollapse",
   views: [

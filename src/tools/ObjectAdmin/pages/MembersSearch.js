@@ -117,7 +117,7 @@ const MembersSearch = () => {
       });
 
       // console.log("    result", result);
-      retrieveMetadata();
+      retrieveMembers();
       // objectAdminContext.setChannelMembersResults(result.data);
     } 
     catch (status) {
@@ -141,7 +141,7 @@ const MembersSearch = () => {
     else toast.info(title, params);
   }
 
-  const retrieveMetadata = async () => {
+  const retrieveMembers = async () => {
     console.log("retrieveMetadata", channelId, memberFilter);
 
     let more = true;
@@ -387,7 +387,7 @@ const MembersSearch = () => {
                           <Button 
                             className="form-control-alternative text-align-right"
                             color="danger"
-                            onClick={retrieveMetadata}
+                            onClick={retrieveMembers}
                             disabled = {keySetContext.pubnub == null || channelId == null}
                           >
                             Search Members

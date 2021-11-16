@@ -57,6 +57,7 @@ const KeySet = () => {
   const [pubKey, setPubKey] = useState(keySetContext.pubKey);
   const [secKey, setSecKey] = useState(keySetContext.secKey);
   const [uuid, setUuid] = useState(keySetContext.uuid);
+  const [authToken, setAuthToken] = useState(keySetContext.authToken);
 
   // const [authKey, setAuthKey] = useState();
   const [tab, setTab] = useState(2);
@@ -83,7 +84,7 @@ const KeySet = () => {
       subKey: subKey,
       secKey: secKey,
       uuid: uuid,
-      // authKey: authKey,
+      authKey: authToken,
     });
   }
 
@@ -305,6 +306,15 @@ const KeySet = () => {
                                       keySetName={keySetContext.keySetName}
                                     />
                                   </Col>
+                                  <div className="col text-right">
+                                    <Button
+                                      color="danger"
+                                      disabled={subKey === ""}
+                                      onClick={submitForm}
+                                    >
+                                      Initialize
+                                    </Button>
+                                  </div>
                                 </Row>
                                 <Row>
                                   <Col>
@@ -389,10 +399,30 @@ const KeySet = () => {
                                     </FormGroup>
                                   </Col>
                                 </Row>
+                                <Row>
+                                  <Col>
+                                    <FormGroup>
+                                      <label
+                                        className="form-control-label"
+                                        htmlFor="input-auth-token"
+                                      >
+                                        Auth Token (Auth Key)
+                                      </label>
+                                      <Input
+                                        className="form-control-alternative"
+                                        id="input-auth-token"
+                                        placeholder="Enter auth token/key if required"
+                                        type="text"
+                                        name="auth-token"
+                                        onChange={(e) => setAuthToken(e.target.value)}
+                                      />
+                                    </FormGroup>
+                                  </Col>
+                                </Row>
                               </div>
                             </CardBody>
                             <CardFooter>
-                            <div className="col text-right">
+                            {/* <div className="col text-right">
                                 <Button
                                   color="danger"
                                   disabled={subKey === ""}
@@ -400,7 +430,7 @@ const KeySet = () => {
                                 >
                                   Initialize
                                 </Button>
-                              </div>
+                              </div> */}
                             </CardFooter>
                           </Form>
                         </Card>
