@@ -159,7 +159,7 @@ const UsersSearch = () => {
   const handleRemove = (e, userId, index) => {
     e.preventDefault();
 
-    confirmAlert("Confirm Remove Metadata?", 
+    confirmAlert("Confirm Remove User?", 
       `${index} - ${userId}`,
       "Confirm", ()=>removeUser(userId, index), "Cancel", ()=>hideAlert()
     );
@@ -400,7 +400,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               ? metadata.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               : metadata
             ).map((row, index) => (
-              <MetadataRow index={(index + (page * rowsPerPage))} row={row} isTruncate={isTruncate} 
+              <MetadataRow index={(index + (page * rowsPerPage))} row={row.uuid} isTruncate={isTruncate} 
                 handleRemove={handleRemove} 
                 handleEdit={handleEdit}
               />
@@ -520,7 +520,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
                   <TableRow>
                     <TableCell width="5%"></TableCell>
                     <TableCell><strong>Email</strong></TableCell>
-                    <TableCell width="95%">{row.description}</TableCell>
+                    <TableCell width="95%">{row.email}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>

@@ -75,7 +75,7 @@ const ChannelForm = () => {
     try {
       const result = await keySetContext.pubnub.objects.setChannelMembers({
         channel: channelId,
-        uuids: newMembers,
+        uuids: newMembers.current,
       });
 
       console.log("    setChannelMembers result", result)
@@ -228,7 +228,8 @@ const ChannelForm = () => {
         // toggle={toggle}
         modal={modal}
         newItems={newMembers}
-        addMembers={addMembers}
+        addItems={addMembers}
+        newMembers={newMembers}
       />
       <ToastContainer
         position="top-center"

@@ -13,13 +13,12 @@ import {
 // core components
 
 const AddMembersDialog = (props) => {
-
   let newItems = null;
+
   const handleClick = (e, isConfirmed) => {
-debugger;
     e.preventDefault();
     props.newItems.current = (newItems == null || newItems === "") ? null : newItems.split("\n");
-    props.addMembers(isConfirmed);
+    props.addItems(isConfirmed);
   }
 
   return (
@@ -46,7 +45,7 @@ debugger;
             id="input-new-members"
             placeholder="Add one member UUID per line"
             type="textarea"
-            // defaultValue={props.newMembers.current}
+            defaultValue={props.newMembers.current}
             onChange={(e) => newItems = e.target.value}
             rows="10"
           />

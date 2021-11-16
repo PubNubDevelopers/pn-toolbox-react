@@ -36,6 +36,7 @@ export const ObjectAdminProvider = ({ children }) => {
   // share UsersSearch state: const [userFilter, setUserFilter] = useState('name LIKE "*"');
   // share ChannelsSearch state: const [maxRows, setMaxRows] = useState(500);
   const [channelMembersResults, setChannelMembersResults] = useState([]);
+  const [memberFilter, setMemberFilter] = useState();
 
 
   // expose data/functions to context users
@@ -72,6 +73,7 @@ export const ObjectAdminProvider = ({ children }) => {
 
     // ChannelMembersSearch State
     channelMembersResults, setChannelMembersResults,
+    memberFilter, setMemberFilter,
   }
 
   

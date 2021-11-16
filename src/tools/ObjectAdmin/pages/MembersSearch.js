@@ -55,7 +55,7 @@ import { useObjectAdminData } from "../ObjectAdminProvider";
 import { DeleteForever, FirstPage, KeyboardArrowDown, KeyboardArrowRight, KeyboardArrowLeft, LastPage } from "@mui/icons-material";
 import { Switch, FormControlLabel } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
-import GroupIcon from '@mui/icons-material/Group';
+// import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
 
 const MembersSearch = () => {
@@ -84,28 +84,29 @@ const MembersSearch = () => {
 
   // page state
   const [channelId, setChannelId] = useState(objectAdminContext.channelId);
-  const [channelFilter, setChannelFilter] = useState(objectAdminContext.channelFilter);
+  const [memberFilter, setMemberFilter] = useState(objectAdminContext.memberFilter);
   
   const [isTruncate, setIsTruncate] = useState(true);
   const [sweetAlert, setSweetAlert] = useState(null);
   const history = useHistory();
 
   async function retrieveMetadata() {
-    console.log("retrieveMetadata", channelId, channelFilter);
+    console.log("retrieveMetadata", channelId, memberFilter);
 
     let more = true;
     let results = [];
     let next = null;
     let totalRecords = 0;
 
-    confirmAlert("Searching Channel Members", "Searching for Channel Members, please wait...");
     const limit = objectAdminContext.maxRows < 100 ? objectAdminContext.maxRows : 100;
+
+    confirmAlert("Searching Channel Members", "Searching for Channel Members, please wait...");
 
     do {
       try {
         const result = await keySetContext.pubnub.objects.getChannelMembers({
           channel: channelId,
-          filter : channelFilter, // || 'id = channel"*"',
+          filter : memberFilter, 
           include: {
             totalCount: true,
             customFields: true,            
@@ -142,42 +143,48 @@ const MembersSearch = () => {
       ? timerAlert("No Members Found!", "Your filter found none Channel Members.", 3)
       : timerAlert("Channel Members Found!", `${totalRecords} Channel Members Found.`, 2);
 
+    console.log("    members found", results);
     objectAdminContext.setChannelMembersResults(results);
   }
 
   const handleEdit = (e, record, index) => {
-    objectAdminContext.setChannelId(record.id);
-    objectAdminContext.setChannelName(record.name);
-    objectAdminContext.setChannelDesc(record.description);
-    objectAdminContext.setChannelCustom(JSON.stringify(record.custom, null, 2));
-    objectAdminContext.setChannelUpdated(record.updated);
-    objectAdminContext.setChannelEtag(record.eTag);
+    // objectAdminContext.setUserId(record.id);
+    // objectAdminContext.setUserName(record.name);
+    // objectAdminContext.setUserExternalId(record.externalId);
+    // objectAdminContext.setUserProfileUrl(record.profileUrl);
+    // objectAdminContext.setUserEmail(record.email);
+    // objectAdminContext.setUserCustom(JSON.stringify(record.custom, null, 2));
+    // objectAdminContext.setUserUpdated(record.updated);
+    // objectAdminContext.setUserEtag(record.eTag);
 
-    history.push("/admin/channel-metadata");
+    // history.push("/admin/objects/user-form");
   }
 
 
-  const handleRemove = (e, channel, index) => {
+  const handleRemove = (e, userId, index) => {
     e.preventDefault();
 
-    confirmAlert("Confirm Remove Metadata?", 
-      `${index} - ${channel}`,
-      "Confirm", ()=>removeMetadata(channel, index), "Cancel", ()=>hideAlert()
+    confirmAlert("Confirm Remove Member?", 
+      `${index} - ${userId}`,
+      "Confirm", ()=>removeUser(userId, index), "Cancel", ()=>hideAlert()
     );
   }
 
-  async function removeMetadata(channel, index) {
-    // console.log("removeChannelMetadata", channel);
-    hideAlert();
+  async function removeUser(userId, index) {
+    console.log("removeUser", userId);
 
+    hideAlert();
     try {
-      const result = await keySetContext.pubnub.objects.removeChannelMetadata({channel : channel});
-      timerAlert("Remove Success!", "ChannelMetadata removed.", 2);
+      const result = await keySetContext.pubnub.objects.removeUUIDMetadata({
+        channel: channelId,
+        uuid : userId
+      });
+      timerAlert("Remove Success!", "User removed.", 2);
       
-      let temp = Array.from(objectAdminContext.channelMetadataResults);
+      let temp = Array.from(objectAdminContext.channelMembersResults);
       temp.splice(index, 1);
 
-      objectAdminContext.setChannelMetadataResults(temp);
+      objectAdminContext.setChannelMembersResults(temp);
     } 
     catch (status) {
       confirmAlert(status.status.errorData.error.message, 
@@ -213,6 +220,7 @@ const MembersSearch = () => {
           style={{ display: "block", marginTop: "100px" }}
           title={title}
           onConfirm={confirmFn}
+          showConfirm={confirmButton != null}
           confirmBtnBsStyle="danger"
           confirmBtnText={confirmButton}
           onCancel={cancelFn}
@@ -270,18 +278,18 @@ const MembersSearch = () => {
                         <FormGroup>
                           <label
                             className="form-control-label"
-                            htmlFor="input-channel-filter"
+                            htmlFor="input-member-filter"
                           >
-                            Channel Filter Expression
+                            Member Filter Expression
                           </label>
                           <Input
                             className="form-control-alternative"
-                            id="input-channel-filter"
+                            id="input-member-filter"
                             placeholder="Enter a filter expression"
                             type="textarea"
                             rows="4"
-                            value={channelFilter}
-                            onChange={(e) => setChannelFilter(e.target.value)}
+                            value={memberFilter}
+                            onChange={(e) => setMemberFilter(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -314,7 +322,7 @@ const MembersSearch = () => {
                             onClick={retrieveMetadata}
                             disabled = {keySetContext.pubnub == null || channelId == null}
                           >
-                            Get Metadata
+                            Search Members
                           </Button>
                         </Row>
                       </Col>
@@ -339,7 +347,7 @@ const MembersSearch = () => {
 
               <CardBody>
                 <MetadataTable 
-                  metadata={objectAdminContext.channelMetadataResults}
+                  metadata={objectAdminContext.channelMembersResults}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   emptyRows={emptyRows}
@@ -407,10 +415,10 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
             <TableRow>
               <TableCell/>
               <TableCell align="right">#</TableCell>
-              <TableCell>Channel ID</TableCell>
-              <TableCell>Channel Name</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Custom Field Data</TableCell>
+              <TableCell>User ID</TableCell>
+              <TableCell>User Name</TableCell>
+              {/* <TableCell>Email</TableCell> */}
+              <TableCell>Custom Membership Data</TableCell>
               <TableCell>Last Updated</TableCell>
               <TableCell align="center">Actions</TableCell>
             </TableRow>
@@ -421,12 +429,10 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               ? metadata.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               : metadata
             ).map((row, index) => (
-
               <MetadataRow index={(index + (page * rowsPerPage))} row={row} isTruncate={isTruncate} 
                 handleRemove={handleRemove} 
                 handleEdit={handleEdit}
               />
-            
             ))}
 
             {emptyRows > 0 && (
@@ -471,9 +477,7 @@ const truncate = (data, size, noDots) => {
 }
 
 const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
-  console.log("MetadataRow", row);
-
-  // const {row} = props;
+  // console.log("MetadataRow", row);
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -492,17 +496,17 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
         <TableCell align="right">{index}</TableCell>
         {isTruncate && (
           <>
-            <TableCell>{truncate(row.id, 40)}</TableCell>
-            <TableCell>{truncate(row.name, 40)}</TableCell>
-            <TableCell>{truncate(row.description, 40)}</TableCell>
+            <TableCell>{truncate(row.uuid.id, 40)}</TableCell>
+            <TableCell>{truncate(row.uuid.name, 40)}</TableCell>
+            {/* <TableCell>{truncate(row.email, 40)}</TableCell> */}
             <TableCell>{truncate(JSON.stringify(row.custom), 40)}</TableCell>
           </>
         )}
         {!isTruncate && (
           <>
-            <TableCell component="th" scope="row">{row.id}</TableCell>
-            <TableCell>{row.name}</TableCell>
-            <TableCell>{row.description}</TableCell>
+            <TableCell component="th" scope="row">{row.uuid.id}</TableCell>
+            <TableCell>{row.uuid.name}</TableCell>
+            {/* <TableCell>{row.email}</TableCell> */}
             <TableCell>{JSON.stringify(row.custom, null, 2)}</TableCell>
           </>
         )}
@@ -513,11 +517,11 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
           <IconButton aria-label="edit" size="small" onClick={(e) => handleEdit(e, row, index)}>
             <EditIcon/>
           </IconButton>
-          <IconButton aria-label="members" size="small" 
+          {/* <IconButton aria-label="members" size="small" 
             // onClick={(e) => handleMembership(e, row.id, index)}
             >
             <GroupIcon/>
-          </IconButton>
+          </IconButton> */}
           <IconButton aria-label="delete" size="small" onClick={(e) => handleRemove(e, row.id, index)}>
             <DeleteForever/>
           </IconButton>
@@ -533,30 +537,74 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
                 <TableBody>
                 <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell><strong>Channel ID</strong></TableCell>
-                    <TableCell width="95%">{row.id}</TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell><strong>User ID</strong></TableCell>
+                    <TableCell width="95%">{row.uuid.id}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell><strong>Channel Name</strong></TableCell>
-                    <TableCell width="95%">{row.name}</TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell><strong>User Name</strong></TableCell>
+                    <TableCell width="95%">{row.uuid.name}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell><strong>Description</strong></TableCell>
-                    <TableCell width="95%">{row.description}</TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell><strong>Email</strong></TableCell>
+                    <TableCell width="95%">{row.uuid.email}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
-                    <TableCell colSpan="2" component="th" width="5%"><strong>Custom Fields</strong></TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell><strong>External ID</strong></TableCell>
+                    <TableCell width="95%">{row.uuid.externalId}</TableCell>
                   </TableRow>
-                  {Object.keys(row.custom).map((key) => (
+                  <TableRow>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell><strong>Profile URL</strong></TableCell>
+                    <TableCell width="95%">{row.uuid.profileUrl}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell colSpan="2" component="th" width="5%"><strong>Custom User Fields</strong></TableCell>
+                  </TableRow>
+
+                  {Object.keys(row.uuid.custom).map((key) => (
                     <TableRow>
+                      <TableCell width="5%"></TableCell>
+                      <TableCell width="5%"></TableCell>
+                      <TableCell width="5%"></TableCell>
+                      <TableCell>{key}</TableCell>
+                      <TableCell width="95%" colSpan="2">{row.uuid.custom[key]}</TableCell>
+                    </TableRow>
+                  ))}
+
+                  <TableRow>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell width="5%"></TableCell>
+                    <TableCell colSpan="2" component="th" width="5%"><strong>Custom Membership Fields</strong></TableCell>
+                  </TableRow>
+
+                  {row.custom &&
+                  Object.keys(row.custom).map((key) => (
+                    <TableRow>
+                      <TableCell width="5%"></TableCell>
+                      <TableCell width="5%"></TableCell>
                       <TableCell width="5%"></TableCell>
                       <TableCell>{key}</TableCell>
                       <TableCell width="95%" colSpan="2">{row.custom[key]}</TableCell>
                     </TableRow>
                   ))}
+
                 </TableBody>
               </Table>
             </Box>
@@ -627,51 +675,3 @@ TablePaginationActions.propTypes = {
   page: PropTypes.number.isRequired,
   rowsPerPage: PropTypes.number.isRequired,
 };
-
-
-// const TruncateSwitch = ({isTruncate, setIsTruncate}) => {
-  //   return(
-  //     <>
-  //     <label
-  //       className="form-control-label"
-  //       htmlFor="input-truncate"
-  //     >
-  //       Truncate Large Values?
-  //     </label>
-  //     <br/>
-  //     <ButtonGroup 
-  //       className="btn-group-toggle" 
-  //       data-toggle="buttons"
-  //     >
-  //       <Button 
-  //         className={classnames({ active: isTruncate })} 
-  //         color="danger" 
-  //         onClick={() => setIsTruncate(!isTruncate)}
-  //       >
-  //         <input
-  //           autoComplete="off"
-  //           name="options"
-  //           type="radio"
-  //           value={!isTruncate}
-  //           size="small"
-  //         />
-  //         No
-  //       </Button>
-  //       <Button 
-  //         className={classnames({ active: isTruncate })} 
-  //         color="danger" 
-  //         onClick={() => setIsTruncate(true)}
-  //       >
-  //         <input
-  //           autoComplete="off"
-  //           name="options"
-  //           type="radio"
-  //           value={isTruncate}
-  //           size="small"
-  //         />
-  //         Yes
-  //       </Button>
-  //     </ButtonGroup>
-  //     </>
-  //   );
-  // }
