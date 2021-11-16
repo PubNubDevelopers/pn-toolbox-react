@@ -16,11 +16,8 @@
 
 */
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 // import classnames from "classnames";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
 
 // reactstrap components
 import {
@@ -43,8 +40,6 @@ import ReactBSAlert from "react-bootstrap-sweetalert";
 import { useKeySetData } from "../../KeySetProvider";
 import { useObjectAdminData } from "../ObjectAdminProvider";
 
-import AddMembersDialog from "./dialogs/AddMembersDialog.js";
-
 
 const ChannelForm = () => {
   const keySetContext = useKeySetData();
@@ -55,69 +50,8 @@ const ChannelForm = () => {
 
   const [channelId, setChannelId] = useState(objectAdminContext.channelId);
   const [sweetAlert, setSweetAlert] = useState(null);
-  const [modal, setModal] = useState(false);
-  const toggle = () => setModal(!modal);
-  const newMembers = useRef([]);
 
-  async function addMembers(isConfirmed) {
-    console.log("addMembers: isConfirmed = ", isConfirmed);
-    
-    toggle(); // dismiss the modal
-    if (!isConfirmed) return;
-    
-    if (newMembers.current == null || newMembers.current.length === 0) {
-      toastNotify("info", "No New Channel Members provided.")
-      return;
-    }
-
-    console.log("    new members", newMembers);
-
-    try {
-      const result = await keySetContext.pubnub.objects.setChannelMembers({
-        channel: channelId,
-        uuids: newMembers.current,
-      });
-
-      console.log("    setChannelMembers result", result)
-    } 
-    catch (status) {
-      console.log("operation failed w/ error:", status);
-    }
-  
-
-    // const result = await keySetContext.pubnub.objects.setMemberships({
-    //   "channels": channels}),
-    //   (status) => {
-    //     console.log("status", status);
-
-    //     if (!status.error) {
-    //       toastNotify("success", "Channels added.");
-    //       listChannels();
-    //     }
-    //     else {
-    //       toastNotify("error", status.errorData.error);
-    //     }
-    // });
-  }
-
-  const toastNotify = (type, title) => {
-    const params = {
-      position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    };
-
-    if (type === "success") toast.success(title, params);
-    else if (type === "error") toast.error(title, params);
-    else toast.info(title, params);
-  }
-
-
-  async function getChannelObject() {
+  const getChannelObject = async () => {
     // console.log("channelId", channelId);
     try {
       const result = await keySetContext.pubnub.objects.getChannelMetadata({
@@ -132,7 +66,6 @@ const ChannelForm = () => {
         : timerAlert("No Records Found!", "Your filter found 0 records.", 3);
     }
     catch (status) {
-
       confirmAlert("Get Channel Failed", 
         // for some reason, the status.errorData.error is null
         // even though the console shows it has a value????
@@ -143,7 +76,7 @@ const ChannelForm = () => {
     }
   }
 
-  async function saveChannelObject() {
+  const saveChannelObject = async () => {
     // console.log("channelId", channelId);
     try {
       const result = await keySetContext.pubnub.objects.setChannelMetadata({
@@ -224,25 +157,6 @@ const ChannelForm = () => {
   return (
     <>
       {sweetAlert}
-      <AddMembersDialog
-        // toggle={toggle}
-        modal={modal}
-        newItems={newMembers}
-        addItems={addMembers}
-        newMembers={newMembers}
-      />
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
-
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -467,15 +381,6 @@ const ChannelForm = () => {
                       disabled = {keySetContext.pubnub == null || channelId === ""}
                     >
                       Save Metadata
-                    </Button>
-                  </Col>
-                  <Col lg="3" className="text-center">
-                    <Button
-                      color="info"
-                      onClick={toggle}
-                      disabled = {keySetContext.pubnub == null || channelId === ""}
-                    >
-                      Add Members
                     </Button>
                   </Col>
                 </Row> 

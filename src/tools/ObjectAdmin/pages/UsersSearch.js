@@ -88,7 +88,7 @@ const UsersSearch = () => {
   const [sweetAlert, setSweetAlert] = useState(null);
   const history = useHistory();
 
-  async function retrieveUser() {
+  const retrieveUser = async () => {
     console.log("userFilter", userFilter);
 
     let more = true;
@@ -356,7 +356,6 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer >
         <Table stickyHeader>
-
           <TableHead>
             <TableRow>
               <TableCell colSpan="4">
@@ -400,7 +399,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               ? metadata.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               : metadata
             ).map((row, index) => (
-              <MetadataRow index={(index + (page * rowsPerPage))} row={row.uuid} isTruncate={isTruncate} 
+              <MetadataRow index={(index + (page * rowsPerPage))} row={row} isTruncate={isTruncate} 
                 handleRemove={handleRemove} 
                 handleEdit={handleEdit}
               />

@@ -16,8 +16,10 @@
 
 */
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useHistory } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // reactstrap components
 import {
@@ -57,6 +59,7 @@ import { Switch, FormControlLabel } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 // import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
+import AddMembersDialog from "./dialogs/AddMembersDialog";
 
 const MembersSearch = () => {
   const keySetContext = useKeySetData();
@@ -90,7 +93,58 @@ const MembersSearch = () => {
   const [sweetAlert, setSweetAlert] = useState(null);
   const history = useHistory();
 
-  async function retrieveMetadata() {
+  const [modal, setModal] = useState(false);
+  const toggle = () => setModal(!modal);
+  const newMembers = useRef([]);
+
+  const addMembers = async (isConfirmed) => {
+    console.log("addMembers: isConfirmed = ", isConfirmed);
+    
+    toggle(); // dismiss the modal
+    if (!isConfirmed) return;
+    
+    if (newMembers.current == null || newMembers.current.length === 0) {
+      toastNotify("info", "No New Channel Members provided.")
+      return;
+    }
+
+    console.log("    new members", newMembers);
+
+    try {
+      const result = await keySetContext.pubnub.objects.setChannelMembers({
+        channel: channelId,
+        uuids: newMembers.current
+      });
+
+      retrieveMetadata();
+
+      // let temp = Array.from(objectAdminContext.channelMembersResults);
+      // objectAdminContext.setChannelMembersResults(temp.concat(result));
+
+      console.log("    setChannelMembers result", result)
+    } 
+    catch (status) {
+      console.log("operation failed w/ error:", status);
+    }
+  }
+
+  const toastNotify = (type, title) => {
+    const params = {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    };
+
+    if (type === "success") toast.success(title, params);
+    else if (type === "error") toast.error(title, params);
+    else toast.info(title, params);
+  }
+
+  const retrieveMetadata = async () => {
     console.log("retrieveMetadata", channelId, memberFilter);
 
     let more = true;
@@ -170,7 +224,7 @@ const MembersSearch = () => {
     );
   }
 
-  async function removeUser(userId, index) {
+  const removeUser = async (userId, index) => {
     console.log("removeUser", userId);
 
     hideAlert();
@@ -238,6 +292,24 @@ const MembersSearch = () => {
   return (
     <>
       {sweetAlert}
+      <AddMembersDialog
+        // toggle={toggle}
+        modal={modal}
+        newItems={newMembers}
+        addItems={addMembers}
+        newMembers={newMembers}
+      />
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -315,7 +387,6 @@ const MembersSearch = () => {
                         </FormGroup>
                         </Row>
                         <Row>
-                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                           <Button 
                             className="form-control-alternative text-align-right"
                             color="danger"
@@ -337,12 +408,20 @@ const MembersSearch = () => {
             <Card className="bg-secondary shadow"> 
               <CardHeader className="border-0">
                 <Row className="align-items-center">
-                  <div className="col">
-                    <h3 className="mb-0">Channel Metadata Results</h3>
-                  </div>
-                  <div className="col text-right">
-                  </div>
+                  <Col>
+                    <h3 className="mb-0">Channel Members Results</h3>
+                  </Col>
+                  <Col lg="2" className="text-center">
+                    <Button
+                      color="info"
+                      onClick={toggle}
+                      disabled = {keySetContext.pubnub == null || channelId === ""}
+                    >
+                      Add Members
+                    </Button>
+                  </Col>
                 </Row>
+                
               </CardHeader>      
 
               <CardBody>
@@ -379,7 +458,7 @@ export default MembersSearch;
 const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {
   console.log("MetadataTable", metadata);
 
-  if (metadata == null || metadata.length ===0) return <><h2>No Results</h2></>;
+  if (metadata == null || metadata.length ===0) return <>No Results</>;
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
