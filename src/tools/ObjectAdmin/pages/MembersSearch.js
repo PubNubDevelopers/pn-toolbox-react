@@ -116,12 +116,9 @@ const MembersSearch = () => {
         uuids: newMembers.current
       });
 
+      // console.log("    result", result);
       retrieveMetadata();
-
-      // let temp = Array.from(objectAdminContext.channelMembersResults);
-      // objectAdminContext.setChannelMembersResults(temp.concat(result));
-
-      console.log("    setChannelMembers result", result)
+      // objectAdminContext.setChannelMembersResults(result.data);
     } 
     catch (status) {
       console.log("operation failed w/ error:", status);
