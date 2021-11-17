@@ -60,6 +60,7 @@ const KeySet = () => {
   const [secKey, setSecKey] = useState(keySetContext.secKey);
   const [uuid, setUuid] = useState(keySetContext.uuid);
   const [authToken, setAuthToken] = useState(keySetContext.authToken);
+  const [showInitButton, setShowInitButton] = useState(true);
 
   // const [authKey, setAuthKey] = useState();
   const [tab, setTab] = useState(2);
@@ -80,7 +81,6 @@ const KeySet = () => {
   }
 
   const submitForm = () => {
-
     keySetContext.initKeySet({
       keySetName: keySetName,
       pubKey: pubKey,
@@ -98,14 +98,23 @@ const KeySet = () => {
     console.log("    keSetProps: ", keySetContext.keySetProps);
 
     if (index === -1) {
+      // setShowInitButton(true);
+
       setKeySetName("Key Set Not Selected");
       setPubKey("");
       setSubKey("");
       setSecKey("");
       setUuid("");
       setAuthToken("");
+
+      keySetContext.uninitKeySet();
     }
     else {
+      // setShowInitButton(
+      //   !keySetContext.isInitialized ||
+      //   keySetContext.subKey === subKey
+      // );
+
       const keySet = keySetContext.keySetProps.pn_keys[index];
       setKeySetName(keySet.name);
       setPubKey(keySet.pub_key);
@@ -323,15 +332,28 @@ const KeySet = () => {
                                       keySetName={keySetContext.keySetName}
                                     />
                                   </Col>
-                                  <div className="col text-right">
-                                    <Button
-                                      color="danger"
-                                      disabled={subKey === ""}
-                                      onClick={submitForm}
-                                    >
-                                      Initialize
-                                    </Button>
-                                  </div>
+                                  { (!keySetContext.isInitialized || keySetContext.subKey !== subKey) 
+                                  ? 
+                                    <div className="col text-right">
+                                      <Button
+                                        color="danger"
+                                        disabled={subKey === ""}
+                                        onClick={submitForm}
+                                      >
+                                        Initialize
+                                      </Button>
+                                    </div>
+                                  : 
+                                    <div className="col text-right">
+                                      <Button
+                                        color="warning"
+                                        // disabled={subKey === ""}
+                                        onClick={keySetContext.uninitKeySet}
+                                      >
+                                        De-Initialize
+                                      </Button>
+                                    </div>
+                                  }
                                 </Row>
                                 <Row>
                                   <Col>
