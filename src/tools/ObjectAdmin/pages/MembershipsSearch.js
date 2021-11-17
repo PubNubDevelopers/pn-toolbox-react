@@ -59,14 +59,14 @@ import { Switch, FormControlLabel } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 // import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
-import AddItemsDialog from "./dialogs/AddItemsDialog";
+import AddMembersDialog from "./dialogs/AddItemsDialog";
 
-const MembersSearch = () => {
+const MembershipsSearch = () => {
   const keySetContext = useKeySetData();
   const objectAdminContext = useObjectAdminData();
 
-  console.log("MembersSearch keySetContext: ", keySetContext);
-  console.log("MembersSearch objectAdminContext: ", objectAdminContext);
+  console.log("MembershipsSearch keySetContext: ", keySetContext);
+  console.log("MembershipsSearch objectAdminContext: ", objectAdminContext);
 
   // table nav controls
   const [page, setPage] = React.useState(0);
@@ -74,7 +74,7 @@ const MembersSearch = () => {
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - objectAdminContext.channelMembersResults.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - objectAdminContext.membershipsResults.length) : 0;
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -86,8 +86,8 @@ const MembersSearch = () => {
   };
 
   // page state
-  const [channelId, setChannelId] = useState(objectAdminContext.channelId);
-  const [memberFilter, setMemberFilter] = useState(objectAdminContext.memberFilter);
+  const [userId, setUserId] = useState(objectAdminContext.userId);
+  const [membershipFilter, setMembershipFilter] = useState(objectAdminContext.membershipFilter);
   
   const [isTruncate, setIsTruncate] = useState(true);
   const [sweetAlert, setSweetAlert] = useState(null);
@@ -95,30 +95,30 @@ const MembersSearch = () => {
 
   const [modal, setModal] = useState(false);
   const toggle = () => setModal(!modal);
-  const newMembers = useRef([]);
+  const newMemberships = useRef([]);
 
-  const addMembers = async (isConfirmed) => {
-    console.log("addMembers: isConfirmed = ", isConfirmed);
+  const addMemberships = async (isConfirmed) => {
+    console.log("addMemberships: isConfirmed = ", isConfirmed);
     
     toggle(); // dismiss the modal
     if (!isConfirmed) return;
     
-    if (newMembers.current == null || newMembers.current.length === 0) {
-      toastNotify("info", "No New Channel Members provided.")
+    if (newMemberships.current == null || newMemberships.current.length === 0) {
+      toastNotify("info", "No New Channel Memberships provided.")
       return;
     }
 
-    console.log("    new members", newMembers);
+    console.log("    new memberships", newMemberships);
 
     try {
-      const result = await keySetContext.pubnub.objects.setChannelMembers({
-        channel: channelId,
-        uuids: newMembers.current
+      const result = await keySetContext.pubnub.objects.setChannelMemberships({
+        channel: userId,
+        uuids: newMemberships.current
       });
 
       // console.log("    result", result);
-      retrieveMembers();
-      // objectAdminContext.setChannelMembersResults(result.data);
+      retrieveMemberships();
+      // objectAdminContext.setChannelMembershipsResults(result.data);
     } 
     catch (status) {
       console.log("operation failed w/ error:", status);
@@ -141,8 +141,8 @@ const MembersSearch = () => {
     else toast.info(title, params);
   }
 
-  const retrieveMembers = async () => {
-    console.log("retrieveMetadata", channelId, memberFilter);
+  const retrieveMemberships = async () => {
+    console.log("retrieveMemberships", userId, membershipFilter);
 
     let more = true;
     let results = [];
@@ -151,18 +151,18 @@ const MembersSearch = () => {
 
     const limit = objectAdminContext.maxRows < 100 ? objectAdminContext.maxRows : 100;
 
-    confirmAlert("Searching Channel Members", "Searching for Channel Members, please wait...");
+    confirmAlert("Searching Memberships", "Searching for Memberships, please wait...");
 
     do {
       try {
-        const result = await keySetContext.pubnub.objects.getChannelMembers({
-          channel: channelId,
-          filter : memberFilter, 
+        const result = await keySetContext.pubnub.objects.getMemberships({
+          uuid: userId,
+          filter : membershipFilter, 
           include: {
             totalCount: true,
             customFields: true,            
-            UUIDFields: true,
-            customUUIDFields: true
+            channelFields: true,
+            customChannelFields: true
           },
           page: {next: next}
         });
@@ -178,9 +178,12 @@ const MembersSearch = () => {
       } 
       catch (status) {
         hideAlert(); // hide the please wait dialog
-        confirmAlert(status.status.errorData.error.message, 
-          status.status.errorData.error.details[0].message,
+        confirmAlert(JSON.stringify(status), 
+        JSON.stringify(status),
           "Dismiss", ()=>hideAlert()
+        // confirmAlert(status.status.errorData.error.message, 
+        //   status.status.errorData.error.details[0].message,
+        //   "Dismiss", ()=>hideAlert()
         );
 
         // exit loop on error
@@ -191,11 +194,11 @@ const MembersSearch = () => {
     hideAlert(); // hide the "searching please wait" dialog
     
     totalRecords === 0 
-      ? timerAlert("No Members Found!", "Your filter found none Channel Members.", 3)
-      : timerAlert("Channel Members Found!", `${totalRecords} Channel Members Found.`, 2);
+      ? timerAlert("No Memberships Found!", "Your filter found none Channel Memberships.", 3)
+      : timerAlert("Memberships Found!", `${totalRecords} Memberships Found.`, 2);
 
-    console.log("    members found", results);
-    objectAdminContext.setChannelMembersResults(results);
+    console.log("    memberships found", results);
+    objectAdminContext.setChannelMembershipsResults(results);
   }
 
   const handleEdit = (e, record, index) => {
@@ -212,30 +215,30 @@ const MembersSearch = () => {
   }
 
 
-  const handleRemove = (e, userId, index) => {
+  const handleRemove = (e, channelId, index) => {
     e.preventDefault();
 
-    confirmAlert("Confirm Remove Member?", 
-      `${index} - ${userId}`,
-      "Confirm", ()=>removeUser(userId, index), "Cancel", ()=>hideAlert()
+    confirmAlert("Confirm Remove Channel?", 
+      `${index} - ${channelId}`,
+      "Confirm", ()=>removeChannel(channelId, index), "Cancel", ()=>hideAlert()
     );
   }
 
-  const removeUser = async (userId, index) => {
-    console.log("removeUser", userId);
+  const removeChannel = async (channelId, index) => {
+    console.log("removeChannel", channelId);
 
     hideAlert();
     try {
       const result = await keySetContext.pubnub.objects.removeUUIDMetadata({
-        channel: channelId,
-        uuid : userId
+        uuid : userId,
+        channel: channelId
       });
-      timerAlert("Remove Success!", "User removed.", 2);
+      timerAlert("Remove Success!", "Channel removed.", 2);
       
-      let temp = Array.from(objectAdminContext.channelMembersResults);
+      let temp = Array.from(objectAdminContext.channelMembershipsResults);
       temp.splice(index, 1);
 
-      objectAdminContext.setChannelMembersResults(temp);
+      objectAdminContext.setChannelMembershipsResults(temp);
     } 
     catch (status) {
       confirmAlert(status.status.errorData.error.message, 
@@ -289,11 +292,11 @@ const MembersSearch = () => {
   return (
     <>
       {sweetAlert}
-      <AddItemsDialog
+      <AddMembersDialog
         // toggle={toggle}
         modal={modal}
-        newItems={newMembers}
-        addItems={addMembers}
+        newItems={newMemberships}
+        addItems={addMemberships}
       />
       <ToastContainer
         position="top-center"
@@ -326,17 +329,17 @@ const MembersSearch = () => {
                         <FormGroup>
                           <label
                             className="form-control-label"
-                            htmlFor="input-channel-id"
+                            htmlFor="input-user-id"
                           >
-                            Channel ID *
+                            User ID *
                           </label>
                           <Input
                             className="form-control-alternative"
-                            id="input-channel-id"
-                            placeholder="Enter a channel ID"
+                            id="input-user-id"
+                            placeholder="Enter a user ID"
                             type="text"
-                            value={channelId}
-                            onChange={(e) => setChannelId(e.target.value)}
+                            value={userId}
+                            onChange={(e) => setUserId(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -348,7 +351,7 @@ const MembersSearch = () => {
                             className="form-control-label"
                             htmlFor="input-member-filter"
                           >
-                            Member Filter Expression
+                            Membership Filter Expression
                           </label>
                           <Input
                             className="form-control-alternative"
@@ -356,8 +359,8 @@ const MembersSearch = () => {
                             placeholder="Enter a filter expression"
                             type="textarea"
                             rows="4"
-                            value={memberFilter}
-                            onChange={(e) => setMemberFilter(e.target.value)}
+                            value={membershipFilter}
+                            onChange={(e) => setMembershipFilter(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -386,8 +389,8 @@ const MembersSearch = () => {
                           <Button 
                             className="form-control-alternative text-align-right"
                             color="danger"
-                            onClick={retrieveMembers}
-                            disabled = {keySetContext.pubnub == null || channelId == null}
+                            onClick={retrieveMemberships}
+                            disabled = {keySetContext.pubnub == null || userId == null}
                           >
                             Search Members
                           </Button>
@@ -405,15 +408,15 @@ const MembersSearch = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <Col>
-                    <h3 className="mb-0">Channel Members Results</h3>
+                    <h3 className="mb-0">Channel Memberships Results</h3>
                   </Col>
                   <Col lg="2" className="text-center">
                     <Button
                       color="info"
                       onClick={toggle}
-                      disabled = {keySetContext.pubnub == null || channelId === ""}
+                      disabled = {keySetContext.pubnub == null || userId === ""}
                     >
-                      Add Members
+                      Add Channels
                     </Button>
                   </Col>
                 </Row>
@@ -422,7 +425,7 @@ const MembersSearch = () => {
 
               <CardBody>
                 <MetadataTable 
-                  metadata={objectAdminContext.channelMembersResults}
+                  metadata={objectAdminContext.channelMembershipsResults}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   emptyRows={emptyRows}
@@ -448,7 +451,7 @@ const MembersSearch = () => {
   );
 };
 
-export default MembersSearch;
+export default MembershipsSearch;
 
 
 const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {
@@ -492,7 +495,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               <TableCell align="right">#</TableCell>
               <TableCell>User ID</TableCell>
               <TableCell>User Name</TableCell>
-              {/* <TableCell>Email</TableCell> */}
+              <TableCell>Description</TableCell>
               <TableCell>Custom Membership Data</TableCell>
               <TableCell>Last Updated</TableCell>
               <TableCell align="center">Actions</TableCell>
@@ -571,17 +574,17 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
         <TableCell align="right">{index}</TableCell>
         {isTruncate && (
           <>
-            <TableCell>{truncate(row.uuid.id, 40)}</TableCell>
-            <TableCell>{truncate(row.uuid.name, 40)}</TableCell>
-            {/* <TableCell>{truncate(row.email, 40)}</TableCell> */}
+            <TableCell>{truncate(row.channel.id, 40)}</TableCell>
+            <TableCell>{truncate(row.channel.name, 40)}</TableCell>
+            <TableCell>{truncate(row.channel.description, 40)}</TableCell>
             <TableCell>{truncate(JSON.stringify(row.custom), 40)}</TableCell>
           </>
         )}
         {!isTruncate && (
           <>
-            <TableCell component="th" scope="row">{row.uuid.id}</TableCell>
-            <TableCell>{row.uuid.name}</TableCell>
-            {/* <TableCell>{row.email}</TableCell> */}
+            <TableCell component="th" scope="row">{row.channel.id}</TableCell>
+            <TableCell>{row.channel.name}</TableCell>
+            <TableCell>{truncate(row.channel.description, 40)}</TableCell>
             <TableCell>{JSON.stringify(row.custom, null, 2)}</TableCell>
           </>
         )}
@@ -614,51 +617,37 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
                     <TableCell width="5%"></TableCell>
                     <TableCell width="5%"></TableCell>
                     <TableCell width="5%"></TableCell>
-                    <TableCell><strong>User ID</strong></TableCell>
-                    <TableCell width="95%">{row.uuid.id}</TableCell>
+                    <TableCell><strong>Channel ID</strong></TableCell>
+                    <TableCell width="95%">{row.channel.id}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
                     <TableCell width="5%"></TableCell>
                     <TableCell width="5%"></TableCell>
-                    <TableCell><strong>User Name</strong></TableCell>
-                    <TableCell width="95%">{row.uuid.name}</TableCell>
+                    <TableCell><strong>Channel Name</strong></TableCell>
+                    <TableCell width="95%">{row.channel.name}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
                     <TableCell width="5%"></TableCell>
                     <TableCell width="5%"></TableCell>
-                    <TableCell><strong>Email</strong></TableCell>
-                    <TableCell width="95%">{row.uuid.email}</TableCell>
+                    <TableCell><strong>Description</strong></TableCell>
+                    <TableCell width="95%">{row.channel.description}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell width="5%"></TableCell>
                     <TableCell width="5%"></TableCell>
                     <TableCell width="5%"></TableCell>
-                    <TableCell><strong>External ID</strong></TableCell>
-                    <TableCell width="95%">{row.uuid.externalId}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell width="5%"></TableCell>
-                    <TableCell width="5%"></TableCell>
-                    <TableCell width="5%"></TableCell>
-                    <TableCell><strong>Profile URL</strong></TableCell>
-                    <TableCell width="95%">{row.uuid.profileUrl}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell width="5%"></TableCell>
-                    <TableCell width="5%"></TableCell>
-                    <TableCell width="5%"></TableCell>
-                    <TableCell colSpan="2" component="th" width="5%"><strong>Custom User Fields</strong></TableCell>
+                    <TableCell colSpan="2" component="th" width="5%"><strong>Custom Channel Fields</strong></TableCell>
                   </TableRow>
 
-                  {Object.keys(row.uuid.custom).map((key) => (
+                  {Object.keys(row.channel.custom).map((key) => (
                     <TableRow>
                       <TableCell width="5%"></TableCell>
                       <TableCell width="5%"></TableCell>
                       <TableCell width="5%"></TableCell>
                       <TableCell>{key}</TableCell>
-                      <TableCell width="95%" colSpan="2">{row.uuid.custom[key]}</TableCell>
+                      <TableCell width="95%" colSpan="2">{row.channel.custom[key]}</TableCell>
                     </TableRow>
                   ))}
 

@@ -12,7 +12,7 @@ import {
 
 // core components
 
-const AddMembersDialog = (props) => {
+const AddItemsDialog = (props) => {
   let newItems = null;
 
   const handleClick = (e, isConfirmed) => {
@@ -28,24 +28,24 @@ const AddMembersDialog = (props) => {
         className="modal-dialog-centered"
       >
         <ModalHeader>
-          <h2>Add New Members</h2>
+          <h2>Add New Items</h2>
         </ModalHeader>
         <ModalBody>
           {/* TODO: allow comma separated values */}
           <div>
             <label
               className="form-control-label"
-              htmlFor="input-new-members"
+              htmlFor="input-new-items"
             >
-              New Members (one UUID per line)
+              New Items
             </label>
           </div>
           <Input
             className="form-control-alternative"
-            id="input-new-members"
-            placeholder="Add one member UUID per line"
+            id="input-new-items"
+            placeholder="Add one item per line"
             type="textarea"
-            defaultValue={props.newMembers.current}
+            defaultValue={props.newItems.current}
             onChange={(e) => newItems = e.target.value}
             rows="10"
           />
@@ -59,4 +59,4 @@ const AddMembersDialog = (props) => {
   );
 }
 
-export default AddMembersDialog;
+export default AddItemsDialog;
