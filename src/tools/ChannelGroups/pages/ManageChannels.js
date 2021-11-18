@@ -267,7 +267,7 @@ debugger;
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Enter Search Filter</h3>
+                    <h3 className="mb-0">Channel Group Admin</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -275,15 +275,18 @@ debugger;
               </CardHeader>
               <CardBody>
                 <Form onSubmit={(e) => e.preventDefault()}>
-                    <Row>
-                      <Col sm="6">
-                        <FormGroup>
+                  <Row>
+                    <Col>
+                      <FormGroup>
+                        <Row>
                           <label
                             className="form-control-label"
                             htmlFor="input-channel-id"
                           >
                             Channel Group *
                           </label>
+                        </Row>
+                        <Row>
                           <Input
                             className="form-control-alternative"
                             id="input-channel-id"
@@ -292,22 +295,32 @@ debugger;
                             value={channelGroup}
                             onChange={(e) => setChannelGroup(e.target.value)}
                           />
-                        </FormGroup>
-                      </Col>
-                      <Col sm="2">
-                        <Row>&nbsp;<br/><br/></Row>
-                        <Row>
-                          <Button 
-                            className="form-control-alternative text-align-right"
-                            color="danger"
-                            onClick={retrieveChannels}
-                            disabled = {keySetContext.pubnub == null || channelGroup == null}
-                          >
-                            Retrieve Channels
-                          </Button>
                         </Row>
-                      </Col>
-                    </Row>
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col sm="8" className="text-right">
+                      <Button 
+                        className="form-control-alternative"
+                        color="danger"
+                        onClick={retrieveChannels}
+                        disabled = {keySetContext.pubnub == null || channelGroup == null}
+                      >
+                        Retrieve Channels
+                      </Button>
+                    </Col>
+                    <Col className="text-right">
+                      <Button 
+                        className="form-control-alternative"
+                        color="warning"
+                        // onClick={deleteChannelGroup}
+                        disabled = {keySetContext.pubnub == null || channelGroup == null}
+                      >
+                        Delete Channel Group
+                      </Button>
+                    </Col>
+                  </Row>
                 </Form>
               </CardBody>
             </Card>
@@ -323,7 +336,7 @@ debugger;
                   </Col>
                   <Col lg="2" className="text-center">
                     <Button
-                      color="info"
+                      color="danger"
                       onClick={toggle}
                       disabled = {keySetContext.pubnub == null || channelGroup === ""}
                     >
