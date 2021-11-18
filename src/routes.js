@@ -8,6 +8,7 @@ import { VpnKey } from "@mui/icons-material";
 import routesPushDebug from "tools/PushDebug/routesPushDebug";
 import routesObjectAdmin from "tools/ObjectAdmin/routesObjectAdmin";
 import routesAuthAdmin from "tools/AuthAdmin/routesAuthAdmin"
+import routesChannelGroups from "tools/ChannelGroups/routesChannelGroups";
 
 var routes = [
   {
@@ -26,6 +27,9 @@ var routes = [
 
   {divider: true,},
   routesObjectAdmin,
+
+  {divider: true,},
+  routesChannelGroups,
 
   {divider: true,},
   routesAuthAdmin,
