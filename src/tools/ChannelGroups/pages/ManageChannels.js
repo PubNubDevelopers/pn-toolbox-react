@@ -211,7 +211,7 @@ const ManageChannels = () => {
 
   const deleteChannelGroup = async () => {
     console.log("removeUser", channelGroup);
-debugger;
+
     hideAlert();
     
     try {
