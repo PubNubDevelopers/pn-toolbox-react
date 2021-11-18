@@ -34,6 +34,7 @@ import {
   Row,
   Col,
   CardFooter,
+  UncontrolledTooltip,
 } from "reactstrap";
 
 import Box from '@mui/material/Box';
@@ -304,54 +305,64 @@ const ManageChannels = () => {
                 </Row>
               </CardHeader>
               <CardBody>
-                <Form onSubmit={(e) => retrieveChannels(e)}>
-                  <Row>
-                    <Col>
-                      <FormGroup>
-                        <Row>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-channel-id"
-                          >
-                            Channel Group *
-                          </label>
-                        </Row>
-                        <Row>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-channel-id"
-                            placeholder="Enter a channel group"
-                            type="text"
-                            value={channelGroup}
-                            onChange={(e) => setChannelGroup(e.target.value)}
-                          />
-                        </Row>
-                      </FormGroup>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col sm="8" className="text-right">
-                      <Button 
-                        className="form-control-alternative"
-                        color="danger"
-                        onClick={(e) => retrieveChannels(e)}
-                        disabled = {keySetContext.pubnub == null || channelGroup == null}
-                      >
-                        Retrieve Channels
-                      </Button>
-                    </Col>
-                    <Col className="text-right">
-                      <Button 
-                        className="form-control-alternative"
-                        color="warning"
-                        onClick={(e) => handleDelete(e)}
-                        disabled = {keySetContext.pubnub == null || channelGroup == null}
-                      >
-                        Delete Channel Group
-                      </Button>
-                    </Col>
-                  </Row>
-                </Form>
+                <div className="col">
+                  <Form onSubmit={(e) => retrieveChannels(e)}>
+                    <Row>
+                      <Col>
+                        <FormGroup>
+                          <Row>
+                            <label
+                              className="form-control-label"
+                              htmlFor="input-channel-id"
+                              id="label-channel-group"
+                            >
+                              <u>Channel Group</u> *
+                            </label>
+                            <UncontrolledTooltip
+                              delay={0}
+                              placement="right"
+                              target="label-channel-group"
+                            >
+                              To create a new Channel Group, enter a non-existing channel group name and click "Add Channels".
+                            </UncontrolledTooltip>
+                          </Row>
+                          <Row>
+                            <Input
+                              className="form-control-alternative"
+                              id="input-channel-id"
+                              placeholder="Enter a channel group (existing or new)"
+                              type="text"
+                              value={channelGroup}
+                              onChange={(e) => setChannelGroup(e.target.value)}
+                            />
+                          </Row>
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col sm="8" className="text-right">
+                        <Button 
+                          className="form-control-alternative"
+                          color="danger"
+                          onClick={(e) => retrieveChannels(e)}
+                          disabled = {keySetContext.pubnub == null || channelGroup == null}
+                        >
+                          Retrieve Channels
+                        </Button>
+                      </Col>
+                      <Col className="text-right">
+                        <Button 
+                          className="form-control-alternative"
+                          color="warning"
+                          onClick={(e) => handleDelete(e)}
+                          disabled = {keySetContext.pubnub == null || channelGroup == null}
+                        >
+                          Delete Channel Group
+                        </Button>
+                      </Col>
+                    </Row>
+                  </Form>
+                </div>
               </CardBody>
             </Card>
           </Col>
