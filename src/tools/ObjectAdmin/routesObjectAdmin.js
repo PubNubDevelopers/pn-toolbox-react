@@ -11,6 +11,7 @@ import UserForm from './pages/UserForm';
 import UsersSearch from './pages/UsersSearch';
 
 import MembersSearch from './pages/MembersSearch';
+import MembershipsSearch from './pages/MembershipsSearch';
 
 import ImportChannels from './pages/ImportChannels';
 import ImportUsers from './pages/ImportUsers';
@@ -57,6 +58,13 @@ var routesObjectAdmin = {
       path: "/objects/members-search",
       name: "Members Search",
       component: MembersSearch,
+      parent: ObjectAdminProvider,
+      layout: "/admin",
+    },
+    {
+      path: "/objects/memberships-search",
+      name: "Memberships Search",
+      component: MembershipsSearch,
       parent: ObjectAdminProvider,
       layout: "/admin",
     },
