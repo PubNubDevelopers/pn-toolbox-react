@@ -32,8 +32,8 @@ var routesObjectAdmin = {
       layout: "/admin",
     },
     {
-      path: "/objects/search-channels",
-      name: "Search Channels",
+      path: "/objects/channels-search",
+      name: "Channels Search",
       component: ChannelsSearch,
       parent: ObjectAdminProvider,
       layout: "/admin",
@@ -47,7 +47,7 @@ var routesObjectAdmin = {
       layout: "/admin",
     },
     {
-      path: "/objects/search-users",
+      path: "/objects/users-search",
       name: "Search Users",
       component: UsersSearch,
       parent: ObjectAdminProvider,
