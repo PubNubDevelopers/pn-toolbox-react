@@ -111,9 +111,9 @@ const MembershipsSearch = () => {
     console.log("    new memberships", newMemberships);
 
     try {
-      const result = await keySetContext.pubnub.objects.setChannelMemberships({
-        channel: userId,
-        uuids: newMemberships.current
+      const result = await keySetContext.pubnub.objects.setMemberships({
+        uuid: userId,
+        channels: newMemberships.current
       });
 
       // console.log("    result", result);
