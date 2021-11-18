@@ -59,7 +59,7 @@ import { Switch, FormControlLabel } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 // import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
-import AddItemsDialog from "./dialogs/AddItemsDialog";
+import AddItemsDialog from "../../utils/AddItemsDialog";
 
 const MembersSearch = () => {
   const keySetContext = useKeySetData();
