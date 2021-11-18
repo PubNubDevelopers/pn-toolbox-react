@@ -136,8 +136,9 @@ const ManageChannels = () => {
     else toast.info(title, params);
   }
 
-  const retrieveChannels = async () => {
+  const retrieveChannels = async (e) => {
     console.log("retrieveChannels", channelGroup);
+    e.preventDefault();
 
     let results = [];
     confirmAlert("Retrieving Channels", "Retrieving Channels for ChannelGroup, please wait...");
@@ -177,8 +178,8 @@ const ManageChannels = () => {
 
   const removeChannel = async (channel, index) => {
     console.log("removeUser", channel);
-debugger;
     hideAlert();
+
     try {
       const result = await keySetContext.pubnub.channelGroups.removeChannels({
         channels: [channel],
@@ -193,6 +194,35 @@ debugger;
     } 
     catch (status) {
       confirmAlert("Error Removing Channel", 
+        JSON.stringify(status),
+        "Dismiss", ()=>hideAlert()
+      );
+    }
+  }
+
+  const handleDelete = (e) => {
+    e.preventDefault();
+
+    confirmAlert("Confirm Delete Channel Group?", 
+      `This action cannot be undone: ${channelGroup}`,
+      "Confirm", ()=>deleteChannelGroup(), "Cancel", ()=>hideAlert()
+    );
+  }
+
+  const deleteChannelGroup = async () => {
+    console.log("removeUser", channelGroup);
+debugger;
+    hideAlert();
+    
+    try {
+      const result = await keySetContext.pubnub.channelGroups.deleteGroup({
+        channelGroup : channelGroup
+      });
+      timerAlert("Delete Success!", "Channel Group deleted.", 2);
+      channelGroupContext.setChannelGroupResults([]);
+    } 
+    catch (status) {
+      confirmAlert("Error Deleting Channel Group", 
         JSON.stringify(status),
         "Dismiss", ()=>hideAlert()
       );
@@ -274,7 +304,7 @@ debugger;
                 </Row>
               </CardHeader>
               <CardBody>
-                <Form onSubmit={(e) => e.preventDefault()}>
+                <Form onSubmit={(e) => retrieveChannels(e)}>
                   <Row>
                     <Col>
                       <FormGroup>
@@ -290,7 +320,7 @@ debugger;
                           <Input
                             className="form-control-alternative"
                             id="input-channel-id"
-                            placeholder="Enter a channel ID"
+                            placeholder="Enter a channel group"
                             type="text"
                             value={channelGroup}
                             onChange={(e) => setChannelGroup(e.target.value)}
@@ -304,7 +334,7 @@ debugger;
                       <Button 
                         className="form-control-alternative"
                         color="danger"
-                        onClick={retrieveChannels}
+                        onClick={(e) => retrieveChannels(e)}
                         disabled = {keySetContext.pubnub == null || channelGroup == null}
                       >
                         Retrieve Channels
@@ -314,7 +344,7 @@ debugger;
                       <Button 
                         className="form-control-alternative"
                         color="warning"
-                        // onClick={deleteChannelGroup}
+                        onClick={(e) => handleDelete(e)}
                         disabled = {keySetContext.pubnub == null || channelGroup == null}
                       >
                         Delete Channel Group
