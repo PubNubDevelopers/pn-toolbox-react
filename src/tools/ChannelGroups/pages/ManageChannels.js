@@ -139,7 +139,8 @@ const ManageChannels = () => {
 
   const retrieveChannels = async (e) => {
     console.log("retrieveChannels", channelGroup);
-    e.preventDefault();
+
+    e && e.preventDefault();
 
     let results = [];
     confirmAlert("Retrieving Channels", "Retrieving Channels for ChannelGroup, please wait...");
