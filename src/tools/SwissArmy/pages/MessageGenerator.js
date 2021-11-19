@@ -15,67 +15,55 @@ import {
   Col,
 } from "reactstrap";
 
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-
-import { subMilliseconds, fromUnixTime } from 'date-fns'
+// import { subMilliseconds, fromUnixTime } from 'date-fns'
 
 // core components
 import { useKeySetData } from "../../KeySetProvider";
 import { useSwissArmyData } from "../SwissArmyProvider";
 
-const BufferDump = () => {
+const MessageGenerator = () => {
   const keySetContext = useKeySetData();
   const swissArmyContext = useSwissArmyData();
 
   console.log("BufferDump keySetContext: ", keySetContext);
   console.log("BufferDump swissArmyContext: ", swissArmyContext);
 
+  const messageDefault = JSON.stringify({
+    "count" : "#counter#",
+    "title": "Ground control to Major Tom - #counter#",
+    "body": "This is ground control to Major Tom.",
+    "tasks" : [
+      {"task": "Take your protein pills.", "priority": 1},
+      {"task": "Put your helmet on.", "priority": 2}
+    ]
+  }, null, 2);
+
   const [channel, setChannel] = useState("");
-  const [bufferMessages, setBufferMessages] = useState([]);
+  const [message, setMessaege] = useState(messageDefault);
 
   const [sweetAlert, setSweetAlert] = useState(null);
 
-  let subscribeUrl = `https://ps.pndsn.com/v2/subscribe/${keySetContext.subKey}/${channel}/0?uuid=${keySetContext.uuid}&pnsdk=the-toolbox-v0.2.0&tt=`;
+  const generateMessages = async (channel, total, start, delay) => {
+    var delay = delay || 250;
+    var i = start || 1;
+    var total = total || 100;
+    total = total + i;
 
-  const retrieveMessages = () => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
-    const oldtt = subMilliseconds(new Date(), 1200000).getTime() + "0000";
-
-    timerAlert("Checking Buffer", "Please wait while we dump the buffer...", 3000);
-
-    fetch(subscribeUrl+oldtt, {signal: controller.signal}).then(res => res.json()).then(
-      (result) => {
-        console.log(result);
-        let payload = [];
-
-        result.m.forEach(element => {
-          let item = {};
-          item.message = JSON.stringify(element.d, null, 2);
-          item.pubid = element.i;
-          item.pubtt = element.p.t;
-          item.pubdatetime = fromUnixTime(element.p.t.substr(0,10)).toString();
-          payload.push(item);
+    // we have to delay the publishes so that we can be sure
+    // that the messages are stored in the order we publish
+    var looper = setInterval(
+        function() {
+            keySetContext.pubnub.publish({
+            channel: channel,
+            message: "message #" + i++
         });
 
-        setBufferMessages(payload);
-        clearTimeout(timeoutId);
-        hideAlert();
-      },
-      (error) => {
-        console.log("subscribe error:", error);
-        setBufferMessages([]);
-        timerAlert("Buffer Empty", "The message buffer was empty.", 2000);
-        // clearTimeout(timeoutId);
-      }
-    ); 
-  }
+        if (i >= total) {
+            clearInterval(looper);
+        }
+    },
+    delay);
+}
 
   const hideAlert = () => {
     console.log("hideAlert");
@@ -126,18 +114,18 @@ const BufferDump = () => {
                         <Col className="col text-right">
                           <Button
                             color="danger"
-                            onClick={retrieveMessages}
+                            onClick={(e) => generateMessages(e)}
                             size="sm"
-                            disabled = {channel === ""}
+                            disabled = {keySetContext.pubnub == null || channel === "" || message === ""}
                           >
-                            Dump Buffer
+                            Generate Messages
                           </Button>
                         </Col>
                       </Row>
                       <Input
                         className="form-control-alternative"
                         id="input-channel"
-                        placeholder="Enter primary message channel"
+                        placeholder="Enter target channel"
                         type="text"
                         value={channel}
                         onChange={(e) => setChannel(e.target.value)}
@@ -159,21 +147,12 @@ const BufferDump = () => {
                                 </label>
                                 
                               </Col>
-                              <Col className="col text-right">
-                                <Button
-                                  color="danger"
-                                  size="sm"
-                                  onClick={() => setBufferMessages([])}
-                                >
-                                  Clear
-                                </Button>
-                              </Col>
                             </Row>
                           </CardHeader>
                           <Card body>
                             <div className="pl-lg-12">
 
-                              <MetadataTable metadata={bufferMessages}/>
+                             
                             
                             </div>
                           </Card>
@@ -192,49 +171,5 @@ const BufferDump = () => {
   );
 }
 
-export default BufferDump;
+export default MessageGenerator;
 
-const MetadataTable = ({metadata}) => {
-  console.log("messages", metadata);
-
-  if (metadata == null || metadata.length ===0) return <>No Results</>;
-
-  return (
-    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer >
-        <Table stickyHeader>
-          <TableHead>
-            <TableRow>
-              <TableCell align="right">#</TableCell>
-              <TableCell>Message</TableCell>
-              <TableCell>Publish UUID</TableCell>
-              <TableCell>Publish TT</TableCell>
-              <TableCell>Publish Datetime</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {metadata.map((payload, index) => (
-              <MetadataRow index={index} payload={payload}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Paper>
-  );
-}
-
-const MetadataRow = ({index, payload}) => {
-  return (
-    <>
-      <TableRow key={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell align="right">{index}</TableCell>
-        <TableCell component="th" scope="row">{payload.message}</TableCell>
-        <TableCell>{payload.pubid}</TableCell>
-        <TableCell>{payload.pubtt}</TableCell>
-        <TableCell>{payload.pubdatetime}</TableCell>
-      </TableRow>
-    </>
-  );
-}
