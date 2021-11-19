@@ -51,7 +51,7 @@ const AddItemsDialog = (props) => {
           <Input
             className="form-control-alternative"
             id="input-new-items"
-            placeholder="Add one item per line or comma separated\n(or both, we'll do the cleanup for you)"
+            placeholder="Add one item per line or comma separated (or both, we'll do the cleanup for you)"
             type="textarea"
             defaultValue={props.newItems.current}
             onChange={(e) => newItems = e.target.value}

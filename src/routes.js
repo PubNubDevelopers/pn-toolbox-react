@@ -9,6 +9,7 @@ import routesPushDebug from "tools/PushDebug/routesPushDebug";
 import routesObjectAdmin from "tools/ObjectAdmin/routesObjectAdmin";
 import routesAuthAdmin from "tools/AuthAdmin/routesAuthAdmin"
 import routesChannelGroups from "tools/ChannelGroups/routesChannelGroups";
+import routesSwissArmy from "tools/SwissArmy/routesSwissArmy";
 
 var routes = [
   {
@@ -33,6 +34,9 @@ var routes = [
 
   {divider: true,},
   routesAuthAdmin,
+
+  {divider: true,},
+  routesSwissArmy,
 
   // copy/past these next two items and leave one for the next tools contributor
   // {divider: true,},

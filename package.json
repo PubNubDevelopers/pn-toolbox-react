@@ -41,6 +41,7 @@
     "chart.js": "2.9.4",
     "clsx": "1.1.1",
     "console-feed": "^3.2.2",
+    "date-fns": "^2.25.0",
     "dropzone": "5.7.6",
     "express": "^4.17.1",
     "jss-rtl": "0.3.0",
