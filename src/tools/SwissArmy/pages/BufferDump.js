@@ -23,7 +23,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
-import { subMilliseconds, fromUnixTime } from 'date-fns'
+import { format, subMilliseconds, fromUnixTime } from 'date-fns'
 
 // core components
 import { useKeySetData } from "../../KeySetProvider";
@@ -57,10 +57,15 @@ const BufferDump = () => {
 
         result.m.forEach(element => {
           let item = {};
+          item.channel = element.c;
           item.message = JSON.stringify(element.d, null, 2);
           item.pubid = element.i;
           item.pubtt = element.p.t;
-          item.pubdatetime = fromUnixTime(element.p.t.substr(0,10)).toString();
+          
+          item.datetime = format(fromUnixTime(element.p.t.substr(0,10)), 'yyyy/dd/MM hh:mm:ss');
+          item.milli = element.p.t.substr(10,3);
+          item.micronano = element.p.t.substr(13,3) + "." + element.p.t.substr(16);
+
           payload.push(item);
         });
 
@@ -206,10 +211,13 @@ const MetadataTable = ({metadata}) => {
           <TableHead>
             <TableRow>
               <TableCell align="right">#</TableCell>
+              <TableCell>Channel</TableCell>
               <TableCell>Message</TableCell>
               <TableCell>Publish UUID</TableCell>
-              <TableCell>Publish TT</TableCell>
-              <TableCell>Publish Datetime</TableCell>
+              <TableCell>Publish TimeToken</TableCell>
+              <TableCell>Publish DateTime</TableCell>
+              <TableCell align="right">milli</TableCell>
+              <TableCell align="right">micro.nano</TableCell>
             </TableRow>
           </TableHead>
 
@@ -230,10 +238,13 @@ const MetadataRow = ({index, payload}) => {
     <>
       <TableRow key={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell align="right">{index}</TableCell>
+        <TableCell component="th" scope="row">{payload.channel}</TableCell>
         <TableCell component="th" scope="row">{payload.message}</TableCell>
         <TableCell>{payload.pubid}</TableCell>
         <TableCell>{payload.pubtt}</TableCell>
-        <TableCell>{payload.pubdatetime}</TableCell>
+        <TableCell>{payload.datetime}</TableCell>
+        <TableCell align="right">{payload.milli}</TableCell>
+        <TableCell align="right">{payload.micronano}</TableCell>
       </TableRow>
     </>
   );
