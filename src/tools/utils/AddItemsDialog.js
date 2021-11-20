@@ -22,7 +22,7 @@ const AddItemsDialog = (props) => {
     else {
       let tmp = newItems;
       tmp = newItems.replaceAll("\n", ",").replaceAll(" ", "");
-      newItems = tmp.split("\n").filter(Boolean);
+      newItems = tmp.split(",").filter(Boolean);
       props.newItems.current = newItems;
     }
 

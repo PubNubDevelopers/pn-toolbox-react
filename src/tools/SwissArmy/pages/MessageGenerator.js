@@ -1,5 +1,22 @@
-import { useState } from "react";
-import ReactBSAlert from "react-bootstrap-sweetalert";
+/*!
+
+=========================================================
+* Argon Dashboard React - v1.2.1
+=========================================================
+
+* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
+* Copyright 2021 Creative Tim (https://www.creative-tim.com)
+* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
+
+* Coded by Creative Tim
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+*/
+
+import { useState, useRef } from "react";
 
 // reactstrap components
 import {
@@ -7,23 +24,24 @@ import {
   Card,
   CardHeader,
   CardBody,
-  Form,
-  FormGroup,
-  Input,
   Container,
+  FormGroup,
+  Form,
+  Input,
   Row,
   Col,
+  // ButtonGroup,
+  CardFooter,
 } from "reactstrap";
 
-// import { subMilliseconds, fromUnixTime } from 'date-fns'
-
-// core components
+// // core components
 import { useKeySetData } from "../../KeySetProvider";
 import { useSwissArmyData } from "../SwissArmyProvider";
 
 const MessageGenerator = () => {
   const keySetContext = useKeySetData();
   const swissArmyContext = useSwissArmyData();
+
 
   console.log("BufferDump keySetContext: ", keySetContext);
   console.log("BufferDump swissArmyContext: ", swissArmyContext);
@@ -38,55 +56,81 @@ const MessageGenerator = () => {
     ]
   }, null, 2);
 
-  const [channel, setChannel] = useState("");
-  const [message, setMessaege] = useState(messageDefault);
+  const [recordCount, setRecordCount] = useState(0);
+  const [successCount, setSuccessCount] = useState(0);
+  const [failCount, setFailCount] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [targetChannels, setTargetChannels] = useState("");
+  const [message, setMessage] = useState(messageDefault);
+  const [sourceData, setSourceData] = useState([]);
 
-  const [sweetAlert, setSweetAlert] = useState(null);
+  const counter = useRef(0);
 
-  const generateMessages = async (channel, total, start, delay) => {
-    var delay = delay || 250;
-    var i = start || 1;
-    var total = total || 100;
-    total = total + i;
+  const openFile = (theFile) => {
+    const propFileReader = new FileReader();
 
-    // we have to delay the publishes so that we can be sure
-    // that the messages are stored in the order we publish
-    var looper = setInterval(
-        function() {
-            keySetContext.pubnub.publish({
-            channel: channel,
-            message: "message #" + i++
-        });
+    propFileReader.onload = function(e) {
+      const data = JSON.parse(e.target.result);
+      setSourceData(data);
+      setRecordCount(data.length);
+    };
+    
+    propFileReader.readAsText(theFile);
+  }
+  
 
-        if (i >= total) {
-            clearInterval(looper);
-        }
-    },
-    delay);
-}
+  const generateMessages = () => {
+    console.log("generateMessages");
 
-  const hideAlert = () => {
-    console.log("hideAlert");
-    setSweetAlert(null);
-  };
+    setSuccessCount(0);
+    setFailCount(0);
+    setProgress(0);
 
-  const timerAlert = (title, message, delay) => {
-    setSweetAlert(
-        <ReactBSAlert
-          style={{ display: "block", marginTop: "100px" }}
-          title={title}
-          onConfirm={() => hideAlert()}
-          showConfirm={false}
-        >
-          {message}
-        </ReactBSAlert>
-    );
-    setTimeout(function() {hideAlert()}, delay);
-  };
+    let record = {};
+    const channelList = createChannelList(pickTargetChannel(targetChannels));
+
+    for (let i = 0; i < recordCount; ++i) {
+      // get sourceData might be upload file or just fixed message
+      const msg = sourceData[i];
+      
+      // 1) inject counter, datetime, timetoken, uuid
+
+      sendMessage(pickTargetChannel(channelList), msg);
+    } // for
+  }
+
+  const createChannelList = () => {
+    let tmp = targetChannels.replaceAll("\n", ",").replaceAll(" ", "");
+    return tmp.split(",").filter(Boolean);
+  }
+
+  const pickTargetChannel = (channels) => {
+    return channels[Math.floor(Math.random() * channels.length)];
+  }
+
+  async function sendMessage(theChannel, theMessage) {
+    console.log("sendMessage:", theChannel, theMessage);
+
+    try {
+      const result = await keySetContext.pubnub.publish({
+        channel: theChannel,
+        message: theMessage,
+      });
+
+      console.log("  success");
+      setProgress((prevProgress) => (prevProgress + 1));
+      setSuccessCount((prevSuccessCount) => (prevSuccessCount + 1));
+    } 
+    catch (status) {
+      console.log("  fail", JSON.stringify(status));
+      setProgress((prevProgress) => (prevProgress + 1));
+      setFailCount((prevFailCount) => (prevFailCount + 1));
+    }
+  }
+
 
   return (
     <>
-      {sweetAlert}
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -94,82 +138,153 @@ const MessageGenerator = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Message Buffer Dump</h3>
+                    <h3 className="mb-0">Import Metadata</h3>
+                  </div>
+                  <div className="col text-right">
                   </div>
                 </Row>
-              </CardHeader>             
+              </CardHeader>
               <CardBody>
-                <Form>
-                  <CardHeader>
-                    <FormGroup>
-                      <Row>
-                        <Col>
+              <Row>
+                <Col>
+                  <div className="pl-lg-4">
+                    <Row>
+                      <Col>
+                        <label
+                          className="form-control-label"
+                          htmlFor="button-open-file"
+                        >
+                          Source Messages File
+                        </label><br/>
+                        <input 
+                          id="button-open-file" 
+                          type="file" 
+                          onChange={(e) => openFile(e.target.files[0])}
+                        />
+                      </Col>
+                      <Col>
+                        <FormGroup>
                           <label
                             className="form-control-label"
-                            htmlFor="input-channel"
+                            htmlFor="input-target-channels"
                           >
-                            Target Channel
+                            Target Channels
                           </label>
-                        </Col>
-                        <Col className="col text-right">
-                          <Button
-                            color="danger"
-                            onClick={(e) => generateMessages(e)}
-                            size="sm"
-                            disabled = {keySetContext.pubnub == null || channel === "" || message === ""}
-                          >
-                            Generate Messages
-                          </Button>
-                        </Col>
-                      </Row>
-                      <Input
-                        className="form-control-alternative"
-                        id="input-channel"
-                        placeholder="Enter target channel"
-                        type="text"
-                        value={channel}
-                        onChange={(e) => setChannel(e.target.value)}
-                      />
-                    </FormGroup>
-                  </CardHeader>
-                  <div className="nav-wrapper">
-                    <Card>
-                      <Row>
-                        <Col sm="12">
-                          <CardHeader>
-                            <Row>
-                              <Col>
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="output-received-messages"
-                                >
-                                  Buffer Messages
-                                </label>
-                                
-                              </Col>
-                            </Row>
-                          </CardHeader>
-                          <Card body>
-                            <div className="pl-lg-12">
-
-                             
-                            
-                            </div>
-                          </Card>
-                        </Col>
-                      </Row>
-                    </Card>
+                          <Input
+                            className="form-control-alternative"
+                            id="input-target-channels"
+                            type="textarea"
+                            rows="4"
+                            onChange={(e) => setTargetChannels(e.target.value)}
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
                   </div>
-                </Form>
+                  <Form>
+                    <div className="pl-lg-4">
+                      <Row>
+                        <Col>
+                          <FormGroup>
+                            <label
+                              className="form-control-label"
+                              htmlFor="input-record-count"
+                            >
+                              # Messages to Generate
+                            </label>
+                            <Input
+                              className="form-control-alternative"
+                              id="input-record-count"
+                              type="text"
+                              value={recordCount}
+                              onChange={(e) => setRecordCount(e.target.value)}
+                            />
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                    </div>
+                  </Form>
+                  <div className="pl-lg-4">
+                    <Row>
+                      <Col>
+                        <label
+                          className="form-control-label"
+                          htmlFor="success-count"
+                        >
+                          Success Count
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="success-count"
+                          type="text"
+                          value={successCount}
+                          disabled
+                        />
+                      </Col>
+                    </Row>
+                  </div>
+                  <div className="pl-lg-4">
+                    <Row>
+                      <Col>
+                        <label
+                          className="form-control-label"
+                          htmlFor="failed-count"
+                        >
+                          Fail Count
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="failed-count"
+                          type="text"
+                          value={failCount}
+                          disabled
+                        />
+                      </Col>
+                    </Row>
+                  </div>
+                  <div className="pl-lg-4">
+                    <Row>
+                      <Col>
+                        <label
+                          className="form-control-label"
+                          htmlFor="processed-count"
+                        >
+                          Total Records Processed
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="processed-count"
+                          type="text"
+                          value={progress}
+                          disabled
+                        />
+                      </Col>
+                    </Row>
+                  </div>
+                </Col>
+              </Row>
               </CardBody>
+              <CardFooter>
+                <Row>
+                  <Col className="text-right">
+                    <Button
+                      color="danger"
+                      onClick={generateMessages}
+                      // disabled = {keySetContext.pubnub == null || metadataRecords == null || metadataRecords.length === 0}
+                    >
+                      Generate Messages
+                    </Button>
+                  </Col>
+                  <Col lg="3" className="text-center">
+                  </Col>
+                </Row> 
+              </CardFooter>
             </Card>
-            <p />
           </Col>
         </Row>
-      </Container>
+      </Container> 
     </>
   );
-}
+};
 
 export default MessageGenerator;
-
