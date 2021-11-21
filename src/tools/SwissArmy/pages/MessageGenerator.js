@@ -37,22 +37,24 @@ import {
 // // core components
 import { useKeySetData } from "../../KeySetProvider";
 import { useSwissArmyData } from "../SwissArmyProvider";
+import { useStopwatch } from "react-timer-hook";
+
 
 const MessageGenerator = () => {
   const keySetContext = useKeySetData();
   const swissArmyContext = useSwissArmyData();
 
 
-  console.log("BufferDump keySetContext: ", keySetContext);
-  console.log("BufferDump swissArmyContext: ", swissArmyContext);
+  console.log("MessageGenerator keySetContext: ", keySetContext);
+  console.log("MessageGenerator swissArmyContext: ", swissArmyContext);
 
   const messageDefault = JSON.stringify({
-    "count" : "#counter#",
+    "count": "#counter#",
     "title": "Ground control to Major Tom - #counter#",
     "body": "This is ground control to Major Tom.",
-    "tasks" : [
-      {"task": "Take your protein pills.", "priority": 1},
-      {"task": "Put your helmet on.", "priority": 2}
+    "tasks": [
+      { "task": "Take your protein pills.", "priority": 1 },
+      { "task": "Put your helmet on.", "priority": 2 }
     ]
   }, null, 2);
 
@@ -63,40 +65,32 @@ const MessageGenerator = () => {
   const [targetChannels, setTargetChannels] = useState("");
   const [message, setMessage] = useState(messageDefault);
   const [sourceData, setSourceData] = useState([]);
+  const [requestDelay, setRequestDelay] = useState(10);
 
   const counter = useRef(0);
+
+  const {
+    seconds,
+    minutes,
+    hours,
+    days,
+    isRunning,
+    start,
+    pause,
+    reset,
+  } = useStopwatch({ autoStart: false });
+
 
   const openFile = (theFile) => {
     const propFileReader = new FileReader();
 
-    propFileReader.onload = function(e) {
+    propFileReader.onload = function (e) {
       const data = JSON.parse(e.target.result);
       setSourceData(data);
       setRecordCount(data.length);
     };
-    
+
     propFileReader.readAsText(theFile);
-  }
-  
-
-  const generateMessages = () => {
-    console.log("generateMessages");
-
-    setSuccessCount(0);
-    setFailCount(0);
-    setProgress(0);
-
-    let record = {};
-    const channelList = createChannelList(pickTargetChannel(targetChannels));
-
-    for (let i = 0; i < recordCount; ++i) {
-      // get sourceData might be upload file or just fixed message
-      const msg = sourceData[i];
-      
-      // 1) inject counter, datetime, timetoken, uuid
-
-      sendMessage(pickTargetChannel(channelList), msg);
-    } // for
   }
 
   const createChannelList = () => {
@@ -108,8 +102,34 @@ const MessageGenerator = () => {
     return channels[Math.floor(Math.random() * channels.length)];
   }
 
+  const generateMessages = () => {
+    console.log("generateMessages - setTimeout");
+
+    setSuccessCount(0);
+    setFailCount(0);
+    setProgress(0);
+    let i = 0
+
+    const channelList = createChannelList(pickTargetChannel(targetChannels));
+
+    console.log("    start timer");
+    reset();
+    start();
+
+    const pubInterval = setInterval(function () {
+      const msg = sourceData[i];
+      i++;
+      sendMessage(pickTargetChannel(channelList), msg);
+
+      if (i >= recordCount) clearInterval(pubInterval);
+    }, requestDelay);
+
+    console.log("    pause timer");
+    pause();
+  }
+
   async function sendMessage(theChannel, theMessage) {
-    console.log("sendMessage:", theChannel, theMessage);
+    console.log("sendMessage - setTimeout:", theChannel, theMessage);
 
     try {
       const result = await keySetContext.pubnub.publish({
@@ -120,7 +140,7 @@ const MessageGenerator = () => {
       console.log("  success");
       setProgress((prevProgress) => (prevProgress + 1));
       setSuccessCount((prevSuccessCount) => (prevSuccessCount + 1));
-    } 
+    }
     catch (status) {
       console.log("  fail", JSON.stringify(status));
       setProgress((prevProgress) => (prevProgress + 1));
@@ -134,135 +154,145 @@ const MessageGenerator = () => {
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
-            <Card className="bg-secondary shadow"> 
+            <Card className="bg-secondary shadow">
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Import Metadata</h3>
-                  </div>
-                  <div className="col text-right">
+                    <h3 className="mb-0">Message Generator</h3>
                   </div>
                 </Row>
               </CardHeader>
               <CardBody>
-              <Row>
-                <Col>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col>
+                <Form>
+                  <Row>
+                    <Col>
+                      <label
+                        className="form-control-label"
+                        htmlFor="button-open-file"
+                      >
+                        Source Messages File
+                      </label><br />
+                      <input
+                        id="button-open-file"
+                        type="file"
+                        onChange={(e) => openFile(e.target.files[0])}
+                      />
+                    </Col>
+                    <Col>
+                      <FormGroup>
                         <label
                           className="form-control-label"
-                          htmlFor="button-open-file"
+                          htmlFor="input-target-channels"
                         >
-                          Source Messages File
-                        </label><br/>
-                        <input 
-                          id="button-open-file" 
-                          type="file" 
-                          onChange={(e) => openFile(e.target.files[0])}
+                          Target Channels
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="input-target-channels"
+                          type="textarea"
+                          rows="4"
+                          onChange={(e) => setTargetChannels(e.target.value)}
                         />
-                      </Col>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-target-channels"
-                          >
-                            Target Channels
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-target-channels"
-                            type="textarea"
-                            rows="4"
-                            onChange={(e) => setTargetChannels(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col>
+                      <FormGroup>
+                        <label
+                          className="form-control-label"
+                          htmlFor="input-record-count"
+                        >
+                          # Messages to Generate
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="input-record-count"
+                          type="text"
+                          value={recordCount}
+                          onChange={(e) => setRecordCount(e.target.value)}
+                        />
+                      </FormGroup>
+                    </Col>
+                    <Col>
+                      <FormGroup>
+                        <label
+                          className="form-control-label"
+                          htmlFor="input-request-delay"
+                        >
+                          Request Interval Delay (ms)
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="input-request-delay"
+                          type="text"
+                          value={requestDelay}
+                          onChange={(e) => setRequestDelay(e.target.value)}
+                        />
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                </Form>
+              </CardBody>
+
+              <CardHeader>
+                <Row className="align-items-center">
+                  <div className="col">
+                    <h3 className="mb-0">Process Report</h3>
                   </div>
-                  <Form>
+                </Row>
+              </CardHeader>
+              <CardBody>
+                <Row>
+                  <Col>
                     <div className="pl-lg-4">
                       <Row>
-                        <Col>
-                          <FormGroup>
-                            <label
-                              className="form-control-label"
-                              htmlFor="input-record-count"
-                            >
-                              # Messages to Generate
-                            </label>
-                            <Input
-                              className="form-control-alternative"
-                              id="input-record-count"
-                              type="text"
-                              value={recordCount}
-                              onChange={(e) => setRecordCount(e.target.value)}
-                            />
-                          </FormGroup>
-                        </Col>
+                        <label className="form-control-label" htmlFor="total-records">
+                          Total
+                        </label>
+                      </Row>
+                      <Row>
+                        {recordCount}
                       </Row>
                     </div>
-                  </Form>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col>
-                        <label
-                          className="form-control-label"
-                          htmlFor="success-count"
-                        >
-                          Success Count
+                  </Col>
+                  <Col>
+                    <div className="pl-lg-4">
+                      <Row>
+                        <label className="form-control-label" htmlFor="success-records">
+                          Successes
                         </label>
-                        <Input
-                          className="form-control-alternative"
-                          id="success-count"
-                          type="text"
-                          value={successCount}
-                          disabled
-                        />
-                      </Col>
-                    </Row>
-                  </div>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col>
-                        <label
-                          className="form-control-label"
-                          htmlFor="failed-count"
-                        >
-                          Fail Count
+                      </Row>
+                      <Row>
+                        {successCount}
+                      </Row>
+                    </div>
+                  </Col>
+                  <Col>
+                    <div className="pl-lg-4">
+                      <Row>
+                        <label className="form-control-label" htmlFor="fail-records">
+                          Fails
                         </label>
-                        <Input
-                          className="form-control-alternative"
-                          id="failed-count"
-                          type="text"
-                          value={failCount}
-                          disabled
-                        />
-                      </Col>
-                    </Row>
-                  </div>
-                  <div className="pl-lg-4">
-                    <Row>
-                      <Col>
-                        <label
-                          className="form-control-label"
-                          htmlFor="processed-count"
-                        >
-                          Total Records Processed
+                      </Row>
+                      <Row>
+                        {failCount}
+                      </Row>
+                    </div>
+                  </Col>
+                  <Col>
+                    <div className="pl-lg-4">
+                      <Row>
+                        <label className="form-control-label" htmlFor="elapsed-time">
+                          Elapsed Time
                         </label>
-                        <Input
-                          className="form-control-alternative"
-                          id="processed-count"
-                          type="text"
-                          value={progress}
-                          disabled
-                        />
-                      </Col>
-                    </Row>
-                  </div>
-                </Col>
-              </Row>
+                      </Row>
+                      <Row>
+                        {minutes}:{seconds}
+                      </Row>
+                    </div>
+                  </Col>
+                </Row>
               </CardBody>
               <CardFooter>
                 <Row>
@@ -270,19 +300,19 @@ const MessageGenerator = () => {
                     <Button
                       color="danger"
                       onClick={generateMessages}
-                      // disabled = {keySetContext.pubnub == null || metadataRecords == null || metadataRecords.length === 0}
+                    // disabled = {keySetContext.pubnub == null || metadataRecords == null || metadataRecords.length === 0}
                     >
                       Generate Messages
                     </Button>
                   </Col>
                   <Col lg="3" className="text-center">
                   </Col>
-                </Row> 
+                </Row>
               </CardFooter>
             </Card>
           </Col>
         </Row>
-      </Container> 
+      </Container>
     </>
   );
 };
