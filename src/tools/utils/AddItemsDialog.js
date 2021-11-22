@@ -17,7 +17,15 @@ const AddItemsDialog = (props) => {
 
   const handleClick = (e, isConfirmed) => {
     e.preventDefault();
-    props.newItems.current = (newItems == null || newItems === "") ? null : newItems.split("\n");
+    
+    if (newItems == null || newItems === "") props.newItems.current = null;
+    else {
+      let tmp = newItems;
+      tmp = newItems.replaceAll("\n", ",").replaceAll(" ", "");
+      newItems = tmp.split(",").filter(Boolean);
+      props.newItems.current = newItems;
+    }
+
     props.addItems(isConfirmed);
   }
 
@@ -43,7 +51,7 @@ const AddItemsDialog = (props) => {
           <Input
             className="form-control-alternative"
             id="input-new-items"
-            placeholder="Add one item per line"
+            placeholder="Add one item per line or comma separated (or both, we'll do the cleanup for you)"
             type="textarea"
             defaultValue={props.newItems.current}
             onChange={(e) => newItems = e.target.value}
