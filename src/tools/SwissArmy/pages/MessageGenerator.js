@@ -16,7 +16,7 @@
 
 */
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 // reactstrap components
 import {
@@ -30,7 +30,7 @@ import {
   Input,
   Row,
   Col,
-  // ButtonGroup,
+  UncontrolledTooltip,
   CardFooter,
 } from "reactstrap";
 
@@ -85,17 +85,11 @@ const MessageGenerator = () => {
     reset,
   } = useStopwatch({ autoStart: false });
 
-  const calculateEstimatedTime = () => {
-    // debugger;
-    // const millis = recordCount * 150 * requestDelay;
-    // const hours = millisecondsToHours(millis);
 
-    // const a = millis - (hours * 60 * 1000);
-    // const minutes = millisecondsToMinutes(a);
-
-    // const seconds = millisecondsToSeconds(millis - (hours * 60 * 60 * 1000));
-    // setEstimatedTime(`${hours}h ${minutes}m ${seconds}s`)
-  }
+  useEffect(() => {
+    var estMilli = recordCount * 150 + requestDelay * recordCount;
+    setEstimatedTime(new Date(estMilli).toISOString().slice(11, 19));
+  });
 
   const openFile = (theFile) => {
     const propFileReader = new FileReader();
@@ -309,7 +303,7 @@ const MessageGenerator = () => {
                           id="input-record-count"
                           type="text"
                           value={recordCount}
-                          onChange={(e) => {setRecordCount(e.target.value); calculateEstimatedTime()}}
+                          onChange={(e) => setRecordCount(e.target.value)}
                         />
                       </FormGroup>
                     </Col>
@@ -326,7 +320,7 @@ const MessageGenerator = () => {
                           id="input-request-delay"
                           type="text"
                           value={requestDelay}
-                          onChange={(e) => {setRequestDelay(e.target.value); calculateEstimatedTime()}}
+                          onChange={(e) => setRequestDelay(e.target.value)}
                         />
                       </FormGroup>
                     </Col>
@@ -402,22 +396,29 @@ const MessageGenerator = () => {
                         </label>
                       </Row>
                       <Row>
-                        {minutes}m {seconds}s
+                        {hours}h {minutes}m {seconds}s
                       </Row>
                     </div>
                   </Col>
-                  {/* <Col>
+                  <Col>
                     <div className="pl-lg-4">
                       <Row>
-                        <label className="form-control-label" htmlFor="estimated-time">
+                        <label id="label-estimated-time" className="form-control-label" htmlFor="estimated-time">
                           Estimated Time
                         </label>
+                        <UncontrolledTooltip
+                            delay={0}
+                            placement="top"
+                            target="label-estimated-time"
+                          >
+                            Assumes an average execution time of (150ms * # of records) + (request delay * # of records).
+                          </UncontrolledTooltip>
                       </Row>
                       <Row>
                         {estimatedTime}
                       </Row>
                     </div>
-                  </Col> */}
+                  </Col>
                 </Row>
               </CardBody>
               <CardFooter>
