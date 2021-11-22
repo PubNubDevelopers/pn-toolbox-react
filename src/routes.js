@@ -38,7 +38,7 @@ var routes = [
   {divider: true,},
   routesSwissArmy,
 
-  // copy/past these next two items and leave one for the next tools contributor
+  // copy/paste these next two items above the "routesSwissArmy" divider and leave this one for the next tools contributor
   // {divider: true,},
   // routes_AppName_,
 

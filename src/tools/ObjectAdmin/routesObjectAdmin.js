@@ -19,7 +19,7 @@ import ImportUsers from './pages/ImportUsers';
 
 var routesObjectAdmin = {
   collapse: true,
-  name: "Objects Admin",
+  name: "Objects",
   icon: AccountTreeIcon,
   iconColor: "Primary",
   state: "objectAdminCollapse",
