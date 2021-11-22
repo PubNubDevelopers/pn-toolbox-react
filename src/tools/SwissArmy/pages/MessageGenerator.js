@@ -63,11 +63,13 @@ const MessageGenerator = () => {
   const [failCount, setFailCount] = useState(0);
   const [progress, setProgress] = useState(0);
   const [targetChannels, setTargetChannels] = useState("");
+  const [senderUuids, setSenderUuids] = useState("");
   const [message, setMessage] = useState(messageDefault);
   const [sourceData, setSourceData] = useState([]);
   const [requestDelay, setRequestDelay] = useState(10);
 
   const channelList = useRef([]);
+  const uuidList = useRef([]);
   const counter = useRef(0);
 
   const {
@@ -97,8 +99,21 @@ const MessageGenerator = () => {
   const createChannelList = () => {
     console.log("createChannelList");
     let tmp = targetChannels.replaceAll("\n", ",").replaceAll(" ", "");
+    setTargetChannels(tmp);
     channelList.current = tmp.split(",").filter(Boolean);;
     console.log("    channelList:", channelList.current);
+  }
+
+  const pickSenderUuid = () => {
+    return uuidList.current[Math.floor(Math.random() * uuidList.current.length)];
+  }
+
+  const createUuidList = () => {
+    console.log("createUuidList");
+    let tmp = senderUuids.replaceAll("\n", ",").replaceAll(" ", "");
+    setSenderUuids(tmp);
+    uuidList.current = tmp.split(",").filter(Boolean);;
+    console.log("    uuidList:", uuidList.current);
   }
 
   const pickTargetChannel = () => {
@@ -156,173 +171,194 @@ const MessageGenerator = () => {
     }
   }
 
-
-    return (
-      <>
-        <Container className="mt--7" fluid>
-          <Row className="mt-0">
-            <Col className="order-xl-2">
-              <Card className="bg-secondary shadow">
-                <CardHeader className="border-0">
-                  <Row className="align-items-center">
-                    <div className="col">
-                      <h3 className="mb-0">Message Generator</h3>
-                    </div>
-                  </Row>
-                </CardHeader>
-                <CardBody>
-                  <Form>
-                    <Row>
-                      <Col>
+  return (
+    <>
+      <Container className="mt--7" fluid>
+        <Row className="mt-0">
+          <Col className="order-xl-2">
+            <Card className="bg-secondary shadow">
+              <CardHeader className="border-0">
+                <Row className="align-items-center">
+                  <div className="col">
+                    <h3 className="mb-0">Message Generator</h3>
+                  </div>
+                </Row>
+              </CardHeader>
+              <CardBody>
+                <Form>
+                  <Row>
+                    <Col>
+                      <label
+                        className="form-control-label"
+                        htmlFor="button-open-file"
+                      >
+                        Source Messages File
+                      </label><br />
+                      <input
+                        id="button-open-file"
+                        type="file"
+                        onChange={(e) => openFile(e.target.files[0])}
+                      />
+                    </Col>
+                    <Col>
+                      <FormGroup>
                         <label
                           className="form-control-label"
-                          htmlFor="button-open-file"
+                          htmlFor="input-target-channels"
                         >
-                          Source Messages File
-                        </label><br />
-                        <input
-                          id="button-open-file"
-                          type="file"
-                          onChange={(e) => openFile(e.target.files[0])}
+                          Target Channels
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="input-target-channels"
+                          type="textarea"
+                          rows="4"
+                          value={targetChannels}
+                          onChange={(e) => setTargetChannels(e.target.value)}
                         />
-                      </Col>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-target-channels"
-                          >
-                            Target Channels
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-target-channels"
-                            type="textarea"
-                            rows="4"
-                            onChange={(e) => setTargetChannels(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-record-count"
-                          >
-                            # Messages to Generate
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-record-count"
-                            type="text"
-                            value={recordCount}
-                            onChange={(e) => setRecordCount(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col>
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-request-delay"
-                          >
-                            Request Interval Delay (ms)
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-request-delay"
-                            type="text"
-                            value={requestDelay}
-                            onChange={(e) => setRequestDelay(e.target.value)}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  </Form>
-                </CardBody>
-
-                <CardHeader>
-                  <Row className="align-items-center">
-                    <div className="col">
-                      <h3 className="mb-0">Process Report</h3>
+                      </FormGroup>
+                    </Col>
+                    <Col>
+                      <FormGroup>
+                        <label
+                          className="form-control-label"
+                          htmlFor="input-sender-uuids"
+                        >
+                          Sender UUIDs
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="input-sender-uuids"
+                          type="textarea"
+                          rows="4"
+                          value={senderUuids}
+                          onChange={(e) => setSenderUuids(e.target.value)}
+                        />
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col>
+                      <FormGroup>
+                        <label
+                          className="form-control-label"
+                          htmlFor="input-record-count"
+                        >
+                          # Messages to Generate
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="input-record-count"
+                          type="text"
+                          value={recordCount}
+                          onChange={(e) => setRecordCount(e.target.value)}
+                        />
+                      </FormGroup>
+                    </Col>
+                    <Col>
+                      <FormGroup>
+                        <label
+                          className="form-control-label"
+                          htmlFor="input-request-delay"
+                        >
+                          Request Interval Delay (ms)
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="input-request-delay"
+                          type="text"
+                          value={requestDelay}
+                          onChange={(e) => setRequestDelay(e.target.value)}
+                        />
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                </Form>
+              </CardBody>
+              <CardFooter>
+                <Row>
+                  <Col className="text-right">
+                    <Button
+                      color="danger"
+                      onClick={generateMessages}
+                    // disabled = {keySetContext.pubnub == null || metadataRecords == null || metadataRecords.length === 0}
+                    >
+                      Generate Messages
+                    </Button>
+                  </Col>
+                  <Col lg="3" className="text-center">
+                  </Col>
+                </Row>
+              </CardFooter>
+              <p/>
+              <CardHeader>
+                <Row className="align-items-center">
+                  <div className="col">
+                    <h3 className="mb-0">Process Report</h3>
+                  </div>
+                </Row>
+              </CardHeader>
+              <CardBody>
+                <Row>
+                  <Col>
+                    <div className="pl-lg-4">
+                      <Row>
+                        <label className="form-control-label" htmlFor="total-records">
+                          Total
+                        </label>
+                      </Row>
+                      <Row>
+                        {progress}
+                      </Row>
                     </div>
-                  </Row>
-                </CardHeader>
-                <CardBody>
-                  <Row>
-                    <Col>
-                      <div className="pl-lg-4">
-                        <Row>
-                          <label className="form-control-label" htmlFor="total-records">
-                            Total
-                          </label>
-                        </Row>
-                        <Row>
-                          {progress}
-                        </Row>
-                      </div>
-                    </Col>
-                    <Col>
-                      <div className="pl-lg-4">
-                        <Row>
-                          <label className="form-control-label" htmlFor="success-records">
-                            Successes
-                          </label>
-                        </Row>
-                        <Row>
-                          {successCount}
-                        </Row>
-                      </div>
-                    </Col>
-                    <Col>
-                      <div className="pl-lg-4">
-                        <Row>
-                          <label className="form-control-label" htmlFor="fail-records">
-                            Fails
-                          </label>
-                        </Row>
-                        <Row>
-                          {failCount}
-                        </Row>
-                      </div>
-                    </Col>
-                    <Col>
-                      <div className="pl-lg-4">
-                        <Row>
-                          <label className="form-control-label" htmlFor="elapsed-time">
-                            Elapsed Time
-                          </label>
-                        </Row>
-                        <Row>
-                          {minutes}m {seconds}s
-                        </Row>
-                      </div>
-                    </Col>
-                  </Row>
-                </CardBody>
-                <CardFooter>
-                  <Row>
-                    <Col className="text-right">
-                      <Button
-                        color="danger"
-                        onClick={generateMessages}
-                      // disabled = {keySetContext.pubnub == null || metadataRecords == null || metadataRecords.length === 0}
-                      >
-                        Generate Messages
-                      </Button>
-                    </Col>
-                    <Col lg="3" className="text-center">
-                    </Col>
-                  </Row>
-                </CardFooter>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
-      </>
-    );
-  }
+                  </Col>
+                  <Col>
+                    <div className="pl-lg-4">
+                      <Row>
+                        <label className="form-control-label" htmlFor="success-records">
+                          Successes
+                        </label>
+                      </Row>
+                      <Row>
+                        {successCount}
+                      </Row>
+                    </div>
+                  </Col>
+                  <Col>
+                    <div className="pl-lg-4">
+                      <Row>
+                        <label className="form-control-label" htmlFor="fail-records">
+                          Fails
+                        </label>
+                      </Row>
+                      <Row>
+                        {failCount}
+                      </Row>
+                    </div>
+                  </Col>
+                  <Col>
+                    <div className="pl-lg-4">
+                      <Row>
+                        <label className="form-control-label" htmlFor="elapsed-time">
+                          Elapsed Time
+                        </label>
+                      </Row>
+                      <Row>
+                        {minutes}m {seconds}s
+                      </Row>
+                    </div>
+                  </Col>
+                </Row>
+              </CardBody>
+              <CardFooter>
+                
+              </CardFooter>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </>
+  );
+}
 
-  export default MessageGenerator;
+export default MessageGenerator;
