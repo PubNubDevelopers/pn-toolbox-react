@@ -38,6 +38,7 @@ import {
 import { useKeySetData } from "../../KeySetProvider";
 import { useSwissArmyData } from "../SwissArmyProvider";
 import { useStopwatch } from "react-timer-hook";
+// import { millisecondsToHours, millisecondsToMinutes, millisecondsToSeconds } from "date-fns";
 
 
 const MessageGenerator = () => {
@@ -64,14 +65,15 @@ const MessageGenerator = () => {
   const [progress, setProgress] = useState(0);
   const [targetChannels, setTargetChannels] = useState("");
   const [senderUuids, setSenderUuids] = useState("");
-  const [message, setMessage] = useState(messageDefault);
+  // const [message, setMessage] = useState(messageDefault);
   const [sourceData, setSourceData] = useState([]);
   const [requestDelay, setRequestDelay] = useState(10);
+  const [estimatedTime, setEstimatedTime] = useState("");
 
   const channelList = useRef([]);
   const uuidList = useRef([]);
   const counter = useRef(0);
-
+  
   const {
     seconds,
     minutes,
@@ -83,6 +85,17 @@ const MessageGenerator = () => {
     reset,
   } = useStopwatch({ autoStart: false });
 
+  const calculateEstimatedTime = () => {
+    // debugger;
+    // const millis = recordCount * 150 * requestDelay;
+    // const hours = millisecondsToHours(millis);
+
+    // const a = millis - (hours * 60 * 1000);
+    // const minutes = millisecondsToMinutes(a);
+
+    // const seconds = millisecondsToSeconds(millis - (hours * 60 * 60 * 1000));
+    // setEstimatedTime(`${hours}h ${minutes}m ${seconds}s`)
+  }
 
   const openFile = (theFile) => {
     const propFileReader = new FileReader();
@@ -117,7 +130,8 @@ const MessageGenerator = () => {
   }
 
   const pickTargetChannel = () => {
-    return channelList.current[Math.floor(Math.random() * channelList.current.length)];
+    const ele = Math.floor(Math.random() * (channelList.current.length));
+    return channelList.current[ele];
   }
 
   const generateMessages = async () => {
@@ -135,7 +149,51 @@ const MessageGenerator = () => {
     start();
 
     console.log("    processMessage (first)");
-    sendMessage(i);
+    sendMessageUri(i);
+  }
+
+  const sendMessageUri = async (i) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    const message = encodeURI(JSON.stringify(sourceData[i]));
+    const channel = pickTargetChannel();
+    const uuid = sourceData[i].sender;
+
+    const publishUrl = `https://ps.pndsn.com/publish/${keySetContext.pubKey}/${keySetContext.subKey}/0/${channel}/0/${message}?uuid=${uuid}&pnsdk=the-toolbox-v0.2.0`;
+    console.log("    pub url: ", publishUrl);
+    if (i < recordCount) {
+      setTimeout(async function () {
+        try {
+          const response = await fetch(publishUrl, {signal: controller.signal});
+          console.log("response", response);
+
+          if (!response.ok) {
+            const message = `${response.status}`;
+            throw new Error(message);
+          }
+        
+          const result = await response.json();
+          console.log("result", result);
+
+          console.log("  success");
+          setProgress((prevProgress) => (prevProgress + 1));
+          setSuccessCount((prevSuccessCount) => (prevSuccessCount + 1));
+        }
+        catch (status) {
+          console.log("  fail", JSON.stringify(status));
+          setProgress((prevProgress) => (prevProgress + 1));
+          setFailCount((prevFailCount) => (prevFailCount + 1));
+        }
+        finally {
+          sendMessageUri(++i);
+        }
+      }, requestDelay);
+    }
+    else {
+      console.log("    the end");
+      pause();
+    }
   }
 
   async function sendMessage(i) {
@@ -251,7 +309,7 @@ const MessageGenerator = () => {
                           id="input-record-count"
                           type="text"
                           value={recordCount}
-                          onChange={(e) => setRecordCount(e.target.value)}
+                          onChange={(e) => {setRecordCount(e.target.value); calculateEstimatedTime()}}
                         />
                       </FormGroup>
                     </Col>
@@ -268,7 +326,7 @@ const MessageGenerator = () => {
                           id="input-request-delay"
                           type="text"
                           value={requestDelay}
-                          onChange={(e) => setRequestDelay(e.target.value)}
+                          onChange={(e) => {setRequestDelay(e.target.value); calculateEstimatedTime()}}
                         />
                       </FormGroup>
                     </Col>
@@ -281,7 +339,7 @@ const MessageGenerator = () => {
                     <Button
                       color="danger"
                       onClick={generateMessages}
-                    // disabled = {keySetContext.pubnub == null || metadataRecords == null || metadataRecords.length === 0}
+                      disabled = {keySetContext.pubnub == null || targetChannels == null || targetChannels === ""}
                     >
                       Generate Messages
                     </Button>
@@ -348,6 +406,18 @@ const MessageGenerator = () => {
                       </Row>
                     </div>
                   </Col>
+                  {/* <Col>
+                    <div className="pl-lg-4">
+                      <Row>
+                        <label className="form-control-label" htmlFor="estimated-time">
+                          Estimated Time
+                        </label>
+                      </Row>
+                      <Row>
+                        {estimatedTime}
+                      </Row>
+                    </div>
+                  </Col> */}
                 </Row>
               </CardBody>
               <CardFooter>
