@@ -265,62 +265,76 @@ const MessageGenerator = () => {
                   </div>
                 </Row>
               </CardHeader>
-
               <CardBody>
                 <Form>
                   <Row>
                     <Col>
-                      <Row>
-                        <Col>
-                          <InputLabel id="label-select-message-strategy"><u>Message Payload</u></InputLabel>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <Select
-                            labelId="label-select-message-strategy"
-                            id="label-select-message-strategy"
-                            value={messageStrategy}
-                            label="Message Payload"
-                            onChange={(e) => setMessageStrategy(e.target.value)}
-                          >
-                            <MenuItem value={FILE}>Upload Messages File</MenuItem>
-                            <MenuItem value={SINGLE}>Input Custom Message</MenuItem>
-                          </Select>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col>
-                          {messageStrategy === FILE &&
-                            <>
-                              <Row>
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="button-open-file"
-                                >
-                                  Messages File
-                                </label><br />
-                              </Row>
-                              <Row>
-                                <input
-                                  id="button-open-file"
-                                  type="file"
-                                  onChange={(e) => openFile(e.target.files[0])}
-                                />
-                              </Row>
-                            </>
-                          }
-                          {messageStrategy === SINGLE &&
+                      <FormGroup>
+                      <InputLabel id="label-select-message-strategy"><u>Message Payload</u></InputLabel>
+                      <Select
+                        labelId="label-select-message-strategy"
+                        id="label-select-message-strategy"
+                        value={messageStrategy}
+                        label="Message Payload"
+                        onChange={(e) => setMessageStrategy(e.target.value)}
+                      >
+                        <MenuItem value={FILE}>Upload Messages File</MenuItem>
+                        <MenuItem value={SINGLE}>Input Custom Message</MenuItem>
+                      </Select>
+                      </FormGroup>
+                      <FormGroup>
+                        {messageStrategy === FILE &&
+                          <>
+                            <InputLabel
+                              id="label-message-file"
+                              className="form-control-label"
+                              htmlFor="button-open-file"
+                            >
+                              Messages File
+                            </InputLabel>
+                            <UncontrolledTooltip
+                              delay={500}
+                              placement="top"
+                              target="label-message-file"
+                            >
+                              Upload a file that contains an array of JSON message payloads.
+                            </UncontrolledTooltip>
+                            <Input
+                              id="button-open-file"
+                              type="file"
+                              onChange={(e) => openFile(e.target.files[0])}
+                            />
+                          </>
+                        }
+                      </FormGroup>
+                      <FormGroup>
+                        {messageStrategy === SINGLE &&
+                          <>
+                            <InputLabel
+                              id="label-message-entry"
+                              className="form-control-label"
+                              htmlFor="input-message-entry"
+                            >
+                              Messages Payload
+                            </InputLabel>
+                            <UncontrolledTooltip
+                              delay={500}
+                              placement="top"
+                              target="label-message-entry"
+                            >
+                              Provide a single JSON payload to be used for every published message.
+                            </UncontrolledTooltip>
                             <Input
                               className="form-control-alternative"
-                              id="input-message-payload"
+                              id="input-message-entry"
                               type="textarea"
                               rows="3"
                               value={messagePayload}
                               onChange={(e) => setMessagePayload(e.target.value)}
-                            />}
-                        </Col>
-                      </Row>
+                            />
+                          </>
+                        }
+                      </FormGroup>
                     </Col>
                     <Col>
                       <FormGroup>
@@ -355,129 +369,135 @@ const MessageGenerator = () => {
                   </Row>
                   <Row>
                     <Col>
-                      <InputLabel id="label-select-channel-strategy"><u>Target Channel Strategy</u></InputLabel>
-                      <Select
-                        labelId="label-select-channel-strategy"
-                        id="label-select-channel-strategy"
-                        value={channelStrategy}
-                        label="Target Channel Strategy"
-                        onChange={(e) => setChannelStrategy(e.target.value)}
-                      >
-                        <MenuItem value={RANDOM}>List - Random</MenuItem>
-                        <MenuItem value={RROBIN}>List - Round Robin</MenuItem>
-                        {/* <MenuItem value={20}>Extract from Message</MenuItem> */}
-                      </Select>
-                      <UncontrolledTooltip
-                        delay={0}
-                        placement="top"
-                        target="label-select-channel-strategy"
-                      >
-                        Choose the way target channel will be provided:<br />
-                        1) List - Random (random selection from provided list)<br />
-                        2) List - Round Robin (ordered selection from provided list),<br />
-                        {/* 3) Extract from Message - specific key name in the provided messages JSON file. */}
-                      </UncontrolledTooltip>
-                      {(channelStrategy === RANDOM || channelStrategy === RROBIN) &&
-                        <FormGroup>
-                          <label
-                            id="label-target-channels-list"
-                            className="form-control-label"
-                            htmlFor="input-target-channels"
-                          >
-                            Target Channels
-                          </label>
-                          <UncontrolledTooltip
-                            delay={0}
-                            placement="top"
-                            target="label-target-channels-list"
-                          >
-                            Enter the channels (comma-delimited or 1 per line) you would like send messages.
-                          </UncontrolledTooltip>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-target-channels"
-                            type="textarea"
-                            rows="4"
-                            value={targetChannels}
-                            onChange={(e) => setTargetChannels(e.target.value)}
-                          />
-                        </FormGroup>}
+                      <FormGroup>
+                        <InputLabel id="label-select-channel-strategy"><u>Target Channel Strategy</u></InputLabel>
+                        <Select
+                          labelId="label-select-channel-strategy"
+                          id="label-select-channel-strategy"
+                          value={channelStrategy}
+                          label="Target Channel Strategy"
+                          onChange={(e) => setChannelStrategy(e.target.value)}
+                        >
+                          <MenuItem value={RANDOM}>List - Random</MenuItem>
+                          <MenuItem value={RROBIN}>List - Round Robin</MenuItem>
+                          {/* <MenuItem value={20}>Extract from Message</MenuItem> */}
+                        </Select>
+                        <UncontrolledTooltip
+                          delay={500}
+                          placement="top"
+                          target="label-select-channel-strategy"
+                        >
+                          Choose the way target channel will be provided:<br />
+                          1) List - Random (random selection from provided list)<br />
+                          2) List - Round Robin (ordered selection from provided list)<br />
+                          {/* 3) Extract from Message - specific key name in the provided messages JSON file. */}
+                        </UncontrolledTooltip>
+                      </FormGroup>
+                      <FormGroup>
+                        {(channelStrategy === RANDOM || channelStrategy === RROBIN) &&
+                          <>
+                            <InputLabel
+                              id="label-target-channels-list"
+                              className="form-control-label"
+                              htmlFor="input-target-channels"
+                            >
+                              Target Channels
+                            </InputLabel>
+                            <UncontrolledTooltip
+                              delay={0}
+                              placement="top"
+                              target="label-target-channels-list"
+                            >
+                              Enter the channels (comma-delimited or 1 per line) you would like send messages.
+                            </UncontrolledTooltip>
+                            <Input
+                              className="form-control-alternative"
+                              id="input-target-channels"
+                              type="textarea"
+                              rows="4"
+                              value={targetChannels}
+                              onChange={(e) => setTargetChannels(e.target.value)}
+                            />
+                          </>
+                        }
+                      </FormGroup>
                     </Col>
                     <Col>
-                      <InputLabel id="label-select-uuid-strategy"><u>Sender UUID Strategy</u></InputLabel>
-                      <Select
-                        labelId="label-select-uuid-strategy"
-                        id="label-select-uuid-strategy"
-                        value={uuidStrategy}
-                        label="Sender UUID Strategy"
-                        onChange={(e) => setUuidStrategy(e.target.value)}
-                      >
-                        <MenuItem value={RANDOM}>List - Random</MenuItem>
-                        <MenuItem value={RROBIN}>List - Round Robin</MenuItem>
-                        <MenuItem value={EXTRACT}>Extract from Message</MenuItem>
-                      </Select>
-                      <UncontrolledTooltip
-                        delay={0}
-                        placement="top"
-                        target="label-select-uuid-strategy"
-                      >
-                        Choose the way sender UUID will be provided:<br />
-                        1) List - Random (random selection from provided list)<br />
-                        2) List - Round Robin (ordered selection from provided list),<br />
-                        3) Extract from Message - specific key name in the provided messages JSON file.
-                      </UncontrolledTooltip>
-                      {(uuidStrategy === RANDOM || uuidStrategy === RROBIN) &&
-                        <FormGroup>
-                          <label
-                            id="label-sender-uuids-list"
-                            className="form-control-label"
-                            htmlFor="input-sender-uuids"
-                          >
-                            <u>Sender UUIDs List</u>
-                          </label>
-                          <UncontrolledTooltip
-                            delay={0}
-                            placement="top"
-                            target="label-sender-uuids-list"
-                          >
-                            Enter the UUIDs (comma-delimited or 1 per line) you would
-                            like to be used as the sender UUID (i.e. the publisher's PubNub UUID).
-                          </UncontrolledTooltip>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-sender-uuids"
-                            type="textarea"
-                            rows="4"
-                            value={senderUuids}
-                            onChange={(e) => setSenderUuids(e.target.value)}
-                          />
-                        </FormGroup>}
-                      {uuidStrategy === EXTRACT &&
-                        <FormGroup>
-                          <label
-                            id="label-sender-uuid-key"
-                            className="form-control-label"
-                            htmlFor="input-sender-uuid-key"
-                          >
-                            <u>Enter Sender UUID JSON Key</u>
-                          </label>
-                          <UncontrolledTooltip
-                            delay={0}
-                            placement="top"
-                            target="label-sender-uuid-key"
-                          >
-                            Enter the JSON key in the provided messages JSON file (first level only).
-                          </UncontrolledTooltip>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-sender-uuid-key"
-                            type="text"
-                            placeholder=""
-                            value={senderUuidKey}
-                            onChange={(e) => setSenderUuidKey(e.target.value)}
-                          />
-                        </FormGroup>}
+                      <FormGroup>
+                        <InputLabel id="label-select-uuid-strategy"><u>Sender UUID Strategy</u></InputLabel>
+                        <Select
+                          labelId="label-select-uuid-strategy"
+                          id="label-select-uuid-strategy"
+                          value={uuidStrategy}
+                          label="Sender UUID Strategy"
+                          onChange={(e) => setUuidStrategy(e.target.value)}
+                        >
+                          <MenuItem value={RANDOM}>List - Random</MenuItem>
+                          <MenuItem value={RROBIN}>List - Round Robin</MenuItem>
+                          <MenuItem value={EXTRACT}>Extract from Message</MenuItem>
+                        </Select>
+                        <UncontrolledTooltip
+                          delay={0}
+                          placement="top"
+                          target="label-select-uuid-strategy"
+                        >
+                          Choose the way sender UUID will be provided:<br />
+                          1) List - Random (random selection from provided list)<br />
+                          2) List - Round Robin (ordered selection from provided list),<br />
+                          3) Extract from Message - specific key name in the provided messages JSON file.
+                        </UncontrolledTooltip>
+                      </FormGroup>
+                      <FormGroup>
+                        {(uuidStrategy === RANDOM || uuidStrategy === RROBIN) &&
+                          <>
+                            <InputLabel id="label-sender-uuids-list" className="form-control-label" htmlFor="input-sender-uuids">
+                              <u>Sender UUIDs List</u>
+                            </InputLabel>
+                            <UncontrolledTooltip
+                              delay={0}
+                              placement="top"
+                              target="label-sender-uuids-list"
+                            >
+                              Enter the UUIDs (comma-delimited or 1 per line) you would
+                              like to be used as the sender UUID (i.e. the publisher's PubNub UUID).
+                            </UncontrolledTooltip>
+                            <Input
+                              className="form-control-alternative"
+                              id="input-sender-uuids"
+                              type="textarea"
+                              rows="4"
+                              value={senderUuids}
+                              onChange={(e) => setSenderUuids(e.target.value)}
+                            />
+                          </>
+                        }
+                      </FormGroup>
+                      <FormGroup>
+                        {uuidStrategy === EXTRACT &&
+                          <>
+                            <InputLabel id="label-sender-uuid-key" className="form-control-label" htmlFor="input-sender-uuid-key">
+                              <u>Enter Sender UUID JSON Key</u>
+                            </InputLabel>
+                            <UncontrolledTooltip
+                              delay={0}
+                              placement="top"
+                              target="label-sender-uuid-key"
+                            >
+                              Enter the JSON key in the provided messages JSON file (first level only).
+                            </UncontrolledTooltip>
+                            <Input
+                              className="form-control-alternative"
+                              id="input-sender-uuid-key"
+                              type="text"
+                              placeholder=""
+                              value={senderUuidKey}
+                              onChange={(e) => setSenderUuidKey(e.target.value)}
+                            />
+                          </>
+                        }
+                      </FormGroup>
                     </Col>
+
 
                   </Row>
                 </Form>
