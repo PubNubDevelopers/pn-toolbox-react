@@ -58,6 +58,10 @@ const MessageGenerator = () => {
     ]
   }, null, 2);
 
+  const RANDOM = 10;
+  const RROBIN = 11;
+  const EXTRACT = 20;
+
   const [recordCount, setRecordCount] = useState(0);
   const [successCount, setSuccessCount] = useState(0);
   const [failCount, setFailCount] = useState(0);
@@ -113,8 +117,13 @@ const MessageGenerator = () => {
     console.log("    channelList:", channelList.current);
   }
 
-  const pickSenderUuid = () => {
-    return uuidList.current[Math.floor(Math.random() * uuidList.current.length)];
+  const pickSenderUuid = (i) => {
+    if (uuidStrategy === RANDOM)
+      return senderUuids[Math.floor(Math.random() * (senderUuids.current.length))];
+    else if (uuidStrategy === RROBIN)
+      return senderUuids[i+1 % senderUuids.length];
+    else // EXTRACT from message
+      return sourceData[i][senderUuidKey];
   }
 
   const createUuidList = () => {
@@ -125,9 +134,11 @@ const MessageGenerator = () => {
     console.log("    uuidList:", uuidList.current);
   }
 
-  const pickTargetChannel = () => {
-    const ele = Math.floor(Math.random() * (channelList.current.length));
-    return channelList.current[ele];
+  const pickTargetChannel = (i) => {
+    if (channelStrategy === RANDOM)
+      return channelList[Math.floor(Math.random() * (channelList.current.length))];
+    else // RROBIN
+      return channelList[i+1 % channelList.length];
   }
 
   const generateMessages = async () => {
@@ -149,15 +160,21 @@ const MessageGenerator = () => {
   }
 
   const sendMessageUri = async (i) => {
+    console.log("sendMessageeUri, index=", i);
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     const message = encodeURI(JSON.stringify(sourceData[i]));
-    const channel = pickTargetChannel();
-    const uuid = sourceData[i].sender;
+
+    const channel = pickTargetChannel(i);
+    console.log("    target channel: ", channel);
+
+    const uuid = pickSenderUuid(i);
+    console.log("    sender uuid: ", uuid);
 
     const publishUrl = `https://ps.pndsn.com/publish/${keySetContext.pubKey}/${keySetContext.subKey}/0/${channel}/0/${message}?uuid=${uuid}&pnsdk=the-toolbox-v0.2.0`;
     console.log("    pub url: ", publishUrl);
+
     if (i < recordCount) {
       setTimeout(async function () {
         try {
@@ -264,8 +281,8 @@ const MessageGenerator = () => {
                         label="Target Channel Strategy"
                         onChange={(e) => setChannelStrategy(e.target.value)}
                       >
-                        <MenuItem value={10}>List - Random</MenuItem>
-                        <MenuItem value={11}>List - Round Robin</MenuItem>
+                        <MenuItem value={RANDOM}>List - Random</MenuItem>
+                        <MenuItem value={RROBIN}>List - Round Robin</MenuItem>
                         {/* <MenuItem value={20}>Extract from Message</MenuItem> */}
                       </Select>
                       <UncontrolledTooltip
@@ -278,7 +295,7 @@ const MessageGenerator = () => {
                         2) List - Round Robin (ordered selection from provided list),<br/> 
                         {/* 3) Extract from Message - specific key name in the provided messages JSON file. */}
                       </UncontrolledTooltip>
-                      {(channelStrategy === 10 || channelStrategy === 11) &&
+                      {(channelStrategy === RANDOM || channelStrategy === RROBIN) &&
                         <FormGroup>
                           <label
                             id="label-target-channels-list"
@@ -314,9 +331,9 @@ const MessageGenerator = () => {
                         label="Sender UUID Strategy"
                         onChange={(e) => setUuidStrategy(e.target.value)}
                       >
-                        <MenuItem value={10}>List - Random</MenuItem>
-                        <MenuItem value={11}>List - Round Robin</MenuItem>
-                        <MenuItem value={20}>Extract from Message</MenuItem>
+                        <MenuItem value={RANDOM}>List - Random</MenuItem>
+                        <MenuItem value={RROBIN}>List - Round Robin</MenuItem>
+                        <MenuItem value={FILE}>Extract from Message</MenuItem>
                       </Select>
                       <UncontrolledTooltip
                         delay={0}
@@ -328,7 +345,7 @@ const MessageGenerator = () => {
                         2) List - Round Robin (ordered selection from provided list),<br/> 
                         3) Extract from Message - specific key name in the provided messages JSON file.
                       </UncontrolledTooltip>
-                      {(uuidStrategy === 10 || uuidStrategy === 11) &&
+                      {(uuidStrategy === RANDOM || uuidStrategy === RROBIN) &&
                         <FormGroup>
                           <label
                             id="label-sender-uuids-list"
@@ -354,7 +371,7 @@ const MessageGenerator = () => {
                             onChange={(e) => setSenderUuids(e.target.value)}
                           />
                       </FormGroup>}
-                      {uuidStrategy === 20 &&
+                      {uuidStrategy === EXTRACT &&
                         <FormGroup>
                           <label
                             id="label-sender-uuid-key"
