@@ -278,6 +278,40 @@ const MessageGenerator = () => {
                         onChange={(e) => openFile(e.target.files[0])}
                       />
                     </Col>
+                    <Col>
+                      <FormGroup>
+                        <label
+                          className="form-control-label"
+                          htmlFor="input-record-count"
+                        >
+                          # Messages to Generate
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="input-record-count"
+                          type="text"
+                          value={recordCount}
+                          onChange={(e) => setRecordCount(e.target.value)}
+                        />
+                        <label
+                          className="form-control-label"
+                          htmlFor="input-request-delay"
+                        >
+                          Request Interval Delay (ms)
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="input-request-delay"
+                          type="text"
+                          value={requestDelay}
+                          onChange={(e) => setRequestDelay(e.target.value)}
+                        />
+                      </FormGroup>
+                    </Col>       
+                  </Row>
+                  <Row>
+
+
 
                     <Col>
                       <InputLabel id="label-select-channel-strategy"><u>Target Channel Strategy</u></InputLabel>
@@ -328,7 +362,6 @@ const MessageGenerator = () => {
                           />
                         </FormGroup>}
                     </Col>
-
                     <Col>
                       <InputLabel id="label-select-uuid-strategy"><u>Sender UUID Strategy</u></InputLabel>
                       <Select
@@ -405,42 +438,6 @@ const MessageGenerator = () => {
                       </FormGroup>}
                     </Col>
 
-                  </Row>
-                  <Row>
-                    <Col>
-                      <FormGroup>
-                        <label
-                          className="form-control-label"
-                          htmlFor="input-record-count"
-                        >
-                          # Messages to Generate
-                        </label>
-                        <Input
-                          className="form-control-alternative"
-                          id="input-record-count"
-                          type="text"
-                          value={recordCount}
-                          onChange={(e) => setRecordCount(e.target.value)}
-                        />
-                      </FormGroup>
-                    </Col>
-                    <Col>
-                      <FormGroup>
-                        <label
-                          className="form-control-label"
-                          htmlFor="input-request-delay"
-                        >
-                          Request Interval Delay (ms)
-                        </label>
-                        <Input
-                          className="form-control-alternative"
-                          id="input-request-delay"
-                          type="text"
-                          value={requestDelay}
-                          onChange={(e) => setRequestDelay(e.target.value)}
-                        />
-                      </FormGroup>
-                    </Col>
                   </Row>
                 </Form>
               </CardBody>
