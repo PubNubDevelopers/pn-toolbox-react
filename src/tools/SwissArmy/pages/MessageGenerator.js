@@ -118,10 +118,13 @@ const MessageGenerator = () => {
   }
 
   const pickSenderUuid = (i) => {
-    if (uuidStrategy === RANDOM)
-      return senderUuids[Math.floor(Math.random() * (senderUuids.current.length))];
-    else if (uuidStrategy === RROBIN)
-      return senderUuids[i+1 % senderUuids.length];
+    if (uuidStrategy === RANDOM) {
+      return uuidList.current[(Math.floor(Math.random() * (uuidList.current.length)))];
+    }
+    else if (uuidStrategy === RROBIN) {
+      const rem = (i+1) % uuidList.current.length;
+      return uuidList.current[rem];
+    }
     else // EXTRACT from message
       return sourceData[i][senderUuidKey];
   }
@@ -135,10 +138,13 @@ const MessageGenerator = () => {
   }
 
   const pickTargetChannel = (i) => {
-    if (channelStrategy === RANDOM)
-      return channelList[Math.floor(Math.random() * (channelList.current.length))];
-    else // RROBIN
-      return channelList[i+1 % channelList.length];
+    if (channelStrategy === RANDOM) {
+      return channelList.current[(Math.floor(Math.random() * (channelList.current.length)))];
+    }
+    else { // RROBIN
+      const rem = (i+1) % channelList.current.length;
+      return channelList.current[rem];
+    }
   }
 
   const generateMessages = async () => {
@@ -150,6 +156,7 @@ const MessageGenerator = () => {
     let i = 0
 
     createChannelList(targetChannels);
+    createUuidList(senderUuids);
 
     console.log("    start timer");
     reset();
@@ -182,8 +189,8 @@ const MessageGenerator = () => {
           console.log("response", response);
 
           if (!response.ok) {
-            const message = `${response.status}`;
-            throw new Error(message);
+            const status = `${response.status}`;
+            throw new Error(status);
           }
         
           const result = await response.json();
@@ -333,7 +340,7 @@ const MessageGenerator = () => {
                       >
                         <MenuItem value={RANDOM}>List - Random</MenuItem>
                         <MenuItem value={RROBIN}>List - Round Robin</MenuItem>
-                        <MenuItem value={FILE}>Extract from Message</MenuItem>
+                        <MenuItem value={EXTRACT}>Extract from Message</MenuItem>
                       </Select>
                       <UncontrolledTooltip
                         delay={0}
@@ -385,13 +392,13 @@ const MessageGenerator = () => {
                             placement="top"
                             target="label-sender-uuid-key"
                           >
-                            Enter the fully qualified JSON path of the key in the provided messages JSON file (e.g. sender, foo.bar.senderId, etc).
+                            Enter the JSON key in the provided messages JSON file (first level only).
                           </UncontrolledTooltip>
                           <Input
                             className="form-control-alternative"
                             id="input-sender-uuid-key"
                             type="text"
-                            placeholder="e.g. sender, content.sender, etc"
+                            placeholder=""
                             value={senderUuidKey}
                             onChange={(e) => setSenderUuidKey(e.target.value)}
                           />
