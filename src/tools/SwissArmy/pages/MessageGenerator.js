@@ -104,6 +104,8 @@ const MessageGenerator = () => {
   });
 
   const openFile = (theFile) => {
+    if (theFile == null) return;
+
     const propFileReader = new FileReader();
 
     propFileReader.onload = function (e) {
@@ -361,12 +363,12 @@ const MessageGenerator = () => {
                       <Row>
                         <Col>
                           <FormGroup>
-                            <label
+                            <InputLabel
                               className="form-control-label"
                               htmlFor="input-record-count"
                             >
                               # Messages to Generate
-                            </label>
+                            </InputLabel>
                             <Input
                               className="form-control-alternative"
                               id="input-record-count"
@@ -378,12 +380,12 @@ const MessageGenerator = () => {
                         </Col>
                         <Col>
                           <FormGroup>
-                            <label
+                            <InputLabel
                               className="form-control-label"
                               htmlFor="input-request-delay"
                             >
                               Request Interval Delay (ms)
-                            </label>
+                            </InputLabel>
                             <Input
                               className="form-control-alternative"
                               id="input-request-delay"
@@ -410,7 +412,7 @@ const MessageGenerator = () => {
                               <MenuItem value={EXTRACT}>Extract from Message</MenuItem>
                             </Select>
                             <UncontrolledTooltip
-                              delay={0}
+                              delay={500}
                               placement="top"
                               target="label-select-uuid-strategy"
                             >
@@ -427,7 +429,7 @@ const MessageGenerator = () => {
                                   <u>Sender UUIDs List</u>
                                 </InputLabel>
                                 <UncontrolledTooltip
-                                  delay={0}
+                                  delay={500}
                                   placement="top"
                                   target="label-sender-uuids-list"
                                 >
@@ -452,7 +454,7 @@ const MessageGenerator = () => {
                                   <u>Enter Sender UUID JSON Key</u>
                                 </InputLabel>
                                 <UncontrolledTooltip
-                                  delay={0}
+                                  delay={500}
                                   placement="top"
                                   target="label-sender-uuid-key"
                                 >
@@ -505,7 +507,7 @@ const MessageGenerator = () => {
                                   className="form-control-label"
                                   htmlFor="input-target-channels"
                                 >
-                                  Target Channels
+                                  <u>Target Channels</u>
                                 </InputLabel>
                                 <UncontrolledTooltip
                                   delay={0}
@@ -559,9 +561,9 @@ const MessageGenerator = () => {
                   <Col>
                     <div className="pl-lg-4">
                       <Row>
-                        <label className="form-control-label" htmlFor="total-records">
+                        <InputLabel className="form-control-label" htmlFor="total-records">
                           Total
-                        </label>
+                        </InputLabel>
                       </Row>
                       <Row>
                         {progress}
@@ -571,9 +573,9 @@ const MessageGenerator = () => {
                   <Col>
                     <div className="pl-lg-4">
                       <Row>
-                        <label className="form-control-label" htmlFor="success-records">
+                        <InputLabel className="form-control-label" htmlFor="success-records">
                           Successes
-                        </label>
+                        </InputLabel>
                       </Row>
                       <Row>
                         {successCount}
@@ -583,9 +585,9 @@ const MessageGenerator = () => {
                   <Col>
                     <div className="pl-lg-4">
                       <Row>
-                        <label className="form-control-label" htmlFor="fail-records">
+                        <InputLabel className="form-control-label" htmlFor="fail-records">
                           Fails
-                        </label>
+                        </InputLabel>
                       </Row>
                       <Row>
                         {failCount}
@@ -595,9 +597,9 @@ const MessageGenerator = () => {
                   <Col>
                     <div className="pl-lg-4">
                       <Row>
-                        <label className="form-control-label" htmlFor="elapsed-time">
+                        <InputLabel className="form-control-label" htmlFor="elapsed-time">
                           Elapsed Time
-                        </label>
+                        </InputLabel>
                       </Row>
                       <Row>
                         {hours}h {minutes}m {seconds}s
@@ -607,9 +609,9 @@ const MessageGenerator = () => {
                   <Col>
                     <div className="pl-lg-4">
                       <Row>
-                        <label id="label-estimated-time" className="form-control-label" htmlFor="estimated-time">
+                        <InputLabel id="label-estimated-time" className="form-control-label" htmlFor="estimated-time">
                           <u>Estimated Time</u>
-                        </label>
+                        </InputLabel>
                         <UncontrolledTooltip
                           delay={0}
                           placement="top"
