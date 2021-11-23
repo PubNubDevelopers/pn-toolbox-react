@@ -58,6 +58,8 @@ const MessageGenerator = () => {
     ]
   }, null, 2);
 
+  const SINGLE = 10;
+  const FILE = 20;
   const RANDOM = 10;
   const RROBIN = 11;
   const EXTRACT = 20;
@@ -68,18 +70,19 @@ const MessageGenerator = () => {
   const [progress, setProgress] = useState(0);
   const [targetChannels, setTargetChannels] = useState("");
   const [senderUuids, setSenderUuids] = useState("");
-  // const [message, setMessage] = useState(messageDefault);
+  const [messagePayload, setMessagePayload] = useState(messageDefault);
   const [sourceData, setSourceData] = useState([]);
   const [requestDelay, setRequestDelay] = useState(10);
   const [estimatedTime, setEstimatedTime] = useState("");
   const [uuidStrategy, setUuidStrategy] = useState(10);
   const [senderUuidKey, setSenderUuidKey] = useState();
   const [channelStrategy, setChannelStrategy] = useState(10);
+  const [messageStrategy, setMessageStrategy] = useState(10);
 
   const channelList = useRef([]);
   const uuidList = useRef([]);
   const counter = useRef(0);
-  
+
   const {
     seconds,
     minutes,
@@ -122,7 +125,7 @@ const MessageGenerator = () => {
       return uuidList.current[(Math.floor(Math.random() * (uuidList.current.length)))];
     }
     else if (uuidStrategy === RROBIN) {
-      const rem = (i+1) % uuidList.current.length;
+      const rem = (i + 1) % uuidList.current.length;
       return uuidList.current[rem];
     }
     else // EXTRACT from message
@@ -142,7 +145,7 @@ const MessageGenerator = () => {
       return channelList.current[(Math.floor(Math.random() * (channelList.current.length)))];
     }
     else { // RROBIN
-      const rem = (i+1) % channelList.current.length;
+      const rem = (i + 1) % channelList.current.length;
       return channelList.current[rem];
     }
   }
@@ -185,14 +188,14 @@ const MessageGenerator = () => {
     if (i < recordCount) {
       setTimeout(async function () {
         try {
-          const response = await fetch(publishUrl, {signal: controller.signal});
+          const response = await fetch(publishUrl, { signal: controller.signal });
           console.log("response", response);
 
           if (!response.ok) {
             const status = `${response.status}`;
             throw new Error(status);
           }
-        
+
           const result = await response.json();
           console.log("result", result);
 
@@ -262,21 +265,62 @@ const MessageGenerator = () => {
                   </div>
                 </Row>
               </CardHeader>
+
               <CardBody>
                 <Form>
                   <Row>
                     <Col>
-                      <label
-                        className="form-control-label"
-                        htmlFor="button-open-file"
-                      >
-                        Source Messages File
-                      </label><br />
-                      <input
-                        id="button-open-file"
-                        type="file"
-                        onChange={(e) => openFile(e.target.files[0])}
-                      />
+                      <Row>
+                        <Col>
+                          <InputLabel id="label-select-message-strategy"><u>Message Payload</u></InputLabel>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>
+                          <Select
+                            labelId="label-select-message-strategy"
+                            id="label-select-message-strategy"
+                            value={messageStrategy}
+                            label="Message Payload"
+                            onChange={(e) => setMessageStrategy(e.target.value)}
+                          >
+                            <MenuItem value={FILE}>Upload Messages File</MenuItem>
+                            <MenuItem value={SINGLE}>Input Custom Message</MenuItem>
+                          </Select>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>
+                          {messageStrategy === FILE &&
+                            <>
+                              <Row>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="button-open-file"
+                                >
+                                  Messages File
+                                </label><br />
+                              </Row>
+                              <Row>
+                                <input
+                                  id="button-open-file"
+                                  type="file"
+                                  onChange={(e) => openFile(e.target.files[0])}
+                                />
+                              </Row>
+                            </>
+                          }
+                          {messageStrategy === SINGLE &&
+                            <Input
+                              className="form-control-alternative"
+                              id="input-message-payload"
+                              type="textarea"
+                              rows="3"
+                              value={messagePayload}
+                              onChange={(e) => setMessagePayload(e.target.value)}
+                            />}
+                        </Col>
+                      </Row>
                     </Col>
                     <Col>
                       <FormGroup>
@@ -307,12 +351,9 @@ const MessageGenerator = () => {
                           onChange={(e) => setRequestDelay(e.target.value)}
                         />
                       </FormGroup>
-                    </Col>       
+                    </Col>
                   </Row>
                   <Row>
-
-
-
                     <Col>
                       <InputLabel id="label-select-channel-strategy"><u>Target Channel Strategy</u></InputLabel>
                       <Select
@@ -331,9 +372,9 @@ const MessageGenerator = () => {
                         placement="top"
                         target="label-select-channel-strategy"
                       >
-                        Choose the way target channel will be provided:<br/> 
-                        1) List - Random (random selection from provided list)<br/> 
-                        2) List - Round Robin (ordered selection from provided list),<br/> 
+                        Choose the way target channel will be provided:<br />
+                        1) List - Random (random selection from provided list)<br />
+                        2) List - Round Robin (ordered selection from provided list),<br />
                         {/* 3) Extract from Message - specific key name in the provided messages JSON file. */}
                       </UncontrolledTooltip>
                       {(channelStrategy === RANDOM || channelStrategy === RROBIN) &&
@@ -380,9 +421,9 @@ const MessageGenerator = () => {
                         placement="top"
                         target="label-select-uuid-strategy"
                       >
-                        Choose the way sender UUID will be provided:<br/> 
-                        1) List - Random (random selection from provided list)<br/> 
-                        2) List - Round Robin (ordered selection from provided list),<br/> 
+                        Choose the way sender UUID will be provided:<br />
+                        1) List - Random (random selection from provided list)<br />
+                        2) List - Round Robin (ordered selection from provided list),<br />
                         3) Extract from Message - specific key name in the provided messages JSON file.
                       </UncontrolledTooltip>
                       {(uuidStrategy === RANDOM || uuidStrategy === RROBIN) &&
@@ -399,7 +440,7 @@ const MessageGenerator = () => {
                             placement="top"
                             target="label-sender-uuids-list"
                           >
-                            Enter the UUIDs (comma-delimited or 1 per line) you would 
+                            Enter the UUIDs (comma-delimited or 1 per line) you would
                             like to be used as the sender UUID (i.e. the publisher's PubNub UUID).
                           </UncontrolledTooltip>
                           <Input
@@ -410,7 +451,7 @@ const MessageGenerator = () => {
                             value={senderUuids}
                             onChange={(e) => setSenderUuids(e.target.value)}
                           />
-                      </FormGroup>}
+                        </FormGroup>}
                       {uuidStrategy === EXTRACT &&
                         <FormGroup>
                           <label
@@ -435,7 +476,7 @@ const MessageGenerator = () => {
                             value={senderUuidKey}
                             onChange={(e) => setSenderUuidKey(e.target.value)}
                           />
-                      </FormGroup>}
+                        </FormGroup>}
                     </Col>
 
                   </Row>
@@ -447,7 +488,7 @@ const MessageGenerator = () => {
                     <Button
                       color="danger"
                       onClick={generateMessages}
-                      disabled = {keySetContext.pubnub == null || targetChannels == null || targetChannels === ""}
+                      disabled={keySetContext.pubnub == null || targetChannels == null || targetChannels === ""}
                     >
                       Generate Messages
                     </Button>
@@ -456,7 +497,7 @@ const MessageGenerator = () => {
                   </Col>
                 </Row>
               </CardFooter>
-              <p/>
+              <p />
               <CardHeader>
                 <Row className="align-items-center">
                   <div className="col">
@@ -521,12 +562,12 @@ const MessageGenerator = () => {
                           <u>Estimated Time</u>
                         </label>
                         <UncontrolledTooltip
-                            delay={0}
-                            placement="top"
-                            target="label-estimated-time"
-                          >
-                            Assumes an average execution time of (150ms * # of records) + (request delay * # of records).
-                          </UncontrolledTooltip>
+                          delay={0}
+                          placement="top"
+                          target="label-estimated-time"
+                        >
+                          Assumes an average execution time of (150ms * # of records) + (request delay * # of records).
+                        </UncontrolledTooltip>
                       </Row>
                       <Row>
                         {estimatedTime}
@@ -536,7 +577,7 @@ const MessageGenerator = () => {
                 </Row>
               </CardBody>
               <CardFooter>
-                
+
               </CardFooter>
             </Card>
           </Col>
