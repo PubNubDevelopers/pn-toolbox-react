@@ -49,17 +49,6 @@ const MessageGenerator = () => {
   console.log("MessageGenerator keySetContext: ", keySetContext);
   console.log("MessageGenerator swissArmyContext: ", swissArmyContext);
 
-  const messageDefault = JSON.stringify({
-    "count": "#counter#",
-    "title": "Ground control to Major Tom - #counter#",
-    "body": "This is ground control to Major Tom.",
-    "tasks": [
-      { "task": "Take your protein pills.", "priority": 1 },
-      { "task": "Put your helmet on.", "priority": 2 }
-    ]
-  }, null, 2);
-
-
   const [successCount, setSuccessCount] = useState(0);
   const [failCount, setFailCount] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -67,11 +56,18 @@ const MessageGenerator = () => {
 
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const SINGLE = 10;
-  const FILE = 20;
-  const [messageStrategy, setMessageStrategy] = useState(10);
+  const FILE = 10;
+  const [messageStrategy, setMessageStrategy] = useState(0);
   const [sourceData, setSourceData] = useState([]);
-  const [messagePayload, setMessagePayload] = useState(messageDefault);
+  const [messagePayload, _setMessagePayload] = useState(messageSamples[0]);
+
+  const setMessagePayload = (val) => {
+debugger;
+    _setMessagePayload(val);
+  }
+
+  const [isInjectCounter, setIsInjectCounter] = useState(true);
+  const [isInjectTimestamp, setIsInjectTimestamp] = useState(true);
 
   const [recordCount, setRecordCount] = useState(0);
   const [requestDelay, setRequestDelay] = useState(10);
@@ -106,6 +102,9 @@ const MessageGenerator = () => {
     var estMilli = recordCount * 150 + requestDelay * recordCount;
     setEstimatedTime(new Date(estMilli).toISOString().slice(11, 19));
   });
+
+
+  
 
   const openFile = (theFile) => {
     if (theFile == null) return;
@@ -176,8 +175,28 @@ const MessageGenerator = () => {
     reset();
     start();
 
-    console.log("    processMessage (first)");
     sendMessageUri(i);
+  }
+
+  const processMessage = (i) => {
+    let result = {};
+
+    if (messageStrategy === FILE) {
+      result = sourceData[i];
+    }
+    else { // raw sample message
+      result = JSON.parse(messagePayload);
+    }
+
+    if (isInjectCounter) {
+      result.counter = i;
+    }
+
+    if (isInjectTimestamp) {
+      result.timestamp = new Date();
+    }
+
+    return result;
   }
 
   const sendMessageUri = async (i) => {
@@ -185,12 +204,10 @@ const MessageGenerator = () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    const message = encodeURI(JSON.stringify(sourceData[i]));
-
+    const message = encodeURI(JSON.stringify(processMessage(i)));
     const channel = pickTargetChannel(i);
-    console.log("    target channel: ", channel);
-
     const uuid = pickSenderUuid(i);
+    console.log("    target channel: ", channel);
     console.log("    sender uuid: ", uuid);
 
     const publishUrl = `https://ps.pndsn.com/publish/${keySetContext.pubKey}/${keySetContext.subKey}/0/${channel}/0/${message}?uuid=${uuid}&pnsdk=the-toolbox-v0.2.0`;
@@ -236,16 +253,14 @@ const MessageGenerator = () => {
         <Row className="mt-0">
           <Col className="order-xl-2">
             <Card className="bg-secondary shadow">
-              <Accordion 
-                // expanded={isExpanded}
+              <Accordion
+              // expanded={isExpanded}
               >
                 <AccordionSummary
                   expandIcon={<KeyboardArrowUp />}
                   aria-controls="panel1a-content"
                   id="panel1a-header"
-                  // onClick={() => {alert("what?"); setIsExpanded(!isExpanded)}}
                 >
-                  
                   <h3 className="mb-0">Message Generator</h3>
                   <Col className="text-right">
                     <Button
@@ -281,7 +296,15 @@ const MessageGenerator = () => {
                               onChange={(e) => setMessageStrategy(e.target.value)}
                             >
                               <MenuItem value={FILE}>Messages File</MenuItem>
-                              <MenuItem value={SINGLE}>Input Message</MenuItem>
+                              <MenuItem value={0}>Sample - Simple</MenuItem>
+                              <MenuItem value={1}>Sample - Major Tom</MenuItem>
+                              <MenuItem value={2}>Sample - MatJ Text</MenuItem>
+                              <MenuItem value={3}>Sample - MatJ L10N</MenuItem>
+                              <MenuItem value={4}>Sample - MatJ Image</MenuItem>
+                              <MenuItem value={5}>Sample - MatJ Typing</MenuItem>
+                              <MenuItem value={6}>Sample - MatJ Invite</MenuItem>
+                              <MenuItem value={7}>Sample - MatJ Poll</MenuItem>
+                              <MenuItem value={8}>Sample - Push</MenuItem>
                             </Select>
                           </FormGroup>
                           <FormGroup>
@@ -319,7 +342,7 @@ const MessageGenerator = () => {
                             }
                           </FormGroup>
                           <FormGroup>
-                            {messageStrategy === SINGLE &&
+                            {messageStrategy >=0 && messageStrategy <10 &&
                               <>
                                 <InputLabel
                                   id="label-message-entry"
@@ -340,8 +363,8 @@ const MessageGenerator = () => {
                                   id="input-message-entry"
                                   type="textarea"
                                   rows="19"
-                                  value={messagePayload}
-                                  onChange={(e) => setMessagePayload(e.target.value)}
+                                  value={JSON.stringify(messageSamples[messageStrategy], null, 2)}
+                                  onChange={() => setMessagePayload(messageSamples[messageStrategy])}
                                 />
                               </>
                             }
@@ -355,7 +378,7 @@ const MessageGenerator = () => {
                                   className="form-control-label"
                                   htmlFor="input-record-count"
                                 >
-                                  # Messages to Generate
+                                  # Messages
                                 </InputLabel>
                                 <Input
                                   className="form-control-alternative"
@@ -372,7 +395,7 @@ const MessageGenerator = () => {
                                   className="form-control-label"
                                   htmlFor="input-request-delay"
                                 >
-                                  Request Interval Delay (ms)
+                                  Request Delay (ms)
                                 </InputLabel>
                                 <Input
                                   className="form-control-alternative"
@@ -381,6 +404,51 @@ const MessageGenerator = () => {
                                   value={requestDelay}
                                   onChange={(e) => setRequestDelay(e.target.value)}
                                 />
+                              </FormGroup>
+                            </Col>
+                            <Col>
+                              <FormGroup>
+                                <Row>
+                                  <InputLabel className="form-control-label">
+                                    Data Injection
+                                  </InputLabel>
+                                </Row>
+                                <Row>
+                                  <Col sm="1"></Col>
+                                  <Col>
+                                    <Input
+                                      className="form-control-alternative"
+                                      id="input-inject-counter"
+                                      type="checkbox"
+                                      value={isInjectCounter}
+                                      onChange={(e) => setIsInjectCounter(e.target.value)}
+                                    />
+                                    <InputLabel
+                                      className="form-control-label"
+                                      htmlFor="input-inject-counter"
+                                    >
+                                      Counter
+                                    </InputLabel>
+                                  </Col>
+                                </Row>
+                                <Row>
+                                  <Col sm="1"></Col>
+                                  <Col>
+                                    <Input
+                                      className="form-control-alternative"
+                                      id="input-record-count"
+                                      type="checkbox"
+                                      value={isInjectTimestamp}
+                                      onChange={(e) => setIsInjectTimestamp(e.target.value)}
+                                    />
+                                    <InputLabel
+                                      className="form-control-label"
+                                      htmlFor="input-record-count"
+                                    >
+                                      Timestamp
+                                    </InputLabel>
+                                  </Col>
+                                </Row>
                               </FormGroup>
                             </Col>
                           </Row>
@@ -525,7 +593,7 @@ const MessageGenerator = () => {
               </Accordion>
               <p />
               <CardHeader>
-                <Row className="align-items-center">
+                <Row>
                   <div className="col">
                     <h3 className="mb-0">Process Report</h3>
                   </div>
@@ -614,3 +682,104 @@ const MessageGenerator = () => {
 }
 
 export default MessageGenerator;
+
+
+const messageSamples = 
+[
+  {
+    "text": "message - #counter#"
+  },
+  {
+    "title": "Ground control to Major Tom",
+    "body": "This is ground control to Major Tom.",
+    "tasks": [
+      { "task": "Take your protein pills.", "priority": 1 },
+      { "task": "Put your helmet on.", "priority": 2 }
+    ]
+  },
+  {
+    "content": {
+        "type": "text",
+        "message": "This is a message"
+    },
+    "sender": "Mathew.Jenkinson"
+  },
+  {
+    "content": {
+      "type": "text",
+      "message": {
+        "en": "This is a message",
+        "es": "Este es un mensaje",
+        "de": "Dies ist eine Nachricht",
+        "nl": "Dit is een bericht"
+      }
+    },
+    "sender": "Mathew.Jenkinson"
+  },
+  {
+    "content": {
+        "type": "image",
+        "full": "https://my/full/image.png",
+        "thumbnail": "https://my/thumbnail/image.png"
+    },
+    "sender": "Mathew.Jenkinson"
+  },
+  {
+    "content": {
+        "type": "action",
+        "event": "typing"
+    },
+    "sender": "Mathew.Jenkinson"
+  },
+  {
+    "content": {
+        "type": "chatInvite",
+        "channel": "this is the channel you are being invited too",
+        "message":"Hi Craig, welcome to the team!"
+    },
+    "sender": "Mathew.Jenkinson"
+  },
+  {
+    "content": {
+      "type": "poll",
+      "question": "What do people want for lunch?",
+      "answers": {
+        "pizza": 0,
+        "tacos": 0,
+        "sushi": 0
+      }
+    },
+    "sender": "Mathew.Jenkinson"
+  },
+  {
+    "pn_debug": true,
+    "text": "This is a test push message from PubNub",
+    "pn_apns": {
+      "aps": {
+        "alert": {
+          "title": "PN Test Push Message",
+          "body": "This is test message from PubNub"
+        },
+      },
+      "pn_push":[
+        {
+          "push_type": "alert",
+          "auth_method": "token",
+          "targets":[
+            {
+              "environment":"production",
+              "topic":"com.pubnub.sampleapp"
+            }
+          ],
+          "version":"v2"
+        }
+      ]
+    },
+    "pn_gcm": {
+      "notification": {
+        "title": "PN Test Push Message",
+        "body": "This is a test message from PubNub"
+      }
+    }
+  },
+];
