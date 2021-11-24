@@ -65,6 +65,8 @@ const MessageGenerator = () => {
   const [progress, setProgress] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState("");
 
+  const [isExpanded, setIsExpanded] = useState(true);
+
   const SINGLE = 10;
   const FILE = 20;
   const [messageStrategy, setMessageStrategy] = useState(10);
@@ -160,6 +162,8 @@ const MessageGenerator = () => {
   const generateMessages = async () => {
     console.log("generateMessages - setTimeout");
 
+    // setIsExpanded(false);
+
     setSuccessCount(0);
     setFailCount(0);
     setProgress(0);
@@ -226,51 +230,22 @@ const MessageGenerator = () => {
     }
   }
 
-  async function sendMessage(i) {
-    console.log("sendMessage ", i);
-
-    const msg = sourceData[i];
-
-    if (i < recordCount) {
-      setTimeout(async function () {
-        try {
-          const result = await keySetContext.pubnub.publish({
-            channel: pickTargetChannel(),
-            message: msg,
-          });
-
-          console.log("  success");
-          setProgress((prevProgress) => (prevProgress + 1));
-          setSuccessCount((prevSuccessCount) => (prevSuccessCount + 1));
-        }
-        catch (status) {
-          console.log("  fail", JSON.stringify(status));
-          setProgress((prevProgress) => (prevProgress + 1));
-          setFailCount((prevFailCount) => (prevFailCount + 1));
-        }
-        finally {
-          sendMessage(++i);
-        }
-      }, requestDelay);
-    }
-    else {
-      console.log("    pause timer");
-      pause();
-    }
-  }
-
   return (
     <>
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
             <Card className="bg-secondary shadow">
-              <Accordion >
+              <Accordion 
+                // expanded={isExpanded}
+              >
                 <AccordionSummary
                   expandIcon={<KeyboardArrowUp />}
                   aria-controls="panel1a-content"
                   id="panel1a-header"
+                  // onClick={() => {alert("what?"); setIsExpanded(!isExpanded)}}
                 >
+                  
                   <h3 className="mb-0">Message Generator</h3>
                   <Col className="text-right">
                     <Button
