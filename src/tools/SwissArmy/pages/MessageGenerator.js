@@ -39,8 +39,11 @@ import {
 import { useKeySetData } from "../../KeySetProvider";
 import { useSwissArmyData } from "../SwissArmyProvider";
 import { useStopwatch } from "react-timer-hook";
-import { Accordion, AccordionSummary, InputLabel, MenuItem, Select } from "@material-ui/core";
-import { KeyboardArrowUp } from "@mui/icons-material";
+import { Accordion, AccordionSummary, IconButton, InputLabel, MenuItem, Select } from "@material-ui/core";
+// import { KeyboardArrowUp } from "@mui/icons-material";
+// import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import { Pause } from "@mui/icons-material";
+import ReactBSAlert from "react-bootstrap-sweetalert";
 
 const MessageGenerator = () => {
   const keySetContext = useKeySetData();
@@ -53,6 +56,10 @@ const MessageGenerator = () => {
   const [failCount, setFailCount] = useState(0);
   const [progress, setProgress] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState("");
+  const isPause = useRef(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const [sweetAlert, setSweetAlert] = useState(null);
 
   // const [isExpanded, setIsExpanded] = useState(true);
 
@@ -65,7 +72,7 @@ const MessageGenerator = () => {
   const [isInjectCounter, setIsInjectCounter] = useState(true);
   const [isInjectTimestamp, setIsInjectTimestamp] = useState(true);
 
-  const [recordCount, setRecordCount] = useState(0);
+  const [recordCount, setRecordCount] = useState(50);
   const [requestDelay, setRequestDelay] = useState(10);
 
   const [channelStrategy, setChannelStrategy] = useState(10);
@@ -80,8 +87,6 @@ const MessageGenerator = () => {
   const [senderUuidKey, setSenderUuidKey] = useState();
   const uuidList = useRef([]);
 
-  const counter = useRef(0);
-
   const {
     seconds,
     minutes,
@@ -93,12 +98,22 @@ const MessageGenerator = () => {
     reset,
   } = useStopwatch({ autoStart: false });
 
+  const handleStart = (e) => {
+    e.preventDefault();
+    isPause.current = false;
+    start();
+  }
+
+  const handlePause = (e) => {
+    e.preventDefault();
+    isPause.current = true;
+    pause();
+  }
 
   useEffect(() => {
     var estMilli = recordCount * 150 + requestDelay * recordCount;
     setEstimatedTime(new Date(estMilli).toISOString().slice(11, 19));
   });
-  
 
   const openFile = (theFile) => {
     if (theFile == null) return;
@@ -112,6 +127,12 @@ const MessageGenerator = () => {
     };
 
     propFileReader.readAsText(theFile);
+  }
+
+  const handleMessageStrategySelect = (e) => {
+    e.preventDefault();
+    setMessageStrategy(e.target.value);
+    setMessagePayload(JSON.stringify(messageSamples[e.target.value], null, 2));
   }
 
   const pickTargetChannel = (i) => {
@@ -167,6 +188,7 @@ const MessageGenerator = () => {
 
     reset();
     start();
+    isPause.current = false;
 
     sendMessageUri(i);
   }
@@ -186,11 +208,10 @@ const MessageGenerator = () => {
     }
 
     if (isInjectTimestamp) {
-      result.timestamp = new Date().toString();
+      result.timestamp = new Date().toISOString();
     }
 
     setMessagePayload(() => setMessagePayload(JSON.stringify(result, null, 2)));
-
     return result;
   }
 
@@ -220,18 +241,44 @@ const MessageGenerator = () => {
           }
 
           const result = await response.json();
-          console.log("result", result);
 
-          console.log("  success");
           setProgress((prevProgress) => (prevProgress + 1));
           setSuccessCount((prevSuccessCount) => (prevSuccessCount + 1));
         }
         catch (status) {
-          console.log("  fail", JSON.stringify(status));
           setProgress((prevProgress) => (prevProgress + 1));
           setFailCount((prevFailCount) => (prevFailCount + 1));
         }
         finally {
+          console.log("    index", i);
+          console.log("    isRunning", isRunning);
+          console.log("    isPause", isPause.current);
+
+          if (isPause.current) {
+            // temporary hack to halt a long running process
+            if (window.confirm("Process paused: \nOK to continue process \nCancel to abort process")) {
+              isPause.current = false;
+            }
+            else {
+              i = recordCount;
+              // this will exit the processing loop
+            }
+
+            // hoping for a more elegant prompt using SweetAlert
+            //   but it doesn't halt processing
+            // console.log("    PAUSED");
+            // // alert("paused");
+            // confirmAlert("Process Paused", "Resume or Abort?", 
+            //   "Resume", (() => start()), 
+            //   "Abort", (() => i=recordCount));
+            // const pauseId = setInterval(() => {
+            //   if (!isPause) clearInterval(pauseId);
+            //   console.log("    STILL PAUSED?");
+            // }, 250);
+            // console.log("    NO LONGER PAUSED?");
+            // hideAlert();
+          }
+
           sendMessageUri(++i);
         }
       }, requestDelay);
@@ -242,14 +289,35 @@ const MessageGenerator = () => {
     }
   }
 
-  const handleMessageStrategySelect = (e) => {
-    e.preventDefault();
-    setMessageStrategy(e.target.value);
-    setMessagePayload(JSON.stringify(messageSamples[e.target.value], null, 2));
-  }
+  const hideAlert = () => {
+    setSweetAlert(null);
+  };
+
+  const confirmAlert = (title, message, confirmButton, confirmFn, cancelButton, cancelFn) => {
+    setSweetAlert(
+        <ReactBSAlert
+          question
+          style={{ display: "block", marginTop: "100px" }}
+          title={title}
+          onConfirm={confirmFn}
+          showConfirm={confirmButton != null}
+          confirmBtnBsStyle="danger"
+          confirmBtnText={confirmButton}
+          onCancel={cancelFn}
+          showCancel={cancelButton != null}
+          cancelBtnBsStyle="secondary"
+          cancelBtnText={cancelButton}
+          reverseButtons={true}
+          btnSize=""
+        >
+          {message}
+        </ReactBSAlert>
+    );
+  };
 
   return (
     <>
+      {sweetAlert}
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
@@ -259,7 +327,7 @@ const MessageGenerator = () => {
                 expanded
               >
                 <AccordionSummary
-                  expandIcon={<KeyboardArrowUp />}
+                  // expandIcon={<KeyboardArrowUp />}
                   aria-controls="panel1a-content"
                   id="panel1a-header"
                 >
@@ -286,9 +354,7 @@ const MessageGenerator = () => {
                               placement="top"
                               target="label-select-message-strategy"
                             >
-                              Provide a source for the messages you want to generate:
-                              1) Message File - upload a file that contains an array of JSON message payloads.
-                              2) Input Message - provide a single JSON payload to be used for every published message.
+                              Provide a source for the messages you want to generate: from a source file or sample JSON.
                             </UncontrolledTooltip>
                             <Select
                               labelId="label-select-message-strategy"
@@ -344,7 +410,7 @@ const MessageGenerator = () => {
                             }
                           </FormGroup>
                           <FormGroup>
-                            {messageStrategy >=0 && messageStrategy <10 &&
+                            {messageStrategy >= 0 && messageStrategy < 10 &&
                               <>
                                 <InputLabel
                                   id="label-message-entry"
@@ -368,7 +434,7 @@ const MessageGenerator = () => {
                                   value={messagePayload}
                                   // {JSON.stringify(messageSamples[messageStrategy], null, 2)}
                                   onChange={(e) => setMessagePayload(e.target.value)}
-                                  // messageSamples[messageStrategy]
+                                // messageSamples[messageStrategy]
                                 />
                               </>
 
@@ -377,14 +443,22 @@ const MessageGenerator = () => {
                         </Col>
                         <Col>
                           <Row>
-                            <Col>
+                            <Col sm="3">
                               <FormGroup>
                                 <InputLabel
+                                  id="label-number-messages"
                                   className="form-control-label"
                                   htmlFor="input-record-count"
                                 >
-                                  # Messages
+                                  <u># Messages</u>
                                 </InputLabel>
+                                <UncontrolledTooltip
+                                  delay={500}
+                                  placement="top"
+                                  target="label-number-messages"
+                                >
+                                  Total number of message to generate.
+                                </UncontrolledTooltip>
                                 <Input
                                   className="form-control-alternative"
                                   id="input-record-count"
@@ -394,14 +468,22 @@ const MessageGenerator = () => {
                                 />
                               </FormGroup>
                             </Col>
-                            <Col>
+                            <Col sm="3">
                               <FormGroup>
                                 <InputLabel
+                                  id="label-request-delay"
                                   className="form-control-label"
                                   htmlFor="input-request-delay"
                                 >
-                                  Request Delay (ms)
+                                  <u>Interval Delay</u>
                                 </InputLabel>
+                                <UncontrolledTooltip
+                                  delay={500}
+                                  placement="top"
+                                  target="label-request-delay"
+                                >
+                                  Amount of delay between publishes (ms).
+                                </UncontrolledTooltip>
                                 <Input
                                   className="form-control-alternative"
                                   id="input-request-delay"
@@ -411,12 +493,20 @@ const MessageGenerator = () => {
                                 />
                               </FormGroup>
                             </Col>
-                            <Col>
+                            <Col></Col>
+                            <Col sm="4">
                               <FormGroup>
                                 <Row>
-                                  <InputLabel className="form-control-label">
-                                    Data Injection
+                                  <InputLabel id="label-data-injection" className="form-control-label">
+                                    <u>Data Injection</u>
                                   </InputLabel>
+                                  <UncontrolledTooltip
+                                    delay={500}
+                                    placement="top"
+                                    target="label-data-injection"
+                                  >
+                                    Inject key/value into message: message counter or timestamp.
+                                  </UncontrolledTooltip>
                                 </Row>
                                 <Row>
                                   <Col sm="1"></Col>
@@ -425,8 +515,8 @@ const MessageGenerator = () => {
                                       className="form-control-alternative"
                                       id="input-inject-counter"
                                       type="checkbox"
-                                      value={isInjectCounter}
-                                      onChange={(e) => setIsInjectCounter(e.target.value)}
+                                      checked={isInjectCounter}
+                                      onChange={(e) => setIsInjectCounter(e.target.checked)}
                                     />
                                     <InputLabel
                                       className="form-control-label"
@@ -443,8 +533,8 @@ const MessageGenerator = () => {
                                       className="form-control-alternative"
                                       id="input-record-count"
                                       type="checkbox"
-                                      value={isInjectTimestamp}
-                                      onChange={(e) => setIsInjectTimestamp(e.target.value)}
+                                      checked={isInjectTimestamp}
+                                      onChange={(e) => setIsInjectTimestamp(e.target.checked)}
                                     />
                                     <InputLabel
                                       className="form-control-label"
@@ -454,6 +544,59 @@ const MessageGenerator = () => {
                                     </InputLabel>
                                   </Col>
                                 </Row>
+                              </FormGroup>
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col>
+                              <FormGroup>
+                                <InputLabel id="label-select-channel-strategy"><u>Target Channel Strategy</u></InputLabel>
+                                <Select
+                                  labelId="label-select-channel-strategy"
+                                  id="label-select-channel-strategy"
+                                  value={channelStrategy}
+                                  label="Target Channel Strategy"
+                                  onChange={(e) => setChannelStrategy(e.target.value)}
+                                >
+                                  <MenuItem value={RANDOM}>List - Random</MenuItem>
+                                  <MenuItem value={RROBIN}>List - Round Robin</MenuItem>
+                                  {/* <MenuItem value={20}>Extract from Message</MenuItem> */}
+                                </Select>
+                                <UncontrolledTooltip
+                                  delay={500}
+                                  placement="top"
+                                  target="label-select-channel-strategy"
+                                >
+                                  Choose the way target channel will be provided: random or round-robin.<br />
+                                </UncontrolledTooltip>
+                              </FormGroup>
+                              <FormGroup>
+                                {(channelStrategy === RANDOM || channelStrategy === RROBIN) &&
+                                  <>
+                                    <InputLabel
+                                      id="label-target-channels-list"
+                                      className="form-control-label"
+                                      htmlFor="input-target-channels"
+                                    >
+                                      <u>Target Channels</u>
+                                    </InputLabel>
+                                    <UncontrolledTooltip
+                                      delay={0}
+                                      placement="top"
+                                      target="label-target-channels-list"
+                                    >
+                                      Enter the target channels (comma-separated or 1 per line).
+                                    </UncontrolledTooltip>
+                                    <Input
+                                      className="form-control-alternative"
+                                      id="input-target-channels"
+                                      type="textarea"
+                                      rows="4"
+                                      value={targetChannels}
+                                      onChange={(e) => setTargetChannels(e.target.value)}
+                                    />
+                                  </>
+                                }
                               </FormGroup>
                             </Col>
                           </Row>
@@ -477,10 +620,7 @@ const MessageGenerator = () => {
                                   placement="top"
                                   target="label-select-uuid-strategy"
                                 >
-                                  Choose the way sender UUID will be provided:<br />
-                                  1) List - Random (random selection from provided list)<br />
-                                  2) List - Round Robin (ordered selection from provided list),<br />
-                                  3) Extract from Message - specific key name in the provided messages JSON file.
+                                  Choose the way sender UUID will be provided: random, round-robin or extract from provided message payload.<br />
                                 </UncontrolledTooltip>
                               </FormGroup>
                               <FormGroup>
@@ -494,8 +634,7 @@ const MessageGenerator = () => {
                                       placement="top"
                                       target="label-sender-uuids-list"
                                     >
-                                      Enter the UUIDs (comma-delimited or 1 per line) you would
-                                      like to be used as the sender UUID (i.e. the publisher's PubNub UUID).
+                                      Enter the UUIDs (comma-separated or 1 per line) for the publisher's PN UUID.
                                     </UncontrolledTooltip>
                                     <Input
                                       className="form-control-alternative"
@@ -534,62 +673,7 @@ const MessageGenerator = () => {
                               </FormGroup>
                             </Col>
                           </Row>
-                          <Row>
-                            <Col>
-                              <FormGroup>
-                                <InputLabel id="label-select-channel-strategy"><u>Target Channel Strategy</u></InputLabel>
-                                <Select
-                                  labelId="label-select-channel-strategy"
-                                  id="label-select-channel-strategy"
-                                  value={channelStrategy}
-                                  label="Target Channel Strategy"
-                                  onChange={(e) => setChannelStrategy(e.target.value)}
-                                >
-                                  <MenuItem value={RANDOM}>List - Random</MenuItem>
-                                  <MenuItem value={RROBIN}>List - Round Robin</MenuItem>
-                                  {/* <MenuItem value={20}>Extract from Message</MenuItem> */}
-                                </Select>
-                                <UncontrolledTooltip
-                                  delay={500}
-                                  placement="top"
-                                  target="label-select-channel-strategy"
-                                >
-                                  Choose the way target channel will be provided:<br />
-                                  1) List - Random (random selection from provided list)<br />
-                                  2) List - Round Robin (ordered selection from provided list)<br />
-                                  {/* 3) Extract from Message - specific key name in the provided messages JSON file. */}
-                                </UncontrolledTooltip>
-                              </FormGroup>
-                              <FormGroup>
-                                {(channelStrategy === RANDOM || channelStrategy === RROBIN) &&
-                                  <>
-                                    <InputLabel
-                                      id="label-target-channels-list"
-                                      className="form-control-label"
-                                      htmlFor="input-target-channels"
-                                    >
-                                      <u>Target Channels</u>
-                                    </InputLabel>
-                                    <UncontrolledTooltip
-                                      delay={0}
-                                      placement="top"
-                                      target="label-target-channels-list"
-                                    >
-                                      Enter the channels (comma-delimited or 1 per line) you would like send messages.
-                                    </UncontrolledTooltip>
-                                    <Input
-                                      className="form-control-alternative"
-                                      id="input-target-channels"
-                                      type="textarea"
-                                      rows="4"
-                                      value={targetChannels}
-                                      onChange={(e) => setTargetChannels(e.target.value)}
-                                    />
-                                  </>
-                                }
-                              </FormGroup>
-                            </Col>
-                          </Row>
+
                         </Col>
                       </Row>
                     </Form>
@@ -600,8 +684,16 @@ const MessageGenerator = () => {
               <CardHeader>
                 <Row>
                   <div className="col">
-                    <h3 className="mb-0">Process Report</h3>
+                    <h3 className="mb-0">Progress Report</h3>
                   </div>
+                    {/* <IconButton aria-label="play" color="primary"
+                      onClick={(e) => handleStart(e)}
+                    >
+                      <PlayArrowIcon />
+                    </IconButton> */}
+                    <IconButton aria-label="pause" onClick={(e) => handlePause(e)}>
+                      <Pause/>
+                    </IconButton>
                 </Row>
               </CardHeader>
               <CardBody>
@@ -661,7 +753,7 @@ const MessageGenerator = () => {
                           <u>Estimated Time</u>
                         </InputLabel>
                         <UncontrolledTooltip
-                          delay={0}
+                          delay={500}
                           placement="top"
                           target="label-estimated-time"
                         >
@@ -689,102 +781,102 @@ const MessageGenerator = () => {
 export default MessageGenerator;
 
 
-const messageSamples = 
-[
-  {
-    "text": "hello"
-  },
-  {
-    "title": "Ground control to Major Tom",
-    "body": "This is ground control to Major Tom.",
-    "tasks": [
-      { "task": "Take your protein pills.", "priority": 1 },
-      { "task": "Put your helmet on.", "priority": 2 }
-    ]
-  },
-  {
-    "content": {
+const messageSamples =
+  [
+    {
+      "text": "hello"
+    },
+    {
+      "title": "Ground control to Major Tom",
+      "body": "This is ground control to Major Tom.",
+      "tasks": [
+        { "task": "Take your protein pills.", "priority": 1 },
+        { "task": "Put your helmet on.", "priority": 2 }
+      ]
+    },
+    {
+      "content": {
         "type": "text",
         "message": "This is a message"
+      },
+      "sender": "Mathew.Jenkinson"
     },
-    "sender": "Mathew.Jenkinson"
-  },
-  {
-    "content": {
-      "type": "text",
-      "message": {
-        "en": "This is a message",
-        "es": "Este es un mensaje",
-        "de": "Dies ist eine Nachricht",
-        "nl": "Dit is een bericht"
-      }
+    {
+      "content": {
+        "type": "text",
+        "message": {
+          "en": "This is a message",
+          "es": "Este es un mensaje",
+          "de": "Dies ist eine Nachricht",
+          "nl": "Dit is een bericht"
+        }
+      },
+      "sender": "Mathew.Jenkinson"
     },
-    "sender": "Mathew.Jenkinson"
-  },
-  {
-    "content": {
+    {
+      "content": {
         "type": "image",
         "full": "https://my/full/image.png",
         "thumbnail": "https://my/thumbnail/image.png"
+      },
+      "sender": "Mathew.Jenkinson"
     },
-    "sender": "Mathew.Jenkinson"
-  },
-  {
-    "content": {
+    {
+      "content": {
         "type": "action",
         "event": "typing"
+      },
+      "sender": "Mathew.Jenkinson"
     },
-    "sender": "Mathew.Jenkinson"
-  },
-  {
-    "content": {
+    {
+      "content": {
         "type": "chatInvite",
         "channel": "this is the channel you are being invited too",
-        "message":"Hi Craig, welcome to the team!"
-    },
-    "sender": "Mathew.Jenkinson"
-  },
-  {
-    "content": {
-      "type": "poll",
-      "question": "What do people want for lunch?",
-      "answers": {
-        "pizza": 0,
-        "tacos": 0,
-        "sushi": 0
-      }
-    },
-    "sender": "Mathew.Jenkinson"
-  },
-  {
-    "pn_debug": true,
-    "text": "This is a test push message from PubNub",
-    "pn_apns": {
-      "aps": {
-        "alert": {
-          "title": "PN Test Push Message",
-          "body": "This is test message from PubNub"
-        },
+        "message": "Hi Craig, welcome to the team!"
       },
-      "pn_push":[
-        {
-          "push_type": "alert",
-          "auth_method": "token",
-          "targets":[
-            {
-              "environment":"production",
-              "topic":"com.pubnub.sampleapp"
-            }
-          ],
-          "version":"v2"
-        }
-      ]
+      "sender": "Mathew.Jenkinson"
     },
-    "pn_gcm": {
-      "notification": {
-        "title": "PN Test Push Message",
-        "body": "This is a test message from PubNub"
+    {
+      "content": {
+        "type": "poll",
+        "question": "What do people want for lunch?",
+        "answers": {
+          "pizza": 0,
+          "tacos": 0,
+          "sushi": 0
+        }
+      },
+      "sender": "Mathew.Jenkinson"
+    },
+    {
+      "pn_debug": true,
+      "text": "This is a test push message from PubNub",
+      "pn_apns": {
+        "aps": {
+          "alert": {
+            "title": "PN Test Push Message",
+            "body": "This is test message from PubNub"
+          },
+        },
+        "pn_push": [
+          {
+            "push_type": "alert",
+            "auth_method": "token",
+            "targets": [
+              {
+                "environment": "production",
+                "topic": "com.pubnub.sampleapp"
+              }
+            ],
+            "version": "v2"
+          }
+        ]
+      },
+      "pn_gcm": {
+        "notification": {
+          "title": "PN Test Push Message",
+          "body": "This is a test message from PubNub"
+        }
       }
-    }
-  },
-];
+    },
+  ];
