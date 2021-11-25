@@ -54,17 +54,13 @@ const MessageGenerator = () => {
   const [progress, setProgress] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState("");
 
-  const [isExpanded, setIsExpanded] = useState(true);
+  // const [isExpanded, setIsExpanded] = useState(true);
 
   const FILE = 10;
   const [messageStrategy, setMessageStrategy] = useState(0);
   const [sourceData, setSourceData] = useState([]);
-  const [messagePayload, _setMessagePayload] = useState(messageSamples[0]);
-
-  const setMessagePayload = (val) => {
-debugger;
-    _setMessagePayload(val);
-  }
+  const [messagePayload, setMessagePayload] = useState(JSON.stringify(messageSamples[0], null, 2));
+  // const [messagePayload, setMessagePayload] = useState(messageSamples[0]);
 
   const [isInjectCounter, setIsInjectCounter] = useState(true);
   const [isInjectTimestamp, setIsInjectTimestamp] = useState(true);
@@ -102,8 +98,6 @@ debugger;
     var estMilli = recordCount * 150 + requestDelay * recordCount;
     setEstimatedTime(new Date(estMilli).toISOString().slice(11, 19));
   });
-
-
   
 
   const openFile = (theFile) => {
@@ -171,7 +165,6 @@ debugger;
     createChannelList(targetChannels);
     createUuidList(senderUuids);
 
-    console.log("    start timer");
     reset();
     start();
 
@@ -193,8 +186,10 @@ debugger;
     }
 
     if (isInjectTimestamp) {
-      result.timestamp = new Date();
+      result.timestamp = new Date().toString();
     }
+
+    setMessagePayload(() => setMessagePayload(JSON.stringify(result, null, 2)));
 
     return result;
   }
@@ -247,6 +242,12 @@ debugger;
     }
   }
 
+  const handleMessageStrategySelect = (e) => {
+    e.preventDefault();
+    setMessageStrategy(e.target.value);
+    setMessagePayload(JSON.stringify(messageSamples[e.target.value], null, 2));
+  }
+
   return (
     <>
       <Container className="mt--7" fluid>
@@ -254,7 +255,8 @@ debugger;
           <Col className="order-xl-2">
             <Card className="bg-secondary shadow">
               <Accordion
-              // expanded={isExpanded}
+                accordionId="accordion-message-generator"
+                expanded
               >
                 <AccordionSummary
                   expandIcon={<KeyboardArrowUp />}
@@ -293,7 +295,7 @@ debugger;
                               id="label-select-message-strategy"
                               value={messageStrategy}
                               label="Message Payload"
-                              onChange={(e) => setMessageStrategy(e.target.value)}
+                              onChange={(e) => handleMessageStrategySelect(e)}
                             >
                               <MenuItem value={FILE}>Messages File</MenuItem>
                               <MenuItem value={0}>Sample - Simple</MenuItem>
@@ -363,10 +365,13 @@ debugger;
                                   id="input-message-entry"
                                   type="textarea"
                                   rows="19"
-                                  value={JSON.stringify(messageSamples[messageStrategy], null, 2)}
-                                  onChange={() => setMessagePayload(messageSamples[messageStrategy])}
+                                  value={messagePayload}
+                                  // {JSON.stringify(messageSamples[messageStrategy], null, 2)}
+                                  onChange={(e) => setMessagePayload(e.target.value)}
+                                  // messageSamples[messageStrategy]
                                 />
                               </>
+
                             }
                           </FormGroup>
                         </Col>
@@ -687,7 +692,7 @@ export default MessageGenerator;
 const messageSamples = 
 [
   {
-    "text": "message - #counter#"
+    "text": "hello"
   },
   {
     "title": "Ground control to Major Tom",
