@@ -14,7 +14,7 @@ var routesSwissArmy = {
   collapse: true,
   name: "Swiss Army Knife",
   icon: LocalHospitalIcon,
-  iconColor: "Danger",
+  iconColor: "Error",
   state: "swissArmyCollapse",
   views: [
     {

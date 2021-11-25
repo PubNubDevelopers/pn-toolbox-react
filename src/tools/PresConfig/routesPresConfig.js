@@ -7,7 +7,7 @@ import ConfigForm from "pages/ConfigForm";
 
 var routesPresConfig = {
   collapse: true,
-  name: "Presence Config",
+  name: "Presence",
   icon: AppIconName,
   iconColor: "Primary",
   state: "presConfigCollapse",

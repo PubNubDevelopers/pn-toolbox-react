@@ -8,7 +8,7 @@ import GrantToken from "./pages/GrantToken";
 
 var routesAuthAdmin = {
   collapse: true,
-  name: "Auth Admin",
+  name: "Access Manager",
   icon: AdminPanelSettings,
   iconColor: "Primary",
   state: "appNameCollapse",

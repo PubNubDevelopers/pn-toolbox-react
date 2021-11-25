@@ -9,7 +9,7 @@ import { PushDebugProvider } from "./PushDebugProvider";
 
 var routesPushDebug = {
   collapse: true,
-  name: "Push Debug",
+  name: "Mobile Push",
   icon: SendToMobile,
   iconColor: "Primary",
   state: "pushDebugCollapse",
