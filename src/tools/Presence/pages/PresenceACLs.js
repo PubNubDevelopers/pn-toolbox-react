@@ -47,7 +47,8 @@ const PresenceACLs = () => {
   console.log("PresenceACLs keySetContext: ", keySetContext);
   console.log("PresenceACLs presConfigContext: ", usePresenceContext);
 
-  const [channelPattern, setChannelPattern] = useState();
+  const [channelPattern, setChannelPattern] = useState("*");
+  const [isChannleGroup, setIsChannelGroup] = useState(false);
   const [tracking, setTracking] = useState(false);
 
   const [clientEvents, setClientEvents] = useState(false);
@@ -65,6 +66,46 @@ const PresenceACLs = () => {
   const [webhookInterval, setWebhookInterval] = useState(false);
   const [webhookActive, setWebhookActive] = useState(false);
   const [webhookInactive, setWebhookInactive] = useState(false);
+
+  const [aclsConfig, setAclsConfig] = useState([]);
+
+  const generateACLs = () => {
+    let config = {"pattern" : channelPattern};
+
+    config.t = tracking;
+
+    if (tracking) {
+      if (clientEvents) {
+        config.p = {};
+
+        if (!clientEventJoin) config.p.join = false;
+        if (!clientEventLeave) config.p.leave = false;
+        if (!clientEventTimeout) config.p.timeout = false;
+        if (!clientEventStateChange) config.p["state-change"] = false;
+        if (!clientEventInterval) config.p.interval = false;
+
+        if (Object.keys(config.p).length ===0) config.p = true;
+      }
+      else config.p = false;
+
+      if (webhooks) {
+        config.w = {};
+
+        if (!webhookJoin) config.w.join = false;
+        if (!webhookLeave) config.w.leave = false;
+        if (!webhookTimeout) config.w.timeout = false;
+        if (!webhookStateChange) config.w["state-change"] = false;
+        if (!webhookInterval) config.w.interval = false;
+        if (!webhookActive) config.w.active = false;
+        if (!webhookInactive) config.w.inactive = false;
+
+        if (Object.keys(config.w).length ===0) config.p = true;
+      }
+      else config.w = false;
+    }
+
+    setAclsConfig(config);
+  }
 
   return (
     <>
@@ -88,18 +129,26 @@ const PresenceACLs = () => {
                       className="form-control-label"
                       htmlFor="input-channel-pattern"
                     >
-                      <Typography><strong>Channel Pattern</strong></Typography>
+                      <Typography><small><strong>Channel Pattern</strong></small></Typography>
                     </label>
                     <Input
                       className="form-control-alternative"
                       id="input-channel-pattern"
-                      placeholder="Enter the channel name or pattern (regex)"
+                      placeholder="Enter the channel name or pattern (using * as wildcard)"
                       type="text"
                       value={channelPattern}
                       onChange={(e) => setChannelPattern(e.target.value)}
                     />
                   </FormGroup>
                 </Col>
+                  <Col className="text-right">
+                    <Button
+                      color="danger"
+                      onClick={() => generateACLs()}
+                    >
+                      Generate ACLs
+                    </Button>
+                  </Col>
               </Row>
             </CardBody>
             {/* </Row> */}
@@ -113,42 +162,43 @@ const PresenceACLs = () => {
                         <Col sm="7">
                           <label
                             className="form-control-label"
-                            htmlFor="input-publish-client-events"
+                            htmlFor="input-tracking"
                           >
-                            <Typography><strong>Tracking</strong></Typography>
+                            <Typography><small><strong>Tracking</strong></small></Typography>
                           </label>
                         </Col>
                         <Col>
                           <FormGroup>
                             <ButtonGroup
+                              id="input-tracking"
                               className="btn-group-toggle"
                               data-toggle="buttons"
                             >
                               <Button
-                                className={classnames({ active: !clientEvents })}
+                                className={classnames({ active: !tracking })}
                                 color="danger"
-                                onClick={() => setClientEvents(false)}
+                                onClick={() => setTracking(false)}
                                 size="sm"
                               >
                                 <input
                                   autoComplete="off"
                                   name="options"
                                   type="radio"
-                                  value={clientEvents}
+                                  value={tracking}
                                 />
                                 Off
                               </Button>
                               <Button
-                                className={classnames({ active: clientEvents })}
+                                className={classnames({ active: tracking })}
                                 color="danger"
-                                onClick={() => setClientEvents(true)}
+                                onClick={() => setTracking(true)}
                                 size="sm"
                               >
                                 <input
                                   autoComplete="off"
                                   name="options"
                                   type="radio"
-                                  value={clientEvents}
+                                  value={tracking}
                                 />
                                 On
                               </Button>
@@ -170,7 +220,7 @@ const PresenceACLs = () => {
                             className="form-control-label"
                             htmlFor="input-publish-client-events"
                           >
-                            <Typography><strong>Client Events</strong></Typography>
+                            <Typography><small><strong>Client Events</strong></small></Typography>
                           </label>
                         </Col>
                         <Col>
@@ -184,6 +234,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setClientEvents(false)}
                                 size="sm"
+                                disabled={!tracking}
                               >
                                 <input
                                   autoComplete="off"
@@ -198,6 +249,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setClientEvents(true)}
                                 size="sm"
+                                disabled={!tracking}
                               >
                                 <input
                                   autoComplete="off"
@@ -233,6 +285,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setClientEventJoin(false)}
                                 size="sm"
+                                disabled={!tracking || !clientEvents}
                               >
                                 <input
                                   autoComplete="off"
@@ -247,6 +300,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setClientEventJoin(true)}
                                 size="sm"
+                                disabled={!tracking || !clientEvents}
                               >
                                 <input
                                   autoComplete="off"
@@ -282,6 +336,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setClientEventLeave(false)}
                                 size="sm"
+                                disabled={!tracking || !clientEvents}
                               >
                                 <input
                                   autoComplete="off"
@@ -296,6 +351,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setClientEventLeave(true)}
                                 size="sm"
+                                disabled={!tracking || !clientEvents}
                               >
                                 <input
                                   autoComplete="off"
@@ -331,6 +387,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setClientEventTimeout(false)}
                                 size="sm"
+                                disabled={!tracking || !clientEvents}
                               >
                                 <input
                                   autoComplete="off"
@@ -345,6 +402,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setClientEventTimeout(true)}
                                 size="sm"
+                                disabled={!tracking || !clientEvents}
                               >
                                 <input
                                   autoComplete="off"
@@ -380,6 +438,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setClientEventStateChange(false)}
                                 size="sm"
+                                disabled={!tracking || !clientEvents}
                               >
                                 <input
                                   autoComplete="off"
@@ -394,6 +453,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setClientEventStateChange(true)}
                                 size="sm"
+                                disabled={!tracking || !clientEvents}
                               >
                                 <input
                                   autoComplete="off"
@@ -429,6 +489,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setClientEventInterval(false)}
                                 size="sm"
+                                disabled={!tracking || !clientEvents}
                               >
                                 <input
                                   autoComplete="off"
@@ -443,6 +504,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setClientEventInterval(true)}
                                 size="sm"
+                                disabled={!tracking || !clientEvents}
                               >
                                 <input
                                   autoComplete="off"
@@ -471,7 +533,7 @@ const PresenceACLs = () => {
                             className="form-control-label"
                             htmlFor="input-webhooks"
                           >
-                            <Typography><strong>Webhooks</strong></Typography>
+                            <Typography><small><strong>Webhooks</strong></small></Typography>
                           </label>
                         </Col>
                         <Col>
@@ -486,6 +548,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhooks(false)}
                                 size="sm"
+                                disabled={!tracking}
                               >
                                 <input
                                   autoComplete="off"
@@ -500,6 +563,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhooks(true)}
                                 size="sm"
+                                disabled={!tracking}
                               >
                                 <input
                                   autoComplete="off"
@@ -535,6 +599,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookJoin(false)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -549,6 +614,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookJoin(true)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -584,6 +650,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookLeave(false)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -598,6 +665,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookLeave(true)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -633,6 +701,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookTimeout(false)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -647,6 +716,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookTimeout(true)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -682,6 +752,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookStateChange(false)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -696,6 +767,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookStateChange(true)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -731,6 +803,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookInterval(false)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -745,6 +818,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookInterval(true)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -780,6 +854,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookActive(false)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -794,6 +869,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookActive(true)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -829,6 +905,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookInactive(false)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -843,6 +920,7 @@ const PresenceACLs = () => {
                                 color="danger"
                                 onClick={() => setWebhookInactive(true)}
                                 size="sm"
+                                disabled={!tracking || !webhooks}
                               >
                                 <input
                                   autoComplete="off"
@@ -861,7 +939,27 @@ const PresenceACLs = () => {
                 </CardBody>
               </Col>
             </Row>
+          </Card>
 
+          <Card>
+            <Row>
+              <CardBody id="acls-config">
+                <label
+                  className="form-control-label"
+                  htmlFor="output-acls-config"
+                >
+                  ACLs Config
+                </label>
+                <Input
+                  className="form-control-alternative"
+                  id="output-acls-config"
+                  type="textarea"
+                  rows="4"
+                  value={JSON.stringify(aclsConfig, null, 2)}
+                  onChange={(e) => setAclsConfig(e.target.value)}
+                />
+              </CardBody>
+            </Row>
           </Card>
         </Form>
       </Container>
