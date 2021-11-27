@@ -1202,19 +1202,6 @@ const AclTable = ({ acls }) => {
   );
 }
 
-const acl = {
-  "pattern": "*",
-  "t": true,
-  "ts": false,
-  "th": false,
-  "p": {
-    "join": false
-  },
-  "w": {
-    "join": false
-  }
-}
-
 const AclRow = ({ index, acl }) => {
   return (
     <>
@@ -1230,20 +1217,20 @@ const AclRow = ({ index, acl }) => {
           <Chip color={(acl.t == null || acl.t) && (acl.th == null || acl.th) ? "primary" : "secondary"} size="small" label="TH"/>&nbsp;
         </TableCell>
         <TableCell align="center">
-          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p.join || acl.p.join == null) ? "primary" : "secondary"} size="small" label="J"/>&nbsp;
-          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p.leave || acl.p.leave == null) ? "primary" : "secondary"} size="small" label="L"/>&nbsp;
-          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p.timeout || acl.p.timeout == null) ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
-          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p["state-change"] || acl.p["state-change"] == null) ? "primary" : "secondary"} size="small" label="S"/>&nbsp;
-          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p.interval || acl.p.interval == null) ? "primary" : "secondary"} size="small" label="I"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p == null || acl.p.join == null || acl.p.join) ? "primary" : "secondary"} size="small" label="J"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p == null || acl.p.leave == null || acl.p.leave) ? "primary" : "secondary"} size="small" label="L"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p == null || acl.p.timeout == null ||acl.p.timeout) ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p == null || acl.p["state-change"] == null || acl.p["state-change"]) ? "primary" : "secondary"} size="small" label="S"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p == null || acl.p.interval == null || acl.p.interval || acl.p.interval == null) ? "primary" : "secondary"} size="small" label="I"/>&nbsp;
         </TableCell>
         <TableCell align="center">
-          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w.join || acl.w.join == null) ? "primary" : "secondary"} size="small" label="J"/>&nbsp;
-          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w.leave || acl.w.leave == null) ? "primary" : "secondary"} size="small" label="L"/>&nbsp;
-          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w.timeout || acl.w.timeout == null) ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
-          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w["state-change"] || acl.w["state-change"] == null) ? "primary" : "secondary"} size="small" label="S"/>&nbsp;
-          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w.interval || acl.w.interval == null) ? "primary" : "secondary"} size="small" label="I"/>&nbsp;
-          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w.active || acl.w.active == null) ? "primary" : "secondary"} size="small" label="A"/>&nbsp;
-          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w.inactive || acl.w.inactive == null) ? "primary" : "secondary"} size="small" label="IA"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.join == null || acl.w.join) ? "primary" : "secondary"} size="small" label="J"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.leave == null || acl.w.leave) ? "primary" : "secondary"} size="small" label="L"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.timeout == null || acl.w.timeout) ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w["state-change"] == null || acl.w["state-change"]) ? "primary" : "secondary"} size="small" label="S"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.interval == null || acl.w.interval) ? "primary" : "secondary"} size="small" label="I"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.active == null || acl.w.active) ? "primary" : "secondary"} size="small" label="A"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.inactive == null || acl.w.inactive) ? "primary" : "secondary"} size="small" label="IA"/>&nbsp;
         </TableCell>
         <TableCell align="center">ACTIONS</TableCell>
       </TableRow>
