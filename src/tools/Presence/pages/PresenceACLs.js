@@ -48,33 +48,39 @@ const PresenceACLs = () => {
   console.log("PresenceACLs presConfigContext: ", usePresenceContext);
 
   const [channelPattern, setChannelPattern] = useState("*");
-  const [isChannleGroup, setIsChannelGroup] = useState(false);
-  const [tracking, setTracking] = useState(false);
+  const [isChannelGroup, setIsChannelGroup] = useState(false);
 
-  const [clientEvents, setClientEvents] = useState(false);
-  const [clientEventJoin, setClientEventJoin] = useState(false);
-  const [clientEventLeave, setClientEventLeave] = useState(false);
-  const [clientEventTimeout, setClientEventTimeout] = useState(false);
-  const [clientEventStateChange, setClientEventStateChange] = useState(false);
-  const [clientEventInterval, setClientEventInterval] = useState(false);
+  const [tracking, setTracking] = useState(true);
+  const [trackSubscribes, setTrackSubscribes] = useState(true);
+  const [trackHeartbeats, setTrackHeartbeats] = useState(true);
 
-  const [webhooks, setWebhooks] = useState(false);
-  const [webhookJoin, setWebhookJoin] = useState(false);
-  const [webhookLeave, setWebhookLeave] = useState(false);
-  const [webhookTimeout, setWebhookTimeout] = useState(false);
-  const [webhookStateChange, setWebhookStateChange] = useState(false);
-  const [webhookInterval, setWebhookInterval] = useState(false);
-  const [webhookActive, setWebhookActive] = useState(false);
-  const [webhookInactive, setWebhookInactive] = useState(false);
+  const [clientEvents, setClientEvents] = useState(true);
+  const [clientEventJoin, setClientEventJoin] = useState(true);
+  const [clientEventLeave, setClientEventLeave] = useState(true);
+  const [clientEventTimeout, setClientEventTimeout] = useState(true);
+  const [clientEventStateChange, setClientEventStateChange] = useState(true);
+  const [clientEventInterval, setClientEventInterval] = useState(true);
+
+  const [webhooks, setWebhooks] = useState(true);
+  const [webhookJoin, setWebhookJoin] = useState(true);
+  const [webhookLeave, setWebhookLeave] = useState(true);
+  const [webhookTimeout, setWebhookTimeout] = useState(true);
+  const [webhookStateChange, setWebhookStateChange] = useState(true);
+  const [webhookInterval, setWebhookInterval] = useState(true);
+  const [webhookActive, setWebhookActive] = useState(true);
+  const [webhookInactive, setWebhookInactive] = useState(true);
 
   const [aclsConfig, setAclsConfig] = useState([]);
 
   const generateACLs = () => {
-    let config = {"pattern" : channelPattern};
+    let config = isChannelGroup ? { "cg_pattern": channelPattern } : { "pattern": channelPattern };
 
     config.t = tracking;
 
     if (tracking) {
+      if (!trackSubscribes) config.ts = false;
+      if (!trackHeartbeats) config.th = false;
+
       if (clientEvents) {
         config.p = {};
 
@@ -84,7 +90,7 @@ const PresenceACLs = () => {
         if (!clientEventStateChange) config.p["state-change"] = false;
         if (!clientEventInterval) config.p.interval = false;
 
-        if (Object.keys(config.p).length ===0) config.p = true;
+        if (Object.keys(config.p).length === 0) config.p = true;
       }
       else config.p = false;
 
@@ -99,7 +105,7 @@ const PresenceACLs = () => {
         if (!webhookActive) config.w.active = false;
         if (!webhookInactive) config.w.inactive = false;
 
-        if (Object.keys(config.w).length ===0) config.p = true;
+        if (Object.keys(config.w).length === 0) config.w = true;
       }
       else config.w = false;
     }
@@ -141,14 +147,57 @@ const PresenceACLs = () => {
                     />
                   </FormGroup>
                 </Col>
-                  <Col className="text-right">
-                    <Button
-                      color="danger"
-                      onClick={() => generateACLs()}
+              </Row>
+
+              <Row id="is-channel-group">
+                <Col sm="2">
+                  <label
+                    className="form-control-label"
+                    htmlFor="input-is-channel-group"
+                  >
+                    <Typography><small><strong>&nbsp;&nbsp;&nbsp;&nbsp;Is Channel Group?</strong></small></Typography>
+                  </label>
+                </Col>
+                <Col sm="3">
+                  <FormGroup>
+                    <ButtonGroup
+                      id="input-is-channel-group"
+                      className="btn-group-toggle"
+                      data-toggle="buttons"
                     >
-                      Generate ACLs
-                    </Button>
-                  </Col>
+                      <Button
+                        className={classnames({ active: !isChannelGroup })}
+                        color="danger"
+                        onClick={() => setIsChannelGroup(false)}
+                        size="sm"
+                        disabled={!tracking}
+                      >
+                        <input
+                          autoComplete="off"
+                          name="options"
+                          type="radio"
+                          value={isChannelGroup}
+                        />
+                        No
+                      </Button>
+                      <Button
+                        className={classnames({ active: isChannelGroup })}
+                        color="danger"
+                        onClick={() => setIsChannelGroup(true)}
+                        size="sm"
+                        disabled={!tracking}
+                      >
+                        <input
+                          autoComplete="off"
+                          name="options"
+                          type="radio"
+                          value={isChannelGroup}
+                        />
+                        Yes
+                      </Button>
+                    </ButtonGroup>
+                  </FormGroup>
+                </Col>
               </Row>
             </CardBody>
             {/* </Row> */}
@@ -156,10 +205,10 @@ const PresenceACLs = () => {
             <Row>
               <Col id="col-left">
                 <CardBody id="cardbody-left-inputs">
-                <Row>
+                  <Row id="tracking">
                     <Col sm="6">
                       <Row>
-                        <Col sm="7">
+                        <Col sm="5">
                           <label
                             className="form-control-label"
                             htmlFor="input-tracking"
@@ -209,13 +258,122 @@ const PresenceACLs = () => {
                     </Col>
                   </Row>
 
-                  <Row>&nbsp;</Row>
-                  <Row>&nbsp;</Row>
-
-                  <Row>
+                  <Row id="track-subscribes">
                     <Col sm="6">
                       <Row>
-                        <Col sm="7">
+                        <Col sm="5">
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-track-subscribes"
+                          >
+                            <Typography><small><strong>&nbsp;&nbsp;&nbsp;&nbsp;Subscribes</strong></small></Typography>
+                          </label>
+                        </Col>
+                        <Col>
+                          <FormGroup>
+                            <ButtonGroup
+                              id="input-track-subscribes"
+                              className="btn-group-toggle"
+                              data-toggle="buttons"
+                            >
+                              <Button
+                                className={classnames({ active: !trackSubscribes })}
+                                color="danger"
+                                onClick={() => setTrackSubscribes(false)}
+                                size="sm"
+                                disabled={!tracking}
+                              >
+                                <input
+                                  autoComplete="off"
+                                  name="options"
+                                  type="radio"
+                                  value={trackSubscribes}
+                                />
+                                Off
+                              </Button>
+                              <Button
+                                className={classnames({ active: trackSubscribes })}
+                                color="danger"
+                                onClick={() => setTrackSubscribes(true)}
+                                size="sm"
+                                disabled={!tracking}
+                              >
+                                <input
+                                  autoComplete="off"
+                                  name="options"
+                                  type="radio"
+                                  value={trackSubscribes}
+                                />
+                                On
+                              </Button>
+                            </ButtonGroup>
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                    </Col>
+                  </Row>
+
+                  <Row id="track-heartbeats">
+                    <Col sm="6">
+                      <Row>
+                        <Col sm="5">
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-track-heartbeats"
+                          >
+                            <Typography><small><strong>&nbsp;&nbsp;&nbsp;&nbsp;Heartbeats</strong></small></Typography>
+                          </label>
+                        </Col>
+                        <Col>
+                          <FormGroup>
+                            <ButtonGroup
+                              id="input-track-heartbeats"
+                              className="btn-group-toggle"
+                              data-toggle="buttons"
+                            >
+                              <Button
+                                className={classnames({ active: !trackHeartbeats })}
+                                color="danger"
+                                onClick={() => setTrackHeartbeats(false)}
+                                size="sm"
+                                disabled={!tracking}
+                              >
+                                <input
+                                  autoComplete="off"
+                                  name="options"
+                                  type="radio"
+                                  value={trackHeartbeats}
+                                />
+                                Off
+                              </Button>
+                              <Button
+                                className={classnames({ active: trackHeartbeats })}
+                                color="danger"
+                                onClick={() => setTrackHeartbeats(true)}
+                                size="sm"
+                                disabled={!tracking}
+                              >
+                                <input
+                                  autoComplete="off"
+                                  name="options"
+                                  type="radio"
+                                  value={trackHeartbeats}
+                                />
+                                On
+                              </Button>
+                            </ButtonGroup>
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                    </Col>
+                  </Row>
+
+                  <Row>&nbsp;</Row>
+
+                  <Row id="client-events">
+                    <Col sm="6">
+                      <Row>
+                        <Col sm="5">
                           <label
                             className="form-control-label"
                             htmlFor="input-publish-client-events"
@@ -525,10 +683,10 @@ const PresenceACLs = () => {
 
               <Col id="col-right">
                 <CardBody id="cardbody-right-inputs">
-                  <Row>
+                  <Row id="webhooks">
                     <Col sm="6">
                       <Row>
-                        <Col sm="7">
+                        <Col sm="5">
                           <label
                             className="form-control-label"
                             htmlFor="input-webhooks"
@@ -941,20 +1099,31 @@ const PresenceACLs = () => {
             </Row>
           </Card>
 
-          <Card>
+          <Card className="bg-secondary shadow">
+            <CardHeader>
+              <Row>
+                <Col>
+                  <div className="col">
+                    <h3 className="mb-0">ACL Config</h3>
+                  </div>
+                </Col>
+                <Col className="text-right">
+                  <Button
+                    color="danger"
+                    onClick={() => generateACLs()}
+                  >
+                    Generate ACLs
+                  </Button>
+                </Col>
+              </Row>
+            </CardHeader>
             <Row>
               <CardBody id="acls-config">
-                <label
-                  className="form-control-label"
-                  htmlFor="output-acls-config"
-                >
-                  ACLs Config
-                </label>
                 <Input
                   className="form-control-alternative"
                   id="output-acls-config"
                   type="textarea"
-                  rows="4"
+                  rows="20"
                   value={JSON.stringify(aclsConfig, null, 2)}
                   onChange={(e) => setAclsConfig(e.target.value)}
                 />
