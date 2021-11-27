@@ -83,8 +83,6 @@ const PresenceACLs = () => {
   const generateACLs = () => {
     let config = isChannelGroup ? { "cg_pattern": channelPattern } : { "pattern": channelPattern };
 
-    config.t = tracking;
-
     if (tracking) {
       if (!trackSubscribes) config.ts = false;
       if (!trackHeartbeats) config.th = false;
@@ -98,7 +96,7 @@ const PresenceACLs = () => {
         if (!clientEventStateChange) config.p["state-change"] = false;
         if (!clientEventInterval) config.p.interval = false;
 
-        if (Object.keys(config.p).length === 0) config.p = true;
+        if (Object.keys(config.p).length === 0) delete config.p;
       }
       else config.p = false;
 
@@ -113,10 +111,11 @@ const PresenceACLs = () => {
         if (!webhookActive) config.w.active = false;
         if (!webhookInactive) config.w.inactive = false;
 
-        if (Object.keys(config.w).length === 0) config.w = true;
+        if (Object.keys(config.w).length === 0) delete config.w;
       }
       else config.w = false;
     }
+    else config.t = false;
 
     setAclsConfig(config);
   }
@@ -1183,10 +1182,11 @@ const AclTable = ({ acls }) => {
             <TableRow>
               <TableCell align="right">#</TableCell>
               <TableCell>Pattern</TableCell>
-              <TableCell>Tracking</TableCell>
-              <TableCell>Publish Events</TableCell>
-              <TableCell>Webhooks</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell align="center">CG?</TableCell>
+              <TableCell align="center">Tracking</TableCell>
+              <TableCell align="center">Publish Events</TableCell>
+              <TableCell align="center">Webhooks</TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
 
@@ -1221,42 +1221,32 @@ const AclRow = ({ index, acl }) => {
       <TableRow key={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell align="right">{index}</TableCell>
         <TableCell component="th" scope="row"><strong>{acl.pattern}</strong></TableCell>
-        <TableCell component="th" scope="row">
-          <Chip color={acl.t ? "primary" : ""} size="small" label="T"/>
-          <Chip color={acl.ts ? "primary" : ""} size="small" label="TS"/>
-          <Chip color={acl.th ? "primary" : ""} size="small" label="TH"/>
+        <TableCell align="center">
+
         </TableCell>
-        <TableCell>
-          <Chip color={acl.p && !acl.p.join && acl.p.join != null  ? "" : "primary"} size="small" label="J"/>
-          <Chip color={acl.p && !acl.p.leave && acl.p.leave != null  ? "" : "primary"} size="small" label="L"/>
-          <Chip color={acl.p && !acl.p.timeout && acl.p.timeout != null  ? "" : "primary"} size="small" label="T"/>
-          <Chip color={acl.p && !acl.p["state-change"] && acl.p["state-change"] != null  ? "" : "primary"} size="small" label="SC"/>
-          <Chip color={acl.p && !acl.p.interval && acl.p.interval != null  ? "" : "primary"} size="small" label="I"/>
+        <TableCell component="th" scope="row" align="center">
+        <Chip color={acl.t == null || acl.t ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.ts == null || acl.ts) ? "primary" : "secondary"} size="small" label="TS"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.th == null || acl.th) ? "primary" : "secondary"} size="small" label="TH"/>&nbsp;
         </TableCell>
-        <TableCell>
-          <Chip color={acl.w && !acl.w.join && acl.w.join != null  ? "" : "primary"} size="small" label="J"/>
-          <Chip color={acl.w && !acl.w.leave && acl.w.leave != null  ? "" : "primary"} size="small" label="L"/>
-          <Chip color={acl.w && !acl.w.timeout && acl.w.timeout != null  ? "" : "primary"} size="small" label="T"/>
-          <Chip color={acl.w && !acl.w["state-change"] && acl.w["state-change"] != null  ? "" : "primary"} size="small" label="SC"/>
-          <Chip color={acl.w && !acl.w.interval && acl.w.interval != null  ? "" : "primary"} size="small" label="I"/>
-          <Chip color={acl.w && !acl.w.active && acl.w.active != null  ? "" : "primary"} size="small" label="A"/>
-          <Chip color={acl.w && !acl.w.inactive && acl.w.inactive != null  ? "" : "primary"} size="small" label="IA"/>
+        <TableCell align="center">
+          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p.join || acl.p.join == null) ? "primary" : "secondary"} size="small" label="J"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p.leave || acl.p.leave == null) ? "primary" : "secondary"} size="small" label="L"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p.timeout || acl.p.timeout == null) ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p["state-change"] || acl.p["state-change"] == null) ? "primary" : "secondary"} size="small" label="S"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p.interval || acl.p.interval == null) ? "primary" : "secondary"} size="small" label="I"/>&nbsp;
         </TableCell>
-        <TableCell>ACTIONS</TableCell>
-        <TableCell align="right">{acl.milli}</TableCell>
-        <TableCell align="right">{acl.micronano}</TableCell>
+        <TableCell align="center">
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w.join || acl.w.join == null) ? "primary" : "secondary"} size="small" label="J"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w.leave || acl.w.leave == null) ? "primary" : "secondary"} size="small" label="L"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w.timeout || acl.w.timeout == null) ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w["state-change"] || acl.w["state-change"] == null) ? "primary" : "secondary"} size="small" label="S"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w.interval || acl.w.interval == null) ? "primary" : "secondary"} size="small" label="I"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w.active || acl.w.active == null) ? "primary" : "secondary"} size="small" label="A"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w.inactive || acl.w.inactive == null) ? "primary" : "secondary"} size="small" label="IA"/>&nbsp;
+        </TableCell>
+        <TableCell align="center">ACTIONS</TableCell>
       </TableRow>
     </>
   );
 }
-
-{/* <TableRow key={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
-<TableCell align="right">{index}</TableCell>
-<TableCell component="th" scope="row">{acl.pattern}</TableCell>
-<TableCell component="th" scope="row">{acl.t} | {acl.ts} | {acl.th}</TableCell>
-<TableCell>{acl.p} | {acl.p.join} | {acl.p.leave} | {acl.p.timeout} | {acl.p["state-change"]} | {acl.p.interval}</TableCell>
-<TableCell>{acl.w} | {acl.w.join} | {acl.w.leave} | {acl.w.timeout} | {acl.w["state-change"]} | {acl.w.interval} | {acl.w.active} | {acl.w.inactive}</TableCell>
-<TableCell>ACTIONS</TableCell>
-<TableCell align="right">{acl.milli}</TableCell>
-<TableCell align="right">{acl.micronano}</TableCell>
-</TableRow> */}
