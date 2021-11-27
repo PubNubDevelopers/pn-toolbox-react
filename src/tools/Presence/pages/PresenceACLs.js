@@ -16,7 +16,7 @@
 
 */
 
-import { Typography } from "@material-ui/core";
+import { Chip, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import { classnames } from "@material-ui/data-grid";
 import { useState } from "react";
 // import classnames from "classnames";
@@ -47,6 +47,8 @@ const PresenceACLs = () => {
   console.log("PresenceACLs keySetContext: ", keySetContext);
   console.log("PresenceACLs presConfigContext: ", usePresenceContext);
 
+  const [aclsConfigData, setAclsConfigData] = useState([]);
+
   const [channelPattern, setChannelPattern] = useState("*");
   const [isChannelGroup, setIsChannelGroup] = useState(false);
 
@@ -71,6 +73,12 @@ const PresenceACLs = () => {
   const [webhookInactive, setWebhookInactive] = useState(true);
 
   const [aclsConfig, setAclsConfig] = useState([]);
+
+  const addAcl = () => {
+    let temp = aclsConfigData;
+    temp.push(aclsConfig);
+    setAclsConfig(temp);
+  }
 
   const generateACLs = () => {
     let config = isChannelGroup ? { "cg_pattern": channelPattern } : { "pattern": channelPattern };
@@ -116,14 +124,39 @@ const PresenceACLs = () => {
   return (
     <>
       <Container className="mt--7" fluid>
+        <Card id="table-acls" className="bg-secondary shadow">
+
+          <CardHeader className="border-0">
+            <Row className="align-items-center">
+              <div className="col">
+                <h3 className="mb-0">Presence ACLs</h3>
+              </div>
+            </Row>
+          </CardHeader>
+
+          <CardBody id="cardbody-acls-table">
+            <div className="pl-lg-12">
+              <AclTable acls={aclsConfigData} />
+            </div>
+          </CardBody>
+
+        </Card>
+
         <Form onSubmit={(e) => e.preventDefault()}>
-          <Card className="bg-secondary shadow">
-            {/* <Row> */}
+          <Card id="input-acls-config" className="bg-secondary shadow">
             <CardHeader className="border-0">
               <Row className="align-items-center">
                 <div className="col">
-                  <h3 className="mb-0">Presence ACLs</h3>
+                  <h3 className="mb-0">ACL Configuration</h3>
                 </div>
+                <Col className="text-right">
+                  <Button
+                    color="danger"
+                    onClick={() => addAcl()}
+                  >
+                    Add ACL
+                  </Button>
+                </Col>
               </Row>
             </CardHeader>
 
@@ -200,7 +233,6 @@ const PresenceACLs = () => {
                 </Col>
               </Row>
             </CardBody>
-            {/* </Row> */}
 
             <Row>
               <Col id="col-left">
@@ -1099,7 +1131,7 @@ const PresenceACLs = () => {
             </Row>
           </Card>
 
-          <Card className="bg-secondary shadow">
+          <Card id="output-acls-config" className="bg-secondary shadow">
             <CardHeader>
               <Row>
                 <Col>
@@ -1137,3 +1169,94 @@ const PresenceACLs = () => {
 };
 
 export default PresenceACLs;
+
+const AclTable = ({ acls }) => {
+  console.log("ACLs", acls);
+
+  if (acls == null || acls.length === 0) return <>No ACLs</>;
+
+  return (
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <TableContainer >
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell align="right">#</TableCell>
+              <TableCell>Pattern</TableCell>
+              <TableCell>Tracking</TableCell>
+              <TableCell>Publish Events</TableCell>
+              <TableCell>Webhooks</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {acls.map((acl, index) => (
+              <AclRow index={index} acl={acl}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
+  );
+}
+
+const acl = {
+  "pattern": "*",
+  "t": true,
+  "ts": false,
+  "th": false,
+  "p": {
+    "join": false
+  },
+  "w": {
+    "join": false
+  }
+}
+
+const AclRow = ({ index, acl }) => {
+  return (
+    <>
+      <TableRow key={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <TableCell align="right">{index}</TableCell>
+        <TableCell component="th" scope="row"><strong>{acl.pattern}</strong></TableCell>
+        <TableCell component="th" scope="row">
+          <Chip color={acl.t ? "primary" : ""} size="small" label="T"/>
+          <Chip color={acl.ts ? "primary" : ""} size="small" label="TS"/>
+          <Chip color={acl.th ? "primary" : ""} size="small" label="TH"/>
+        </TableCell>
+        <TableCell>
+          <Chip color={acl.p && !acl.p.join && acl.p.join != null  ? "" : "primary"} size="small" label="J"/>
+          <Chip color={acl.p && !acl.p.leave && acl.p.leave != null  ? "" : "primary"} size="small" label="L"/>
+          <Chip color={acl.p && !acl.p.timeout && acl.p.timeout != null  ? "" : "primary"} size="small" label="T"/>
+          <Chip color={acl.p && !acl.p["state-change"] && acl.p["state-change"] != null  ? "" : "primary"} size="small" label="SC"/>
+          <Chip color={acl.p && !acl.p.interval && acl.p.interval != null  ? "" : "primary"} size="small" label="I"/>
+        </TableCell>
+        <TableCell>
+          <Chip color={acl.w && !acl.w.join && acl.w.join != null  ? "" : "primary"} size="small" label="J"/>
+          <Chip color={acl.w && !acl.w.leave && acl.w.leave != null  ? "" : "primary"} size="small" label="L"/>
+          <Chip color={acl.w && !acl.w.timeout && acl.w.timeout != null  ? "" : "primary"} size="small" label="T"/>
+          <Chip color={acl.w && !acl.w["state-change"] && acl.w["state-change"] != null  ? "" : "primary"} size="small" label="SC"/>
+          <Chip color={acl.w && !acl.w.interval && acl.w.interval != null  ? "" : "primary"} size="small" label="I"/>
+          <Chip color={acl.w && !acl.w.active && acl.w.active != null  ? "" : "primary"} size="small" label="A"/>
+          <Chip color={acl.w && !acl.w.inactive && acl.w.inactive != null  ? "" : "primary"} size="small" label="IA"/>
+        </TableCell>
+        <TableCell>ACTIONS</TableCell>
+        <TableCell align="right">{acl.milli}</TableCell>
+        <TableCell align="right">{acl.micronano}</TableCell>
+      </TableRow>
+    </>
+  );
+}
+
+{/* <TableRow key={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
+<TableCell align="right">{index}</TableCell>
+<TableCell component="th" scope="row">{acl.pattern}</TableCell>
+<TableCell component="th" scope="row">{acl.t} | {acl.ts} | {acl.th}</TableCell>
+<TableCell>{acl.p} | {acl.p.join} | {acl.p.leave} | {acl.p.timeout} | {acl.p["state-change"]} | {acl.p.interval}</TableCell>
+<TableCell>{acl.w} | {acl.w.join} | {acl.w.leave} | {acl.w.timeout} | {acl.w["state-change"]} | {acl.w.interval} | {acl.w.active} | {acl.w.inactive}</TableCell>
+<TableCell>ACTIONS</TableCell>
+<TableCell align="right">{acl.milli}</TableCell>
+<TableCell align="right">{acl.micronano}</TableCell>
+</TableRow> */}
