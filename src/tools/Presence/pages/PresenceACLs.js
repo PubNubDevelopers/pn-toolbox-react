@@ -18,7 +18,7 @@
 
 import { Chip, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@material-ui/core";
 import { classnames } from "@material-ui/data-grid";
-import { Check, Edit, CheckCircle, AddCircle, DeleteForever, KeyboardArrowUp, KeyboardArrowDown } from "@mui/icons-material";
+import { Edit, CheckCircle, AddCircle, DeleteForever, KeyboardArrowUp, KeyboardArrowDown } from "@mui/icons-material";
 import { useState } from "react";
 // import classnames from "classnames";
 
@@ -1326,7 +1326,7 @@ const AclRow = ({ acl, index }) => {
           <strong>{acl.pattern || acl.cg_pattern}</strong>
         </TableCell>
         <TableCell align="center">
-          {acl.cg_pattern != null ? <Check/> : ""}
+          <Chip color={acl.cg_pattern != null ? "primary" : "secondary"} size="small" label="CG"/>&nbsp;
         </TableCell>
         <TableCell component="th" scope="row" align="center">
           <Chip color={acl.t == null || acl.t ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
