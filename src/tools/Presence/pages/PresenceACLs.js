@@ -1210,11 +1210,13 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
 
   const saveAcl = (e) => {
     e.preventDefault();
+    let tmp = JSON.parse(JSON.stringify(aclsConfigData));
+    tmp[index] = editAcl;
+    setAclsConfigData(tmp);
   }
 
   const addAcl = (e) => {
     e.preventDefault();
-
     let tmp = JSON.parse(JSON.stringify(aclsConfigData));
     tmp.push(editAcl);
     setAclsConfigData(tmp);
@@ -1228,6 +1230,13 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
 
   const deleteAcl = (e, selRow) => {
     e.preventDefault();
+    let tmp = JSON.parse(JSON.stringify(aclsConfigData));
+
+    if (selRow > -1) {
+      tmp.splice(selRow, 1);
+    }
+
+    setAclsConfigData(tmp);
   }
 
 
