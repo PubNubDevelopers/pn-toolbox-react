@@ -16,8 +16,9 @@
 
 */
 
-import { Chip, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
+import { Chip, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@material-ui/core";
 import { classnames } from "@material-ui/data-grid";
+import { Check, Edit, CheckCircle, AddCircle, DeleteForever, KeyboardArrowUp, KeyboardArrowDown } from "@mui/icons-material";
 import { useState } from "react";
 // import classnames from "classnames";
 
@@ -72,12 +73,13 @@ const PresenceACLs = () => {
   const [webhookActive, setWebhookActive] = useState(true);
   const [webhookInactive, setWebhookInactive] = useState(true);
 
-  const [aclsConfig, setAclsConfig] = useState([]);
+  const [aclsConfig, setAclsConfig] = useState({});
 
   const addAcl = () => {
-    let temp = aclsConfigData;
+    // this is a safe deep copy of the array of objects
+    let temp = JSON.parse(JSON.stringify(aclsConfigData));
     temp.push(aclsConfig);
-    setAclsConfig(temp);
+    setAclsConfigData(temp);
   }
 
   const generateACLs = () => {
@@ -135,7 +137,7 @@ const PresenceACLs = () => {
 
           <CardBody id="cardbody-acls-table">
             <div className="pl-lg-12">
-              <AclTable acls={aclsConfigData} />
+              <AclsTable aclsConfigData={aclsConfigData} setAclsConfigData={setAclsConfigData} />
             </div>
           </CardBody>
 
@@ -1169,10 +1171,56 @@ const PresenceACLs = () => {
 
 export default PresenceACLs;
 
-const AclTable = ({ acls }) => {
-  console.log("ACLs", acls);
+const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
+  console.log("ACLs", aclsConfigData);
 
-  if (acls == null || acls.length === 0) return <>No ACLs</>;
+  // const [pattern, setPattern] = useState("*");
+  const [editAcl, setEditAcl] = useState({"pattern":"*"});
+
+  const clickCGChip = (e) => {
+    e.preventDefault();
+    let tmp = JSON.parse(JSON.stringify(editAcl));
+
+    if (tmp.pattern != null) {
+      tmp.cg_pattern = tmp.pattern;
+      delete tmp.pattern;
+    }
+    else {
+      tmp.pattern = tmp.cg_pattern;
+      delete tmp.cg_pattern;
+    }
+    
+    setEditAcl(tmp);
+  }
+
+  const clickChip = (e, prop, prop2) => {
+    e.preventDefault();
+    let tmp = JSON.parse(JSON.stringify(editAcl));
+    
+    if (prop2 == null) {
+      tmp[prop] = !editAcl[prop];
+    }
+    else {
+      if (tmp[prop] == null) tmp[prop] = {};
+      tmp[prop][prop2] = editAcl[prop] == null ? false : !editAcl[prop][prop2];
+    }
+    
+    setEditAcl(tmp);
+  }
+
+  const saveAcl = (e) => {
+    e.preventDefault();
+  }
+
+  const addAcl = (e) => {
+    e.preventDefault();
+
+    let tmp = JSON.parse(JSON.stringify(aclsConfigData));
+    tmp.push(editAcl);
+    setAclsConfigData(tmp);
+  }
+
+  if (aclsConfigData == null || aclsConfigData.length === 0) return <>No ACLs</>;
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -1180,6 +1228,7 @@ const AclTable = ({ acls }) => {
         <Table stickyHeader>
           <TableHead>
             <TableRow>
+              <TableCell align="center">Order</TableCell>
               <TableCell align="right">#</TableCell>
               <TableCell>Pattern</TableCell>
               <TableCell align="center">CG?</TableCell>
@@ -1188,31 +1237,99 @@ const AclTable = ({ acls }) => {
               <TableCell align="center">Webhooks</TableCell>
               <TableCell align="center">Actions</TableCell>
             </TableRow>
+            <TableRow>
+              <TableCell align="right"></TableCell>
+              <TableCell align="right" style={{ verticalAlign: 'top'}}>index</TableCell>
+              <TableCell style={{verticalAlign: 'top'}}>
+                <Input
+                  className="form-control-alternative"
+                  id="input-channel-pattern"
+                  placeholder="Enter a name or pattern (using * as wildcard)"
+                  type="text"
+                  value={editAcl.pattern}
+                  disabled
+                />
+              </TableCell>
+              <TableCell align="center" style={{ verticalAlign: 'top'}}>
+                <Chip onClick={(e) => clickCGChip(e)} color={editAcl.cg_pattern != null ? "primary" : "secondary"} size="small" label="CG"/>&nbsp;
+              </TableCell>
+              <TableCell align="center" style={{ verticalAlign: 'top'}}>
+                <Chip onClick={(e) => clickChip(e, "t")} color={editAcl.t == null || editAcl.t ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
+                <Chip onClick={(e) => clickChip(e, "ts")} color={(editAcl.t == null || editAcl.t) && (editAcl.ts == null || editAcl.ts) ? "primary" : "secondary"} size="small" label="TS"/>&nbsp;
+                <Chip onClick={(e) => clickChip(e, "th")} color={(editAcl.t == null || editAcl.t) && (editAcl.th == null || editAcl.th) ? "primary" : "secondary"} size="small" label="TH"/>
+              </TableCell>
+              <TableCell align="center" style={{ verticalAlign: 'top'}}>
+                <Chip onClick={(e) => clickChip(e, "p", "join")} color={(editAcl.t == null || editAcl.t) && (editAcl.p == null || editAcl.p) && (editAcl.p == null || editAcl.p.join == null || editAcl.p.join) ? "primary" : "secondary"} size="small" label="J"/>&nbsp;
+                <Chip onClick={(e) => clickChip(e, "p", "leave")} color={(editAcl.t == null || editAcl.t) && (editAcl.p == null || editAcl.p) && (editAcl.p == null || editAcl.p.leave == null || editAcl.p.leave) ? "primary" : "secondary"} size="small" label="L"/>&nbsp;
+                <Chip onClick={(e) => clickChip(e, "p", "timeout")} color={(editAcl.t == null || editAcl.t) && (editAcl.p == null || editAcl.p) && (editAcl.p == null || editAcl.p.timeout == null ||editAcl.p.timeout) ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
+                <Chip onClick={(e) => clickChip(e, "p", "state-change")} color={(editAcl.t == null || editAcl.t) && (editAcl.p == null || editAcl.p) && (editAcl.p == null || editAcl.p["state-change"] == null || editAcl.p["state-change"]) ? "primary" : "secondary"} size="small" label="S"/>&nbsp;
+                <Chip onClick={(e) => clickChip(e, "p", "interval")} color={(editAcl.t == null || editAcl.t) && (editAcl.p == null || editAcl.p) && (editAcl.p == null || editAcl.p.interval == null || editAcl.p.interval) ? "primary" : "secondary"} size="small" label="I"/>
+              </TableCell>
+              <TableCell align="center" style={{ verticalAlign: 'top'}}>
+                <Chip onClick={(e) => clickChip(e, "w", "join")} color={(editAcl.t == null || editAcl.t) && (editAcl.w == null || editAcl.w) && (editAcl.w == null || editAcl.w.join == null || editAcl.w.join) ? "primary" : "secondary"} size="small" label="J"/>&nbsp;
+                <Chip onClick={(e) => clickChip(e, "w", "leave")} color={(editAcl.t == null || editAcl.t) && (editAcl.w == null || editAcl.w) && (editAcl.w == null || editAcl.w.leave == null || editAcl.w.leave) ? "primary" : "secondary"} size="small" label="L"/>&nbsp;
+                <Chip onClick={(e) => clickChip(e, "w", "timeout")} color={(editAcl.t == null || editAcl.t) && (editAcl.w == null || editAcl.w) && (editAcl.w == null || editAcl.w.timeout == null ||editAcl.w.timeout) ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
+                <Chip onClick={(e) => clickChip(e, "w", "state-change")} color={(editAcl.t == null || editAcl.t) && (editAcl.w == null || editAcl.w) && (editAcl.w == null || editAcl.w["state-change"] == null || editAcl.w["state-change"]) ? "primary" : "secondary"} size="small" label="S"/>&nbsp;
+                <Chip onClick={(e) => clickChip(e, "w", "interval")} color={(editAcl.t == null || editAcl.t) && (editAcl.w == null || editAcl.w) && (editAcl.w == null || editAcl.w.interval == null || editAcl.w.interval) ? "primary" : "secondary"} size="small" label="I"/>&nbsp;
+                <Chip onClick={(e) => clickChip(e, "w", "active")} color={(editAcl.t == null || editAcl.t) && (editAcl.w == null || editAcl.w) && (editAcl.w == null || editAcl.w.active == null || editAcl.w.active) ? "primary" : "secondary"} size="small" label="A"/>&nbsp;
+                <Chip onClick={(e) => clickChip(e, "w", "inactive")} color={(editAcl.t == null || editAcl.t) && (editAcl.w == null || editAcl.w) && (editAcl.w == null || editAcl.w.inactive == null || editAcl.w.inactive) ? "primary" : "secondary"} size="small" label="IA"/>
+              </TableCell>
+              <TableCell align="center" style={{ verticalAlign: 'top'}}>
+                <CheckCircle onClick={(e) => saveAcl(e)}/>
+                &nbsp;
+                <AddCircle onClick={(e) => addAcl(e)}/>
+              </TableCell>
+            </TableRow>
           </TableHead>
 
           <TableBody>
-            {acls.map((acl, index) => (
-              <AclRow index={index} acl={acl}
-              />
+            {aclsConfigData.map((acl, index) => (
+              <AclRow acl={acl} index={index} />
             ))}
           </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell colSpan="3">
+                <Input
+                  id="output-edit-acl"
+                  type="textarea"
+                  rows="10"
+                  value={JSON.stringify(editAcl, null, 2)}
+                  disabled
+                />
+              </TableCell>
+              <TableCell colSpan="3">
+                
+                <Input
+                  id="output-acls-config"
+                  type="textarea"
+                  rows="10"
+                  value={JSON.stringify(aclsConfigData, null, 2)}
+                  disabled
+                />
+              </TableCell>
+            </TableRow>
+          </TableFooter>
         </Table>
       </TableContainer>
     </Paper>
   );
 }
 
-const AclRow = ({ index, acl }) => {
+const AclRow = ({ acl, index }) => {
   return (
     <>
-      <TableRow key={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
+      <TableRow id={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <TableCell align="center"><KeyboardArrowUp/><br/><KeyboardArrowDown/></TableCell>
         <TableCell align="right">{index}</TableCell>
-        <TableCell component="th" scope="row"><strong>{acl.pattern}</strong></TableCell>
+        <TableCell component="th" scope="row">
+          <strong>{acl.pattern || acl.cg_pattern}</strong>
+        </TableCell>
         <TableCell align="center">
-
+          {acl.cg_pattern != null ? <Check/> : ""}
         </TableCell>
         <TableCell component="th" scope="row" align="center">
-        <Chip color={acl.t == null || acl.t ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
+          <Chip color={acl.t == null || acl.t ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
           <Chip color={(acl.t == null || acl.t) && (acl.ts == null || acl.ts) ? "primary" : "secondary"} size="small" label="TS"/>&nbsp;
           <Chip color={(acl.t == null || acl.t) && (acl.th == null || acl.th) ? "primary" : "secondary"} size="small" label="TH"/>&nbsp;
         </TableCell>
@@ -1221,7 +1338,7 @@ const AclRow = ({ index, acl }) => {
           <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p == null || acl.p.leave == null || acl.p.leave) ? "primary" : "secondary"} size="small" label="L"/>&nbsp;
           <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p == null || acl.p.timeout == null ||acl.p.timeout) ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
           <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p == null || acl.p["state-change"] == null || acl.p["state-change"]) ? "primary" : "secondary"} size="small" label="S"/>&nbsp;
-          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p == null || acl.p.interval == null || acl.p.interval || acl.p.interval == null) ? "primary" : "secondary"} size="small" label="I"/>&nbsp;
+          <Chip color={(acl.t == null || acl.t) && (acl.p == null || acl.p) && (acl.p == null || acl.p.interval == null || acl.p.interval) ? "primary" : "secondary"} size="small" label="I"/>&nbsp;
         </TableCell>
         <TableCell align="center">
           <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.join == null || acl.w.join) ? "primary" : "secondary"} size="small" label="J"/>&nbsp;
@@ -1232,7 +1349,7 @@ const AclRow = ({ index, acl }) => {
           <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.active == null || acl.w.active) ? "primary" : "secondary"} size="small" label="A"/>&nbsp;
           <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.inactive == null || acl.w.inactive) ? "primary" : "secondary"} size="small" label="IA"/>&nbsp;
         </TableCell>
-        <TableCell align="center">ACTIONS</TableCell>
+        <TableCell align="center"><Edit/>&nbsp;<DeleteForever/></TableCell>
       </TableRow>
     </>
   );
