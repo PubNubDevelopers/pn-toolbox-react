@@ -206,6 +206,14 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
           </TableBody>
           <TableFooter>
             <TableRow>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell colSpan="3"><strong>Selected ACL</strong></TableCell>
+              <TableCell colSpan="3"><strong>ACLs Config</strong></TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
               <TableCell colSpan="3">
                 <Input
                   id="output-edit-acl"
@@ -215,7 +223,7 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
                   disabled
                 />
               </TableCell>
-              <TableCell colSpan="3">
+              <TableCell colSpan="2">
                 
                 <Input
                   id="output-acls-config"
