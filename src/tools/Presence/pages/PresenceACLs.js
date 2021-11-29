@@ -1174,7 +1174,7 @@ export default PresenceACLs;
 const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
   console.log("ACLs", aclsConfigData);
 
-  // const [pattern, setPattern] = useState("*");
+  const [index, setIndex] = useState(-1);
   const [editAcl, setEditAcl] = useState({"pattern":"*"});
 
   const clickCGChip = (e) => {
@@ -1220,6 +1220,17 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
     setAclsConfigData(tmp);
   }
 
+  const updateAcl = (e, selRow) => {
+    e.preventDefault();
+    setIndex(selRow);
+    setEditAcl(aclsConfigData[selRow]);
+  }
+
+  const deleteAcl = (e, selRow) => {
+    e.preventDefault();
+  }
+
+
   if (aclsConfigData == null || aclsConfigData.length === 0) return <>No ACLs</>;
 
   return (
@@ -1239,7 +1250,7 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
             </TableRow>
             <TableRow>
               <TableCell align="right"></TableCell>
-              <TableCell align="right" style={{ verticalAlign: 'top'}}>index</TableCell>
+              <TableCell align="right" style={{ verticalAlign: 'top'}}>{index}</TableCell>
               <TableCell style={{verticalAlign: 'top'}}>
                 <Input
                   className="form-control-alternative"
@@ -1284,7 +1295,7 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
 
           <TableBody>
             {aclsConfigData.map((acl, index) => (
-              <AclRow acl={acl} index={index} />
+              <AclRow acl={acl} index={index} updateAcl={updateAcl} deleteAcl={deleteAcl} />
             ))}
           </TableBody>
           <TableFooter>
@@ -1316,7 +1327,7 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
   );
 }
 
-const AclRow = ({ acl, index }) => {
+const AclRow = ({ acl, index, updateAcl, deleteAcl}) => {
   return (
     <>
       <TableRow id={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
@@ -1349,7 +1360,11 @@ const AclRow = ({ acl, index }) => {
           <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.active == null || acl.w.active) ? "primary" : "secondary"} size="small" label="A"/>&nbsp;
           <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.inactive == null || acl.w.inactive) ? "primary" : "secondary"} size="small" label="IA"/>&nbsp;
         </TableCell>
-        <TableCell align="center"><Edit/>&nbsp;<DeleteForever/></TableCell>
+        <TableCell align="center" onClick={(e) => updateAcl(e, index)}>
+          <Edit/>
+          &nbsp;
+          <DeleteForever onClick={(e) => deleteAcl(e, index)}/>
+        </TableCell>
       </TableRow>
     </>
   );
