@@ -77,6 +77,35 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
   const [index, setIndex] = useState(-1);
   const [editAcl, setEditAcl] = useState({"pattern":"*"});
 
+  const handlePatternChange = (e) => {
+    e.preventDefault();
+    let tmp = JSON.parse(JSON.stringify(editAcl));
+    
+    tmp.pattern = e.target.value;
+    setEditAcl(tmp);
+  } 
+
+  const sortIt = (acl) => {
+    // sort the acl keys
+    const ordered = Object.keys(acl).sort().reduce(
+      (obj, key) => { 
+        obj[key] = acl[key]; 
+        return obj;
+      }, 
+      {}
+    );
+
+    return ordered;
+  }
+
+  const hashIt = (str) => {
+    let hash = 0
+    for (let i = 0; i < str.length; ++i)
+      hash = Math.imul(31, hash) + str.charCodeAt(i)
+
+    return hash | 0
+  }
+
   const clickCGChip = (e) => {
     e.preventDefault();
     let tmp = JSON.parse(JSON.stringify(editAcl));
@@ -97,15 +126,36 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
     e.preventDefault();
     let tmp = JSON.parse(JSON.stringify(editAcl));
     
-    if (prop2 == null) {
-      tmp[prop] = !editAcl[prop];
+    if (editAcl[prop] == null) {
+      tmp[prop] = {};
+      tmp[prop][prop2] = false;
     }
     else {
-      if (tmp[prop] == null) tmp[prop] = {};
-      tmp[prop][prop2] = editAcl[prop] == null ? false : !editAcl[prop][prop2];
+      if (!editAcl[prop]) {
+        tmp[prop] = {};
+        tmp[prop] = disableOthers(tmp[prop], prop2);
+      }
+      else if (editAcl[prop][prop2] == null || editAcl[prop][prop2]) {
+        tmp[prop][prop2] = false;
+      }
+      else delete tmp[prop][prop2];
     }
+
+    if (Object.keys(tmp[prop]).length === 0) delete tmp[prop];
+    else if (Object.keys(tmp[prop]).length === 5) tmp[prop] = false;
     
     setEditAcl(tmp);
+  }
+
+  const disableOthers = (path, prop2) => {
+    path.join = "join" === prop2;
+    path.leave = "leave" === prop2;
+    path.timeout = "timeout" === prop2;
+    path["state-change"] = "state-change" === prop2;
+    path.interval = "interval" === prop2;
+
+    delete path[prop2];
+    return path;
   }
 
   const saveAcl = (e) => {
@@ -164,11 +214,11 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
                   placeholder="Enter a name or pattern (using * as wildcard)"
                   type="text"
                   value={editAcl.pattern}
-                  disabled
+                  onChange={(e) => handlePatternChange(e)}
                 />
               </TableCell>
               <TableCell align="center" style={{ verticalAlign: 'top'}}>
-                <Chip onClick={(e) => clickCGChip(e)} color={editAcl.cg_pattern != null ? "primary" : "secondary"} size="small" label="CG"/>&nbsp;
+                <Chip onClick={(e) => clickCGChip(e)} color={editAcl.cg_pattern != null ? "primary" : "default"} size="small" label="CG"/>&nbsp;
               </TableCell>
               <TableCell align="center" style={{ verticalAlign: 'top'}}>
                 <Chip onClick={(e) => clickChip(e, "t")} color={editAcl.t == null || editAcl.t ? "primary" : "secondary"} size="small" label="T"/>&nbsp;
@@ -192,9 +242,13 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData }) => {
                 <Chip onClick={(e) => clickChip(e, "w", "inactive")} color={(editAcl.t == null || editAcl.t) && (editAcl.w == null || editAcl.w) && (editAcl.w == null || editAcl.w.inactive == null || editAcl.w.inactive) ? "primary" : "secondary"} size="small" label="IA"/>
               </TableCell>
               <TableCell align="center" style={{ verticalAlign: 'top'}}>
-                <CheckCircle onClick={(e) => saveAcl(e)}/>
+                <CheckCircle 
+                  disabled={index === -1}
+                  color={index === -1 ? "default" : "primary"}
+                  onClick={(e) => saveAcl(e)}
+                />
                 &nbsp;
-                <AddCircle onClick={(e) => addAcl(e)}/>
+                <AddCircle color="primary" onClick={(e) => addAcl(e)}/>
               </TableCell>
             </TableRow>
           </TableHead>
@@ -274,10 +328,10 @@ const AclRow = ({ acl, index, updateAcl, deleteAcl}) => {
           <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.active == null || acl.w.active) ? "primary" : "secondary"} size="small" label="A"/>&nbsp;
           <Chip color={(acl.t == null || acl.t) && (acl.w == null || acl.w) && (acl.w == null || acl.w.inactive == null || acl.w.inactive) ? "primary" : "secondary"} size="small" label="IA"/>&nbsp;
         </TableCell>
-        <TableCell align="center" onClick={(e) => updateAcl(e, index)}>
-          <Edit/>
+        <TableCell align="center">
+          <Edit color="primary" onClick={(e) => updateAcl(e, index)}/>
           &nbsp;
-          <DeleteForever onClick={(e) => deleteAcl(e, index)}/>
+          <DeleteForever color="error" onClick={(e) => deleteAcl(e, index)}/>
         </TableCell>
       </TableRow>
     </>
