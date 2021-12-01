@@ -10,6 +10,7 @@ import routesObjectAdmin from "tools/ObjectAdmin/routesObjectAdmin";
 import routesAuthAdmin from "tools/AuthAdmin/routesAuthAdmin"
 import routesChannelGroups from "tools/ChannelGroups/routesChannelGroups";
 import routesSwissArmy from "tools/SwissArmy/routesSwissArmy";
+import routesPresence from "tools/Presence/routesPresence";
 
 var routes = [
   {
@@ -34,6 +35,9 @@ var routes = [
 
   {divider: true,},
   routesAuthAdmin,
+
+  {divider: true,},
+  routesPresence,
 
   {divider: true,},
   routesSwissArmy,

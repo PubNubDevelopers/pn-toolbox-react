@@ -40,8 +40,6 @@ import { useKeySetData } from "../../KeySetProvider";
 import { useSwissArmyData } from "../SwissArmyProvider";
 import { useStopwatch } from "react-timer-hook";
 import { Accordion, AccordionSummary, IconButton, InputLabel, MenuItem, Select } from "@material-ui/core";
-// import { KeyboardArrowUp } from "@mui/icons-material";
-// import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { Pause } from "@mui/icons-material";
 import ReactBSAlert from "react-bootstrap-sweetalert";
 
@@ -57,7 +55,6 @@ const MessageGenerator = () => {
   const [progress, setProgress] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState("");
   const isPause = useRef(false);
-  const [isPaused, setIsPaused] = useState(false);
 
   const [sweetAlert, setSweetAlert] = useState(null);
 
@@ -67,7 +64,6 @@ const MessageGenerator = () => {
   const [messageStrategy, setMessageStrategy] = useState(0);
   const [sourceData, setSourceData] = useState([]);
   const [messagePayload, setMessagePayload] = useState(JSON.stringify(messageSamples[0], null, 2));
-  // const [messagePayload, setMessagePayload] = useState(messageSamples[0]);
 
   const [isInjectCounter, setIsInjectCounter] = useState(true);
   const [isInjectTimestamp, setIsInjectTimestamp] = useState(true);
@@ -686,14 +682,9 @@ const MessageGenerator = () => {
                   <div className="col">
                     <h3 className="mb-0">Progress Report</h3>
                   </div>
-                    {/* <IconButton aria-label="play" color="primary"
-                      onClick={(e) => handleStart(e)}
-                    >
-                      <PlayArrowIcon />
-                    </IconButton> */}
-                    <IconButton aria-label="pause" onClick={(e) => handlePause(e)}>
-                      <Pause/>
-                    </IconButton>
+                  <IconButton aria-label="pause" onClick={(e) => handlePause(e)}>
+                    <Pause/>
+                  </IconButton>
                 </Row>
               </CardHeader>
               <CardBody>

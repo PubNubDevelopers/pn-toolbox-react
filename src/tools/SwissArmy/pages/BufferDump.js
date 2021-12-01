@@ -28,7 +28,6 @@ import { format, subMilliseconds, fromUnixTime } from 'date-fns'
 // core components
 import { useKeySetData } from "../../KeySetProvider";
 import { useSwissArmyData } from "../SwissArmyProvider";
-
 const BufferDump = () => {
   const keySetContext = useKeySetData();
   const swissArmyContext = useSwissArmyData();
@@ -177,9 +176,7 @@ const BufferDump = () => {
                           </CardHeader>
                           <Card body>
                             <div className="pl-lg-12">
-
                               <MetadataTable metadata={bufferMessages}/>
-                            
                             </div>
                           </Card>
                         </Col>
@@ -234,6 +231,13 @@ const MetadataTable = ({metadata}) => {
 }
 
 const MetadataRow = ({index, payload}) => {
+  // const ttcolor = 
+  //   <>
+  //     <Typography color="Primary"><small>{payload.pubtt.substr(0, 10)}</small></Typography>
+  //     <Typography color="Warning"><small>{payload.pubtt.substr(10, 3)}</small></Typography>
+  //     <Typography color="Success"><small>{payload.pubtt.substr(13, 4)}</small></Typography>
+  //   </>;
+
   return (
     <>
       <TableRow key={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
