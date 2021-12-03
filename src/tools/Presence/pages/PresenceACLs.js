@@ -219,6 +219,27 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData, keySetContext }) => {
     );
   } 
 
+  var moveRow = function(i, up) {
+    let tmp = JSON.parse(JSON.stringify(aclsConfigData));
+
+    const eli = tmp[i];
+    let j;
+
+    if (up) {
+      j = i - 1;
+      if (j === -1) j = aclsConfigData.length - 1;
+    }
+    else {
+      j = i + 1;
+      if (j === aclsConfigData.length) j = 0;
+    }
+
+    tmp[i] = tmp[j];
+    tmp[j] = eli;
+
+    setAclsConfigData(tmp);
+  };
+
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer >
@@ -293,7 +314,7 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData, keySetContext }) => {
 
           <TableBody>
             {aclsConfigData.map((acl, index) => (
-              <AclRow acl={acl} index={index} updateAcl={updateAcl} deleteAcl={deleteAcl} />
+              <AclRow acl={acl} index={index} length={aclsConfigData.length} updateAcl={updateAcl} deleteAcl={deleteAcl} moveRow={moveRow} />
             ))}
           </TableBody>
           <TableFooter>
@@ -328,11 +349,20 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData, keySetContext }) => {
   );
 }
 
-const AclRow = ({ acl, index, updateAcl, deleteAcl}) => {
+const AclRow = ({ acl, index, length, updateAcl, deleteAcl, moveRow}) => {
   return (
     <>
       <TableRow id={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell align="center"><KeyboardArrowUp/><br/><KeyboardArrowDown/></TableCell>
+        <TableCell align="center">
+          <KeyboardArrowUp 
+            color="primary"
+            onClick={() => moveRow(index, true)}
+          />
+          <br/>
+          <KeyboardArrowDown 
+            color="primary"
+            onClick={() => moveRow(index, false)}/>
+        </TableCell>
         <TableCell align="right">{index}</TableCell>
         <TableCell component="th" scope="row">
           <strong>{acl.pattern || acl.cg_pattern}</strong>
