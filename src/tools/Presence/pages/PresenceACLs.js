@@ -157,7 +157,7 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData, keySetContext }) => {
     let tmp = JSON.parse(JSON.stringify(aclsConfigData));
     tmp[index] = editAcl;
     setAclsConfigData(tmp);
-    generatePnConfig();
+    generatePnConfig(tmp);
   }
 
   const addAcl = (e) => {
@@ -165,14 +165,13 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData, keySetContext }) => {
     let tmp = JSON.parse(JSON.stringify(aclsConfigData));
     tmp.push(editAcl);
     setAclsConfigData(tmp);
-    generatePnConfig();
+    generatePnConfig(tmp);
   }
 
   const updateAcl = (e, selRow) => {
     e.preventDefault();
     setIndex(selRow);
     setEditAcl(aclsConfigData[selRow]);
-    generatePnConfig();
   }
 
   const deleteAcl = (e, selRow) => {
@@ -184,11 +183,11 @@ const AclsTable = ({ aclsConfigData, setAclsConfigData, keySetContext }) => {
     }
 
     setAclsConfigData(tmp);
-    generatePnConfig();
+    generatePnConfig(tmp);
   }
 
-  const generatePnConfig = () => {
-    const acls = JSON.stringify(aclsConfigData);
+  const generatePnConfig = (tmp) => {
+    const acls = JSON.stringify(tmp);
     const cmd = `pnconfig-cli.py --email YOU@pubnub.com ${keySetContext.subKey} presence_acl '${acls}'`
     setPnConfig(cmd);
   }
