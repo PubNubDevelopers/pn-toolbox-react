@@ -17,28 +17,17 @@ app.get('/express_backend', (req, res, next) => {
 
 app.get('/pnconfig', async (req, res, next) => {
   console.log("req.query", req.query);
-  const result = await runPnConfig(req.query.subkey);
+  const result = await runPnConfig(req.query.subkey, req.query.prop);
 
   console.log("result", result);
   res.send(result);
 }); 
 
-
-// async function main() {
-//   const { stdout, stderr } = await exec('find . -type f | wc -l');
-
-//   if (stderr) {
-//     console.error(`error: ${stderr}`);
-//   }
-//   console.log(`Number of files ${JSON.stringify(stdout, null, 2)}`);
-//   return stdout;
-// }
-
-
-const runPnConfig = async (subKey) => {
+const runPnConfig = async (subKey, prop) => {
   console.log("runPnConfig");
 
-  const pnconfigcmd = `/Users/pubnubcvconover/Developer/pubnub/gits/pnconfig-cli/pnconfig-cli.py --email craig@pubnub.com ${subKey}`;
+  let pnconfigcmd = `/Users/pubnubcvconover/Developer/pubnub/gits/pnconfig-cli/pnconfig-cli.py --email craig@pubnub.com ${subKey}`;
+  if (prop != null) pnconfigcmd = pnconfigcmd + ` ${prop}`;
 
   const { stdout, stderr } = await exec(pnconfigcmd, ["-i"]);
 
