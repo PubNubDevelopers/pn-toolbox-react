@@ -9,6 +9,7 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import {SwissArmyProvider} from "./SwissArmyProvider"
 import BufferDump from './pages/BufferDump';
 import MessageGenerator from './pages/MessageGenerator';
+import PnConfig from './pages/PnConfig';
 
 var routesSwissArmy = {
   collapse: true,
@@ -28,6 +29,13 @@ var routesSwissArmy = {
       path: "/swissarmy/message-generator",
       name: "Message Generator",
       component: MessageGenerator,
+      parent: SwissArmyProvider,
+      layout: "/admin",
+    },
+    {
+      path: "/swissarmy/pnconfig",
+      name: "pnconfig-cli",
+      component: PnConfig,
       parent: SwissArmyProvider,
       layout: "/admin",
     },
