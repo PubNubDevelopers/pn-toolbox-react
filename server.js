@@ -4,18 +4,16 @@ const exec = util.promisify(require('child_process').exec);
 const cors = require('cors');
 
 const app = express();
-app.use(cors({
-  origin: '*'
-}));
+app.use(cors({origin: '*'}));
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
-app.get('/express_backend', (req, res, next) => {
+app.get('/express_backend', (req, res) => {
   res.send({ express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT' });
 }); 
 
-app.get('/pnconfig', async (req, res, next) => {
+app.get('/pnconfig', async (req, res) => {
   console.log("req.query", req.query);
   const result = await runPnConfig(req.query);
 
