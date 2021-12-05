@@ -45,11 +45,17 @@ const runPnConfig = async (params) => {
   }
   else {
     console.log("success");
-    if (params.filter !=null && params.filter !== "") {
-      const data = JSON.parse("{" + stdout.replace(/\s/g, "").slice(0, -1) + "}");
+    if (params.prop !=null && params.prop !== "") {
+      const data = {"properties": JSON.parse(stdout) };
       console.log("data", data);
       return data;
     }
+    else if (params.filter !=null && params.filter !== "") {
+      const data = JSON.parse('{"properties":{' + stdout.replace(/\s/g, "").slice(0, -1) + '}}');
+      console.log("data", data);
+      return data;
+    }
+
     return stdout;
   }
 }
