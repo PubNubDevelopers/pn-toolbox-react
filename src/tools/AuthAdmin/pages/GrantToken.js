@@ -42,8 +42,8 @@ const GrantToken = () => {
   const keySetContext = useKeySetData();
   const authAdminContext = useAuthAdminData();
 
-  console.log("ParseToken keySetContext: ", keySetContext);
-  console.log("ParseToken authAdminContext: ", authAdminContext);
+  console.log("GrantToken keySetContext: ", keySetContext);
+  console.log("GrantToken authAdminContext: ", authAdminContext);
 
   const [grantedPermissions, setGrantedPermissions] = useState(authAdminContext.grantedPermissions);
 

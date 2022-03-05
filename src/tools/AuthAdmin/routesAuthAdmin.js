@@ -5,6 +5,7 @@ import { AuthAdminProvider } from "./AuthAdminProvider";
 // app pages
 import ParseToken from "./pages/ParseToken";
 import GrantToken from "./pages/GrantToken";
+import PermTest from "./pages/PermTest";
 
 var routesAuthAdmin = {
   collapse: true,
@@ -24,6 +25,13 @@ var routesAuthAdmin = {
       path: "/auth/grant-token",
       name: "Grant Token",
       component: GrantToken,
+      parent: AuthAdminProvider,
+      layout: "/admin",
+    },
+    {
+      path: "/auth/test-perms",
+      name: "Test Permissions - v2",
+      component: PermTest,
       parent: AuthAdminProvider,
       layout: "/admin",
     },

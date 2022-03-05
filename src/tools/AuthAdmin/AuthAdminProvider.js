@@ -64,16 +64,34 @@ export const AuthAdminProvider = ({ children }) => {
   const [grantedAuthToken, setGrantedAuthToken] = useState();
   const [grantedPermissions, setGrantedPermissions] = useState(defaultPermissions);
 
+  ///////////////////
+  // PermTest State
+  ///////////////////
+  const [keySetRead, setKeySetRead] = useState("?");
+  const [keySetWrite, setKeySetWrite] = useState("?");
+
+  const [isReadCheck, setIsReadCheck] = useState(true);
+  const [isWriteCheck, setIsWriteCheck] = useState(true);
+
+
 
   // provide data/functions to context users
   //////////////////////////////////////////
   const useAuthAdminData = {
-    // ManageDevice State
+    // Parse Token State
     parsedAuthToken, setParsedAuthToken,
     parsedPermissions, setParsedPermissions,
+
+    // Grant Token State
     grantedAuthToken, setGrantedAuthToken,
     grantedPermissions, setGrantedPermissions,
     defaultPermissions,
+
+    // Perm Test State
+    keySetRead, setKeySetRead,
+    keySetWrite, setKeySetWrite,
+    isReadCheck, setIsReadCheck,
+    isWriteCheck, setIsWriteCheck,
   }
 
   return <Context.Provider value={useAuthAdminData}> {children} </Context.Provider>
