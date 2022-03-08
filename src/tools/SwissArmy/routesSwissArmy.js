@@ -9,7 +9,8 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import {SwissArmyProvider} from "./SwissArmyProvider"
 import BufferDump from './pages/BufferDump';
 import MessageGenerator from './pages/MessageGenerator';
-import PnConfig from './pages/PnConfig';
+import ChannelBrowser from './pages/ChannelBrowser';
+// import PnConfig from './pages/PnConfig';
 
 var routesSwissArmy = {
   collapse: true,
@@ -33,12 +34,19 @@ var routesSwissArmy = {
       layout: "/admin",
     },
     {
-      path: "/swissarmy/pnconfig",
-      name: "pnconfig-cli",
-      component: PnConfig,
+      path: "/swissarmy/channel-browser",
+      name: "Channel Browser",
+      component: ChannelBrowser,
       parent: SwissArmyProvider,
       layout: "/admin",
     },
+    // {
+    //   path: "/swissarmy/pnconfig",
+    //   name: "pnconfig-cli",
+    //   component: PnConfig,
+    //   parent: SwissArmyProvider,
+    //   layout: "/admin",
+    // },
   ]
 };
 
