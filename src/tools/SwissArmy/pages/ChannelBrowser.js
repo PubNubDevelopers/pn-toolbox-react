@@ -54,8 +54,6 @@ import { useKeySetData } from "../../KeySetProvider";
 import { useSwissArmyData } from "../SwissArmyProvider"
 import { DeleteForever, FirstPage, KeyboardArrowDown, KeyboardArrowRight, KeyboardArrowLeft, LastPage } from "@mui/icons-material";
 import { Switch, FormControlLabel } from "@mui/material";
-import EditIcon from '@mui/icons-material/Edit';
-import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
 import { format, subMilliseconds, fromUnixTime } from 'date-fns'
 
@@ -142,21 +140,7 @@ const ChannelBrowser = () => {
     totalRecords === 0 
       ? timerAlert("No Messages Found!", "Your filter found none messages.", 3)
       : timerAlert("Messages Found!", `${totalRecords} Messages Found.`, 2);
-debugger;
       swissArmyContext.setChannelMessageResults(results);
-  }
-
-  const handleEdit = (e, record, index) => {
-    e.preventDefault();
-    alert("Not Implemented");
-    // swissArmyContext.setChannelId(record.id);
-    // swissArmyContext.setChannelName(record.name);
-    // swissArmyContext.setChannelDesc(record.description);
-    // swissArmyContext.setChannelCustom(JSON.stringify(record.custom, null, 2));
-    // swissArmyContext.setChannelUpdated(record.updated);
-    // swissArmyContext.setChannelEtag(record.eTag);
-
-    // history.push("/admin/objects/channel-form");
   }
 
 
@@ -164,7 +148,7 @@ debugger;
     e.preventDefault();
     alert("Not Implemented");
 
-    // confirmAlert("Confirm Remove Channel?", 
+    // confirmAlert("Confirm Delete Message?", 
     //   `${index} - ${channel}`,
     //   "Confirm", ()=>removeChannel(channel, index), "Cancel", ()=>hideAlert()
     // );
@@ -222,7 +206,7 @@ debugger;
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Channels Search</h3>
+                    <h3 className="mb-0">Channel Message Browser</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -279,7 +263,7 @@ debugger;
                             onClick={retrieveMessages}
                             disabled = {keySetContext.pubnub == null}
                           >
-                            Search Channels
+                            Retrieve Messages
                           </Button>
                         </Row>
                       </Col>
@@ -295,7 +279,7 @@ debugger;
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Channel Search Results</h3>
+                    <h3 className="mb-0">Message Results</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -313,7 +297,6 @@ debugger;
                   isTruncate={isTruncate}
                   setIsTruncate={setIsTruncate}
                   handleRemove={handleRemove}
-                  handleEdit={handleEdit}
                 />
               </CardBody>
 
@@ -333,7 +316,7 @@ debugger;
 export default ChannelBrowser;
 
 
-const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove, handleEdit}) => {
+const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate, handleRemove}) => {
   // console.log("MetadataTable", metadata);
 
   if (metadata == null || metadata.length ===0) return <><h2>No Results</h2></>;
@@ -372,13 +355,14 @@ debugger;
             <TableRow>
               <TableCell/>
               <TableCell align="right">#</TableCell>
-              <TableCell>Channel</TableCell>
               <TableCell>Message</TableCell>
-              <TableCell>Publish UUID</TableCell>
+              <TableCell>UUID</TableCell>
               <TableCell>Publish TimeToken</TableCell>
-              <TableCell>Publish DateTime</TableCell>
-              <TableCell align="right">milli</TableCell>
-              <TableCell align="right">micro.nano</TableCell>
+              {/* <TableCell>DateTime</TableCell> */}
+              <TableCell>Date</TableCell>
+              <TableCell>Time</TableCell>
+              {/* <TableCell align="right">milli</TableCell>
+              <TableCell align="right">micro.nano</TableCell> */}
               <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -390,7 +374,6 @@ debugger;
             ).map((row, index) => (
               <MetadataRow index={(index + (page * rowsPerPage))} row={row} isTruncate={isTruncate} 
                 handleRemove={handleRemove} 
-                handleEdit={handleEdit}
               />
             ))}
             {emptyRows > 0 && (
@@ -404,7 +387,7 @@ debugger;
             <TableRow>
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25, 50, 100, { label: 'All', value: -1 }]}
-                colSpan={8}
+                colSpan={7}
                 count={metadata.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
@@ -436,17 +419,17 @@ const truncate = (data, size, noDots) => {
 }
 
 
-const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
-  // console.log("MetadataRow", row);
-
-  // const {row} = props;
+const MetadataRow = ({index, row, isTruncate, handleRemove}) => {
+  console.log("MetadataRow", row);
+  
   const [open, setOpen] = React.useState(false);
 
   const pubtt = row.timetoken;
-  const datetime = format(fromUnixTime(pubtt.substr(0,10)), 'yyyy/dd/MM hh:mm:ss');
-  const milli = pubtt.substr(10,3);
-  const micronano = pubtt.substr(13,3) + "." + pubtt.substr(16);
-
+  const datetime = format(fromUnixTime(pubtt.substring(0,10)), 'yyyy/dd/MM hh:mm:ss');
+  const dateVal = datetime.substring(0, 10);
+  const timeVal = datetime.substring(11) + "." + pubtt.substring(10, 13) + "." + pubtt.substring(13, 16) + "." + pubtt.substring(16);
+  // const milli = pubtt.substring(10, 13);
+  // const micronano = pubtt.substring(13, 16) + "." + pubtt.substring(16);
 
   return (
     <>
@@ -464,32 +447,24 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
         <TableCell align="right">{index}</TableCell>
         {isTruncate && (
           <>
-            <TableCell>{truncate(row.channel, 40)}</TableCell>
             <TableCell>{truncate(JSON.stringify(row.message), 40)}</TableCell>
           </>
         )}
         {!isTruncate && (
           <>
-            <TableCell>{row.channel}</TableCell>
             <TableCell>{JSON.stringify(row.message, null, 2)}</TableCell>
           </>
         )}
 
         <TableCell>{row.uuid}</TableCell>
         <TableCell>{pubtt}</TableCell>
-        <TableCell>{datetime}</TableCell>
-        <TableCell align="right">{milli}</TableCell>
-        <TableCell align="right">{micronano}</TableCell>
+        {/* <TableCell>{datetime}</TableCell> */}
+        <TableCell>{dateVal}</TableCell>
+        <TableCell>{timeVal}</TableCell>
+        {/* <TableCell align="right">{milli}</TableCell>
+        <TableCell align="right">{micronano}</TableCell> */}
 
         <TableCell align="center">
-          <IconButton aria-label="edit" size="small" onClick={(e) => handleEdit(e, row, index)}>
-            <EditIcon/>
-          </IconButton>
-          <IconButton aria-label="members" size="small" 
-            // onClick={(e) => handleMembership(e, row.id, index)}
-            >
-            <GroupIcon/>
-          </IconButton>
           <IconButton aria-label="delete" size="small" onClick={(e) => handleRemove(e, row.id, index)}>
             <DeleteForever/>
           </IconButton>
@@ -497,36 +472,19 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
       </TableRow>
 
       {/* Expandable Detail Data */}
-      {/* <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Table size="small">
                 <TableBody>
-                <TableRow>
-                    <TableCell width="5%"></TableCell>
-                    <TableCell><strong>Channel</strong></TableCell>
-                    <TableCell width="95%">{row.id}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell width="5%"></TableCell>
-                    <TableCell><strong>Channel Name</strong></TableCell>
-                    <TableCell width="95%">{row.name}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell width="5%"></TableCell>
-                    <TableCell><strong>Description</strong></TableCell>
-                    <TableCell width="95%">{row.description}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell width="5%"></TableCell>
-                    <TableCell colSpan="2" component="th" width="5%"><strong>Custom Fields</strong></TableCell>
-                  </TableRow>
-                  {Object.keys(row.custom).map((key) => (
+                  {Object.keys(row.message).map((key) => (
                     <TableRow>
+                      <TableCell> </TableCell>
+                      <TableCell> </TableCell>
                       <TableCell width="5%"></TableCell>
                       <TableCell>{key}</TableCell>
-                      <TableCell width="95%" colSpan="2">{row.custom[key]}</TableCell>
+                      <TableCell width="95%" colSpan="2">{row.message[key]}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -534,7 +492,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
             </Box>
           </Collapse>
         </TableCell>
-      </TableRow> */}
+      </TableRow>
     </>
   );
 }
@@ -599,51 +557,3 @@ TablePaginationActions.propTypes = {
   page: PropTypes.number.isRequired,
   rowsPerPage: PropTypes.number.isRequired,
 };
-
-
-// const TruncateSwitch = ({isTruncate, setIsTruncate}) => {
-  //   return(
-  //     <>
-  //     <label
-  //       className="form-control-label"
-  //       htmlFor="input-truncate"
-  //     >
-  //       Truncate Large Values?
-  //     </label>
-  //     <br/>
-  //     <ButtonGroup 
-  //       className="btn-group-toggle" 
-  //       data-toggle="buttons"
-  //     >
-  //       <Button 
-  //         className={classnames({ active: isTruncate })} 
-  //         color="danger" 
-  //         onClick={() => setIsTruncate(!isTruncate)}
-  //       >
-  //         <input
-  //           autoComplete="off"
-  //           name="options"
-  //           type="radio"
-  //           value={!isTruncate}
-  //           size="small"
-  //         />
-  //         No
-  //       </Button>
-  //       <Button 
-  //         className={classnames({ active: isTruncate })} 
-  //         color="danger" 
-  //         onClick={() => setIsTruncate(true)}
-  //       >
-  //         <input
-  //           autoComplete="off"
-  //           name="options"
-  //           type="radio"
-  //           value={isTruncate}
-  //           size="small"
-  //         />
-  //         Yes
-  //       </Button>
-  //     </ButtonGroup>
-  //     </>
-  //   );
-  // }
