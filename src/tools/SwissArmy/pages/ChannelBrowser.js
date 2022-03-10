@@ -144,14 +144,68 @@ const ChannelBrowser = () => {
   }
 
 
-  const handleRemove = (e, channel, index) => {
+  const handleRemove = (e, row, index) => {
     e.preventDefault();
-    alert("Not Implemented");
 
-    // confirmAlert("Confirm Delete Message?", 
-    //   `${index} - ${channel}`,
-    //   "Confirm", ()=>removeChannel(channel, index), "Cancel", ()=>hideAlert()
-    // );
+    confirmAlert("Confirm Delete Message?", 
+      `${index} - ${JSON.stringify(row.message, null, 2)}`,
+      "Confirm", ()=> deleteMessage(row.timetoken, index), "Cancel", ()=>hideAlert()
+    );
+  }
+
+  async function deleteMessage(tt, index) {
+    try {
+      const result = await keySetContext.pubnub.deleteMessages({
+        channel: channel,
+        start: ttMinus1(tt),
+        end: tt,
+      });
+
+      console.log(result);
+      timerAlert("Message Deleted!", `Row ${index} Deleted.`, 3);
+
+      let temp = Array.from(swissArmyContext.channelMessageResults);
+      temp.splice(index, 1);
+
+      swissArmyContext.setChannelMessageResults(temp);
+    }
+    catch (status) {
+      console.error(`Message Delete Failed: ${status}`);
+      confirmAlert("Message Delete Failed!", status, "Dismiss", ()=>hideAlert());
+    }
+  }
+
+  // code as per PN engineer
+  const ttMinus1 = (tt, tail = '') => {
+    if (!tt) {
+      throw new Error('No timetoken provided');
+    }
+    if (Object.prototype.toString.call(tt) !== '[object String]') {
+      throw new Error('Invalid timetoken');
+    }
+    if (tt.length === 0) {
+      throw new Error('Timetoken was either 0 or empty');
+    }
+  
+    tail = tt[tt.length - 1] + tail;
+    tt = tt.substring(0, tt.length - 1);
+  
+    if (Number(tail) === 0) {
+      return ttMinus1(tt, tail);
+    } else {
+      return tt + (Number(tail) - 1);
+    }
+  }
+
+  const ttIncrement = (tt) => {
+    const tt16 = parseInt(tt.substring(0,16));
+    const ttnano = parseInt(tt.substring(16));
+
+    if (ttnano == 9) {
+      return (tt16 + 1) + "0"
+    }
+    else 
+      return tt16 + "" + (ttnano + 1)
   }
 
 
@@ -320,7 +374,6 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
   // console.log("MetadataTable", metadata);
 
   if (metadata == null || metadata.length ===0) return <><h2>No Results</h2></>;
-debugger;
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer >
@@ -465,7 +518,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove}) => {
         <TableCell align="right">{micronano}</TableCell> */}
 
         <TableCell align="center">
-          <IconButton aria-label="delete" size="small" onClick={(e) => handleRemove(e, row.id, index)}>
+          <IconButton aria-label="delete" size="small" onClick={(e) => handleRemove(e, row, index)}>
             <DeleteForever/>
           </IconButton>
         </TableCell>
