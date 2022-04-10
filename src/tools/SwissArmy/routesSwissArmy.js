@@ -10,6 +10,7 @@ import {SwissArmyProvider} from "./SwissArmyProvider"
 import BufferDump from './pages/BufferDump';
 import MessageGenerator from './pages/MessageGenerator';
 import ChannelBrowser from './pages/ChannelBrowser';
+import MessageDelete from './pages/MessageDelete';
 // import PnConfig from './pages/PnConfig';
 
 var routesSwissArmy = {
@@ -37,6 +38,13 @@ var routesSwissArmy = {
       path: "/swissarmy/channel-browser",
       name: "Channel Browser",
       component: ChannelBrowser,
+      parent: SwissArmyProvider,
+      layout: "/admin",
+    },
+    {
+      path: "/swissarmy/message-delete",
+      name: "Message Delete",
+      component: MessageDelete,
       parent: SwissArmyProvider,
       layout: "/admin",
     },
