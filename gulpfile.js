@@ -76,5 +76,7 @@ gulp.task("licenses", async function () {
   return;
 });
 
-gulp.task("licenses", license);
-gulp.task("default", license);
+// was supposed to fix the Amplify build issue but it didn't
+// open ticket with Creative Tim on this
+// gulp.task("licenses", license);
+// gulp.task("default", license);
