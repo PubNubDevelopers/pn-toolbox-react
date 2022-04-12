@@ -15,7 +15,7 @@ export const PushDebugProvider = ({ children }) => {
       "aps": {
         "alert": {
           "title": "PN Test Message - #counter#",
-          "body": "This is test message from PubNub - ask Mike Comer if you are concerned",
+          "body": "You have a new message",
           "content-available": "1"
         },
       },
@@ -26,7 +26,7 @@ export const PushDebugProvider = ({ children }) => {
           "targets":[
             {
               "environment":"production",
-              "topic":"com.everbridge.mobile.iv.Recipient"
+              "topic":"com.pubnub.app.bundleid"
             }
           ],
           "version":"v2"
@@ -36,7 +36,7 @@ export const PushDebugProvider = ({ children }) => {
     "pn_gcm": {
       "notification": {
         "title": "PN Test Message - #counter#",
-        "body": "This is test message from PubNub - ask Mike Comer if you are concerned"
+        "body": "You have a new message"
       }
     }
   }, null, 2);
@@ -69,10 +69,10 @@ export const PushDebugProvider = ({ children }) => {
   //////////////////////
   // ManageChannel State
   //////////////////////
-  const defaultApnsUri = `curl -s -v storageweb-red1.aws-sjc-1.ps.pn:9000/v1/push/sub-key/SUB_KEY}/audit-devices/CHANNEL_NAME`;
-  const defaultApns2DevUri = `curl -s -v "storageweb-red1.aws-sjc-1.ps.pn:9000/v2/admin-push/sub-key/SUB_KEY/channel/CHANNEL_NAME?type=apns2&environment=development&topic=TOPIC`;
-  const defaultApns2PrdUri = `curl -s -v "storageweb-red1.aws-sjc-1.ps.pn:9000/v2/admin-push/sub-key/SUB_KEY/channel/CHANNEL_NAME?type=apns2&environment=production&topic=TOPIC`;
-  const defaultFcmUri = `curl -s -v "storageweb-red1.aws-sjc-1.ps.pn:9000/v2/admin-push/sub-key/SUB_KEY/channel/CHANNEL_NAME?type=gcm`;
+  const defaultApnsUri = `curl -s -v [internal_pn_server_goes_here]/v1/push/sub-key/SUB_KEY}/audit-devices/CHANNEL_NAME`;
+  const defaultApns2DevUri = `curl -s -v "[internal_pn_server_goes_here]/v2/admin-push/sub-key/SUB_KEY/channel/CHANNEL_NAME?type=apns2&environment=development&topic=TOPIC`;
+  const defaultApns2PrdUri = `curl -s -v "[internal_pn_server_goes_here]/v2/admin-push/sub-key/SUB_KEY/channel/CHANNEL_NAME?type=apns2&environment=production&topic=TOPIC`;
+  const defaultFcmUri = `curl -s -v "[internal_pn_server_goes_here]/v2/admin-push/sub-key/SUB_KEY/channel/CHANNEL_NAME?type=gcm`;
 
   const [manageChannel, setManageChannel] = useState("CHANNEL_NAME");
   const [apns2DevUri, setApns2DevUri] = useState(defaultApnsUri);
