@@ -98,7 +98,6 @@
     "gulp": "^3.9.1",
     "gulp-append-prepend": "1.0.8"
   },
-  "main": "gulpfile.js",
   "keywords": [],
   "proxy": "http://localhost:5000/",
   "directories": {
