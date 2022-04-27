@@ -1,16 +1,16 @@
 {
   "name": "pn-dev-toolbox",
-  "version": "1.0.0",
-  "author": "Creative Tim",
-  "license": "See license in https://www.creative-tim.com/license",
-  "description": "Material UI version of Argon Dashboard PRO React by Creative Tim",
-  "homepage": "https://demos.creative-tim.com/argon-dashboard-pro-material-ui/#/admin/dashboard",
+  "version": "0.4.0",
+  "author": "Craig Conover (craig@pubnub.com)",
+  "license": "MIT",
+  "description": "Simple tools for PubNub Developers to inspect and troubleshoot PubNub applications and data.",
+  "homepage": "https://pubnub.com",
   "bugs": {
-    "url": "https://github.com/creativetimofficial/ct-argon-dashboard-pro-material-ui/issues"
+    "url": "https://github.com/PubNubDevelopers/pn-toolbox-react/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/creativetimofficial/argon-dashboard-material-ui.git"
+    "url": "https://github.com/PubNubDevelopers/pn-toolbox-react"
   },
   "scripts": {
     "start": "npm run client",
@@ -94,12 +94,9 @@
     ]
   },
   "devDependencies": {
-    "eslint-plugin-unused-imports": "1.1.0",
-    "gulp": "^3.9.1",
-    "gulp-append-prepend": "1.0.8"
+    "eslint-plugin-unused-imports": "1.1.0"
   },
   "keywords": [],
-  "proxy": "http://localhost:5000/",
   "directories": {
     "doc": "docs"
   }
