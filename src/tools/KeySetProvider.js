@@ -15,6 +15,16 @@ export const KeySetProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState("");
   const [keySetProps, setKeySetProps] = useState();
 
+  const [portalUsername, setPortalUsername] = useState();
+  const [portalPassword, setPortalPassword] = useState();
+  const [portalUserId, setPortalUserId] = useState();
+  const [portalToken, setPortalToken] = useState();
+  const [portalAccountId, setPortalAccountId] = useState();
+  const [portalAccounts, setPortalAccounts] = useState([]);
+  const [portalApps, setPortalApps] = useState([]);
+  const [portalKeys, setPortalKeys] = useState([]);
+  
+
   const initKeySet = (keySetConfig) => {
     uninitKeySet();
 
@@ -69,6 +79,7 @@ export const KeySetProvider = ({ children }) => {
   }
 
   const keySetData = {
+    // Key Set Initialize
     keySetName, setKeySetName,
     subKey, setPubKey,
     pubKey, setSubKey,
@@ -78,6 +89,16 @@ export const KeySetProvider = ({ children }) => {
     keySetProps, setKeySetProps,
     isInitialized, status,
     pubnub, initKeySet, uninitKeySet,
+
+    // PN Dashboard Login
+    portalUsername, setPortalUsername,
+    portalPassword, setPortalPassword,
+    portalUserId, setPortalUserId,
+    portalToken, setPortalToken,
+    portalAccountId, setPortalAccountId,
+    portalAccounts, setPortalAccounts,
+    portalApps, setPortalApps,
+    portalKeys, setPortalKeys,
   }
 
   return <Context.Provider value={keySetData}> {children} </Context.Provider>

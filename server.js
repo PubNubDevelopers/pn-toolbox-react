@@ -1,65 +1,114 @@
 const express = require('express');
+const request = require('request');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const cors = require('cors');
 
 const app = express();
-app.use(cors({origin: '*'}));
+app.use(cors({ origin: '*' }));
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
-app.get('/express_backend', (req, res) => {
-  res.send({ express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT' });
-}); 
 
-app.get('/pnconfig', async (req, res) => {
-  console.log("req.query", req.query);
-  const result = await runPnConfig(req.query);
 
-  console.log("result", result);
-  res.send(result);
-}); 
+app.get('/keys', (req, res) => {
+  console.log("in get /keys");
 
-const runPnConfig = async (params) => {
-  console.log("runPnConfig");
+  // curl 'https://internal-admin.pubnub.com/api/app/keys?app_id=1&page=1&limit=1' --header 'X-Session-Token: <token>'
 
-  try {
-    let pnconfigcmd = `/Users/pubnubcvconover/Developer/pubnub/gits/pnconfig-cli/pnconfig-cli.py --email craig@pubnub.com ${params.subkey}`;
+  const options = {
+    'url': `https://internal-admin.pubnub.com/api/app/keys?app_id=${req.query.app_id}&page=1&limit=99`,
+    'headers': { 'X-Session-Token': req.query.token }
+  };
 
-    if (params.prop != null && params.prop !== "") {
-      console.log("prop query", params.prop);
-      pnconfigcmd = pnconfigcmd + ` ${params.prop}`;
-    }
-    else if (params.filter !=null && params.filter !== "") {
-      console.log("filter query", params.filter);
-      pnconfigcmd = pnconfigcmd + ` | egrep '${params.filter}'`
+  console.log(`keys options: ${JSON.stringify(options)}`);
+
+  request.get(options, (err1, res1, body1) => {
+    if (err1) {
+      return console.log(err1);
     }
 
-    const { stdout, stderr } = await exec(pnconfigcmd, ["-i"]);
+    let data = JSON.parse(body1).result;
+    console.log("keys", data);
+    res.send(data);
+  });
+});
 
-    if (stderr) {
-      console.error("error");
-      return stderr;
+
+
+app.get('/apps', (req, res) => {
+  console.log("in get /apps");
+
+  // curl --request GET 'https://internal-admin.pubnub.com/api/apps?owner_id=<account_id>&no_keys=1' 
+  // --header 'X-Session-Token: <session_token>'
+
+  const options = {
+    'url': `https://internal-admin.pubnub.com/api/apps?owner_id=${req.query.ownerid}&no_keys=1`,
+    'headers': { 'X-Session-Token': req.query.token }
+  };
+
+  console.log(`apps options: ${JSON.stringify(options)}`);
+
+  request.get(options, (err1, res1, body1) => {
+    if (err1) {
+      return console.log(err1);
     }
-    else {
-      console.log("success");
-      if (params.prop !=null && params.prop !== "") {
-        const data = {"properties": JSON.parse(stdout) };
-        console.log("data", data);
-        return data;
+
+    let data = JSON.parse(body1).result;
+    console.log("apps", data);
+    res.send(data);
+  });
+});
+
+app.get('/login', (req, res) => {
+  // curl --request POST 'https://internal-admin.pubnub.com/api/me' \
+  // --header 'Content-Type: application/json' \
+  // --data-raw '{"email":"<email>","password":"<password>"}'
+
+  // login //
+  ///////////
+
+  const options = {
+    url: 'https://internal-admin.pubnub.com/api/me',
+    json: true,
+    body: {
+      email: req.query.username,
+      password: req.query.password
+    }
+  };
+
+  request.post(options, (err, res1, body) => {
+    if (err) {
+      return console.log(err);
+    }
+
+    // get accounts //
+    //////////////////
+
+    const options = {
+      'url': `https://internal-admin.pubnub.com/api/accounts?user_id= + ${res1.body.result.user_id}`,
+      'headers': { 'X-Session-Token': res1.body.result.token }
+    };
+
+    request.get(options, (err, res2, body2) => {
+      if (err) {
+        return console.log(err);
       }
-      else if (params.filter !=null && params.filter !== "") {
-        const data = JSON.parse('{"properties":{' + stdout.replace(/\s/g, "").slice(0, -1) + '}}');
-        console.log("data", data);
-        return data;
-      }
 
-      return stdout;
-    }
-  }
-  catch (error) {
-    console.error("error");
-    return error;
-  }
-}
+      // respond to client with data //
+      /////////////////////////////////
+      let data = {
+        "session": {
+          "userid": res1.body.result.user_id,
+          "token": res1.body.result.token,
+          "accountid": res1.body.result.user.account_id
+        }
+      };
+
+      data.accounts = JSON.parse(body2).result.accounts;
+
+      res.send(data);
+    });
+  });
+});

@@ -1,8 +1,9 @@
 import KeySet from "tools/KeySet";
+import PnDashboard from "tools/PnDashboard";
 import ToolboxApp from "tools/ToolboxApp";
 
 // @mui/icons-material
-import { VpnKey } from "@mui/icons-material";
+import { VpnKey, Dashboard } from "@mui/icons-material";
 
 // tool routes
 import routesPushDebug from "tools/PushDebug/routesPushDebug";
@@ -14,6 +15,16 @@ import routesPresence from "tools/Presence/routesPresence";
 
 var routes = [
   {
+    path: "/pndashboard",
+    name: "PN Dashboard",
+    icon: Dashboard,
+    iconColor: "Error",
+    component: PnDashboard,
+    layout: "/admin",
+    parent: ToolboxApp,
+    index: 0,
+  },
+  {
     path: "/key-set",
     name: "Key Set",
     icon: VpnKey,
@@ -21,7 +32,7 @@ var routes = [
     component: KeySet,
     layout: "/admin",
     parent: ToolboxApp,
-    index: 0,
+    index: 1,
   },
 
   {divider: true,},
