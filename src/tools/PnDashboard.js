@@ -37,7 +37,6 @@ import ReactBSAlert from "react-bootstrap-sweetalert";
 
 // core components
 import { useKeySetData } from "./KeySetProvider";
-import { AppBar } from "@material-ui/core";
 
 const PnDashboard = () => {
     const keySetContext = useKeySetData();
@@ -182,8 +181,11 @@ const PnDashboard = () => {
         };
     }
 
-    const initKeySet = () => {
-        // might be implemented in keySetContext or do I have some setup to do first?
+    const initKeySet = (e, record, index) => {
+        keySetContext.setKeySetName(record.properties.name);
+        keySetContext.setPubKey(record.publish_key);
+        keySetContext.setSubKey(record.subscribe_key);
+        history.push("/admin/key-set");
     }
 
     const hideAlert = () => {
