@@ -32,7 +32,7 @@ ReactDOM.render(
         {/* <Route path="/index" render={(props) => <Index {...props} />} /> */}
         <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
         <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
-        <Redirect from="*" to="/admin/key-set" />
+        <Redirect from="*" to="/admin/pndashboard" />
       </Switch>
     </BrowserRouter>
   </ThemeProvider>,

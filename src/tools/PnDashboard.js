@@ -109,10 +109,15 @@ const PnDashboard = () => {
                 hideAlert();
             },
             (error) => {
-                console.log("PN Dashboard Login error:", JSON.stringify(error, null, 2));
-                timerAlert("PN Dashboard Login error", JSON.stringify(error, null, 2), 2000);
+                hideAlert();
+                console.log("PN Dashboard Login error:", error);
+                timerAlert("PN Dashboard Login error", error + " (VPN enabled?)", 5000);
             }
-        );
+        ).catch = (error) => {
+            hideAlert();
+            console.log("login error:", error);
+            timerAlert("fetch /login", error, 5000);
+        };
     }
 
     const retrieveApps = async (e, record, index) => {
@@ -135,11 +140,14 @@ const PnDashboard = () => {
                 hideAlert();
             },
             (error) => {
-                console.log("retrieveApps error:", JSON.stringify(error, null, 2));
-                timerAlert("Error: retrieveApps", JSON.stringify(error, null, 2), 2000);
+                hideAlert();
+                console.log("retrieveApps error:", error);
+                timerAlert("Error: retrieveApps", error, 5000);
             }
         ).catch = (error) => {
-            console.log("fetch error:", JSON.stringify(error, null, 2));
+            hideAlert();
+            console.log("fetch apps error:", error);
+            timerAlert("fetch /apps", error, 5000);
         };
     }
 
@@ -163,11 +171,14 @@ const PnDashboard = () => {
                 hideAlert();
             },
             (error) => {
-                console.log("retrieveKeys error:", JSON.stringify(error, null, 2));
-                timerAlert("Error: retrieveKeys", JSON.stringify(error, null, 2), 2000);
+                hideAlert();
+                console.log("retrieveKeys error:", error);
+                timerAlert("Error: retrieveKeys", error, 5000);
             }
         ).catch = (error) => {
-            console.log("fetch error:", JSON.stringify(error, null, 2));
+            hideAlert();
+            console.log("fetch /keys error:", error);
+            timerAlert("fetch /keys", error, 5000);
         };
     }
 
@@ -248,7 +259,7 @@ const PnDashboard = () => {
                                                 <Input
                                                     className="form-control-alternative"
                                                     id="input-password"
-                                                    type="text"
+                                                    type="password"
                                                     value={keySetContext.portalPassword}
                                                     onChange={(e) => keySetContext.setPortalPassword(e.target.value)}
                                                 />

@@ -3,7 +3,7 @@ import PnDashboard from "tools/PnDashboard";
 import ToolboxApp from "tools/ToolboxApp";
 
 // @mui/icons-material
-import { VpnKey, Dashboard } from "@mui/icons-material";
+import { VpnKey, Dashboard, DynamicForm } from "@mui/icons-material";
 
 // tool routes
 import routesPushDebug from "tools/PushDebug/routesPushDebug";
@@ -15,25 +15,33 @@ import routesPresence from "tools/Presence/routesPresence";
 
 var routes = [
   {
-    path: "/pndashboard",
-    name: "PN Dashboard",
-    icon: Dashboard,
-    iconColor: "Error",
-    component: PnDashboard,
-    layout: "/admin",
-    parent: ToolboxApp,
-    index: 0,
-  },
-  {
-    path: "/key-set",
-    name: "Key Set",
+    collapse: true,
+    name: "PN Key Set Init",
     icon: VpnKey,
     iconColor: "Error",
-    component: KeySet,
-    layout: "/admin",
-    parent: ToolboxApp,
-    index: 1,
-  },
+    state: "swissArmyCollapse",
+    views: [
+    {
+      path: "/pndashboard",
+      name: "Login & Select",
+      icon: Dashboard,
+      iconColor: "Error",
+      component: PnDashboard,
+      layout: "/admin",
+      parent: ToolboxApp,
+      index: 0,
+    },
+    {
+      path: "/key-set",
+      name: "Manual Entry",
+      icon: DynamicForm,
+      iconColor: "Error",
+      component: KeySet,
+      layout: "/admin",
+      parent: ToolboxApp,
+      index: 1,
+    },
+  ]},
 
   {divider: true,},
   routesPushDebug,
