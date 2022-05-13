@@ -47,8 +47,8 @@ app.get('/apps', (req, res) => {
   // --header 'X-Session-Token: <session_token>'
 
   const options = {
-    'url': `https://internal-admin.pubnub.com/api/apps?owner_id=${req.query.ownerid}&no_keys=1`,
-    'headers': { 'X-Session-Token': req.query.token }
+    url: `https://internal-admin.pubnub.com/api/apps?owner_id=${req.query.ownerid}&no_keys=1`,
+    headers: { 'X-Session-Token': req.query.token }
   };
 
   console.log(`apps options: ${JSON.stringify(options)}`);
@@ -82,7 +82,7 @@ app.get('/login', (req, res) => {
     }
   };
 
-  console.log(`login options: ${optioins}`);
+  console.log(`login options: ${options}`);
 
   request.post(options, (err, res1, body) => {
     if (err) {
@@ -93,8 +93,9 @@ app.get('/login', (req, res) => {
     //////////////////
 
     const options = {
-      'url': `https://internal-admin.pubnub.com/api/accounts?user_id= + ${res1.body.result.user_id}`,
-      'headers': { 'X-Session-Token': res1.body.result.token }
+      url: `https://internal-admin.pubnub.com/api/accounts?user_id= + ${res1.body.result.user_id}`,
+      headers: { 'X-Session-Token': res1.body.result.token },
+      json: true
     };
 
     console.log(`accounts options: ${options}`);
