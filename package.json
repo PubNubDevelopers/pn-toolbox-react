@@ -13,11 +13,12 @@
     "url": "git+https://github.com/creativetimofficial/argon-dashboard-material-ui.git"
   },
   "scripts": {
-    "start": "npm run client",
+    "start": "concurrently 'npm run server' 'npm run client'",
     "client": "react-scripts start",
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "server": "nodemon server.js  --ignore client",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start",
     "compile:scss": "node-sass --importer node_modules/node-sass-package-importer/dist/cli.js src/assets/scss/argon-dashboard-pro-material-ui.scss src/assets/css/argon-dashboard-pro-material-ui.css",
     "minify:scss": "node-sass --importer node_modules/node-sass-package-importer/dist/cli.js src/assets/scss/argon-dashboard-pro-material-ui.scss src/assets/css/argon-dashboard-pro-material-ui.min.css --output-style compressed",
@@ -75,6 +76,7 @@
     "react-to-print": "2.12.3",
     "react-toastify": "^8.0.3",
     "reactstrap": "^9.0.0",
+    "request": "^2.88.2",
     "sass": "^1.49.9"
   },
   "optionalDependencies": {
