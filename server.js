@@ -59,7 +59,6 @@ app.get('/apps', (req, res) => {
     }
 
     let data = JSON.parse(body1).result;
-    console.log("apps", data);
     res.send(data);
   });
 });
@@ -82,8 +81,6 @@ app.get('/login', (req, res) => {
     }
   };
 
-  console.log(`login options: ${options}`);
-
   request.post(options, (err, res1, body) => {
     if (err) {
       return console.log(err);
@@ -95,10 +92,8 @@ app.get('/login', (req, res) => {
     const options = {
       url: `https://internal-admin.pubnub.com/api/accounts?user_id= + ${res1.body.result.user_id}`,
       headers: { 'X-Session-Token': res1.body.result.token },
-      json: true
+      // json: true
     };
-
-    console.log(`accounts options: ${options}`);
 
     request.get(options, (err, res2, body2) => {
       if (err) {
@@ -115,10 +110,7 @@ app.get('/login', (req, res) => {
         }
       };
 
-      console.log(`accounts body: ${body2}`);
-
       data.accounts = JSON.parse(body2).result.accounts;
-
       res.send(data);
     });
   });
