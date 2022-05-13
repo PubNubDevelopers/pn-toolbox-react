@@ -10,6 +10,9 @@ app.use(cors({ origin: '*' }));
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
+app.get('/test', (req, res) => {
+  res.send({ express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT' });
+}); 
 
 
 app.get('/keys', (req, res) => {
@@ -62,6 +65,7 @@ app.get('/apps', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
+  console.log("in /login");
   // curl --request POST 'https://internal-admin.pubnub.com/api/me' \
   // --header 'Content-Type: application/json' \
   // --data-raw '{"email":"<email>","password":"<password>"}'
@@ -78,6 +82,8 @@ app.get('/login', (req, res) => {
     }
   };
 
+  console.log(`login options: ${optioins}`);
+
   request.post(options, (err, res1, body) => {
     if (err) {
       return console.log(err);
@@ -90,6 +96,8 @@ app.get('/login', (req, res) => {
       'url': `https://internal-admin.pubnub.com/api/accounts?user_id= + ${res1.body.result.user_id}`,
       'headers': { 'X-Session-Token': res1.body.result.token }
     };
+
+    console.log(`accounts options: ${options}`);
 
     request.get(options, (err, res2, body2) => {
       if (err) {
@@ -105,6 +113,8 @@ app.get('/login', (req, res) => {
           "accountid": res1.body.result.user.account_id
         }
       };
+
+      console.log(`accounts body: ${body2}`);
 
       data.accounts = JSON.parse(body2).result.accounts;
 
