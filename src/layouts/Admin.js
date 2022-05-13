@@ -104,7 +104,7 @@ const Admin = (props) => {
             closeSidebarResponsive={() => setSidebarOpenResponsive(false)}
             logo={{
               innerLink: "/index",
-              imgSrc: require("../assets/img/brand/pubnub-logo.png").default,
+              imgSrc: require("../assets/img/brand/pubnub-logo.png"), //.default, - THIS .default cause image to not display
               imgAlt: "...",
             }}
           />
