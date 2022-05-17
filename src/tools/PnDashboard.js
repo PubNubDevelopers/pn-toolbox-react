@@ -453,7 +453,7 @@ const AccountsTable = ({ data, rowsPerPage, page, emptyRows, handleChangePage, h
                             ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             : data
                         ).map((row, index) => (
-                            <AccountRow index={(index + (page * rowsPerPage))} row={row} retrieveApps={retrieveApps} />
+                            <AccountRow key={index} index={(index + (page * rowsPerPage))} row={row} retrieveApps={retrieveApps} />
                         ))}
                         {emptyRows > 0 && (
                             <TableRow style={{ height: 53 * emptyRows }}>
@@ -554,7 +554,7 @@ const AppsTable = ({ data, rowsPerPage, page, emptyRows, handleChangePage, handl
                             ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             : data
                         ).map((row, index) => (
-                            <AppRow index={(index + (page * rowsPerPage))} row={row} retrieveKeys={retrieveKeys} />
+                            <AppRow key={index} index={(index + (page * rowsPerPage))} row={row} retrieveKeys={retrieveKeys} />
                         ))}
                         {emptyRows > 0 && (
                             <TableRow style={{ height: 53 * emptyRows }}>
@@ -592,7 +592,7 @@ const AppRow = ({ index, row, retrieveKeys }) => {
 
     return (
         <>
-            <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+            <TableRow sx={{ '& > *': { borderBottom: 'unset' } } }>
                 <TableCell align="right">{index}</TableCell>
                 <>
                     <TableCell>{row.name}</TableCell>
@@ -668,7 +668,7 @@ const KeySetsTable = ({ data, rowsPerPage, page, emptyRows, handleChangePage, ha
                             ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             : data
                         ).map((row, index) => (
-                            <KeySetRow index={(index + (page * rowsPerPage))} row={row} 
+                            <KeySetRow key={index} index={(index + (page * rowsPerPage))} row={row} 
                                 isTruncate={isTruncate} initKeySet={initKeySet}
                             />
                         ))}
