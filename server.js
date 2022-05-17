@@ -81,7 +81,11 @@ app.get('/login', (req, res) => {
     }
   };
 
+  // console.log("login options", options);
+
   request.post(options, (err, res1, body) => {
+    // console.log("login post response", JSON.stringify(res1));
+
     if (err) {
       return console.log(err);
     }

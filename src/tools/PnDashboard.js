@@ -93,7 +93,7 @@ const PnDashboard = () => {
         const timeoutId = setTimeout(() => controller.abort(), 5000);
         timerAlert("PN Dashboard Login", "Please wait while we authenticate...", 5000);
 
-        let uri = `http://localhost:3000/login?username=${keySetContext.portalUsername}&password=${keySetContext.portalPassword}`;
+        let uri = `/login?username=${keySetContext.portalUsername}&password=${keySetContext.portalPassword}`;
         console.log(`uri: ${uri}`);
 
         fetch(uri, { signal: controller.signal }).then(res => res.json()).then(
