@@ -65,6 +65,11 @@ export const PushDebugProvider = ({ children }) => {
   const [enableEnvironment, setEnableEnvironment] = useState(true);
   const [enableTopic, setEnableTopic] = useState(true);
 
+  //////////////////////
+  // ManageChannel2 State
+  //////////////////////
+
+  const [registeredDevices, setRegisteredDevices] = useState([]);
 
   //////////////////////
   // ManageChannel State
@@ -101,6 +106,9 @@ export const PushDebugProvider = ({ children }) => {
     environmentRadios, setEnvironmentRadios,
     enableEnvironment, setEnableEnvironment,
     enableTopic, setEnableTopic,
+
+    // ManageChannel2 State
+    registeredDevices, setRegisteredDevices,
 
     // ManageChannel State
     manageChannel, setManageChannel,
