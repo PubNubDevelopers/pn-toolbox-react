@@ -64,7 +64,7 @@ const ManageChannel2 = () => {
   
   const [modal, setModal] = useState(false);
   const toggle = () => setModal(!modal);
-  const newChannels = useRef("");
+  const newDevices = useRef("");
 
   const getPushParams = (params) => {
     const newParams = params || {};
@@ -80,19 +80,19 @@ const ManageChannel2 = () => {
   }
 
   const listDevices = () => {
-    keySetContext.pubnub.push.listChannels(
+    keySetContext.pubnub.push.listDevices(
       getPushParams(),
       (status, response) => {
         if (!status.error) {
           updateContextState();
 
           if (response.channels !== null && response.channels.length === 0) {
-            toastNotify("info", "No registered channels.");
-            pushDebugContext.setRegisteredChannels([]);
+            toastNotify("info", "No registered device tokens.");
+            pushDebugContext.setRegisteredDevices([]);
           }
           else {
-            const sortedChannels = response.channels.sort()
-            pushDebugContext.setRegisteredChannels(sortedChannels);
+            const sortedDevices = response.devices.sort()
+            pushDebugContext.setRegisteredDevices(sortedDevices);
           }
         }
         else {
@@ -176,17 +176,17 @@ const ManageChannel2 = () => {
     removeChannel(channel);
   }
 
-  const removeChannel = (channel) => {
-    console.log("removeChannel", channel);
+  const removeDevice = (device) => {
+    console.log("removeDevice", device);
 
-    keySetContext.pubnub.push.removeChannels(
-      getPushParams({"channels": [channel]}),
+    keySetContext.pubnub.push.removeDevices(
+      getPushParams({"devices": [device]}),
       (status) => {
         console.log("status", status);
 
         if (!status.error) {
-          toastNotify("success", "Channel removed.");
-          listChannels();
+          toastNotify("success", "Device tokens removed.");
+          listDevices();
         }
         else {
           toastNotify("error", status.message);
@@ -237,11 +237,11 @@ const ManageChannel2 = () => {
 
   return (
     <>
-      <AddChannelsModal
+      <AddDevicesModal
         // toggle={toggle}
         modal={modal}
-        newChannels={newChannels}
-        addChannels={addChannels}
+        newDevices={newDevices}
+        addDevices={addDevices}
       />
       <ToastContainer
         position="top-center"
@@ -423,11 +423,11 @@ const ManageChannel2 = () => {
                     <Col className="text-right">
                       <Button
                         color="danger"
-                        onClick={listChannels}
+                        onClick={listDevices}
                         disabled = {keySetContext.pubnub == null || channel === "" || (pushType === "apns2" && topic === "")}
                         // size="sm"
                       >
-                        List Channels
+                        List Devices
                       </Button>
                       <Button
                         color="secondary"
@@ -435,7 +435,7 @@ const ManageChannel2 = () => {
                         disabled = {keySetContext.pubnub == null || channel === "" || (pushType === "apns2" && topic === "")}
                         // size="sm"
                       >
-                        Add Channels
+                        Add Devices
                       </Button>
                     </Col>
                   </Row> 
@@ -543,7 +543,7 @@ function ChannelRows(props) {
   );
 }
 
-const AddChannelsModal = (props) => {
+const AddDevicesModal = (props) => {
 
   const handleClick = (e, isConfirmed) => {
     e.preventDefault();
@@ -557,25 +557,25 @@ const AddChannelsModal = (props) => {
         className="modal-dialog-centered"
       >
         <ModalHeader>
-          <h2>Add New Channels</h2>
+          <h2>Add New Device Tokens</h2>
         </ModalHeader>
         <ModalBody>
           {/* TODO: allow comma separated values */}
           <div>
             <label
               className="form-control-label"
-              htmlFor="input-new-channels"
+              htmlFor="input-new-devices"
             >
-              New Channels (one per line)
+              New Devices Tokens (one per line)
             </label>
           </div>
           <Input
             className="form-control-alternative"
-            id="input-new-channels"
-            placeholder="Add one channel name per line"
+            id="input-new-devices"
+            placeholder="Add one device token per line"
             type="textarea"
-            defaultValue={props.newChannels.current}
-            onChange={(e) => props.newChannels.current = e.target.value}
+            defaultValue={props.newDevices.current}
+            onChange={(e) => props.newDevices.current = e.target.value}
             rows="10"
           />
         </ModalBody>
