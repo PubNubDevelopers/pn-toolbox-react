@@ -45,7 +45,14 @@ const ParseToken = () => {
   console.log("ParseToken keySetContext: ", keySetContext);
   console.log("ParseToken authAdminContext: ", authAdminContext);
 
-  const [parsedAuthToken, setParsedAuthToken] = useState(authAdminContext.parsedAuthToken);
+  const [parsedAuthToken, _setParsedAuthToken] = useState(authAdminContext.parsedAuthToken);
+
+  // replace %-ecoding with ='s when the value is input into the text box
+  const setParsedAuthToken = (token) => {
+    let regx = /%3D/gi;
+    _setParsedAuthToken(token.replace(regx, '='));
+  }
+
   // const [permissions, setPermissions] = useState(authAdminContext.permissions);
   
   // const [modal, setModal] = useState(false);
