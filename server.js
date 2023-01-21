@@ -7,6 +7,7 @@ const cors = require('cors');
 const app = express();
 app.use(cors({ origin: '*' }));
 
+const domain = "admin.pubnub.com";
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
@@ -21,7 +22,7 @@ app.get('/keys', (req, res) => {
   // curl 'https://internal-admin.pubnub.com/api/app/keys?app_id=1&page=1&limit=1' --header 'X-Session-Token: <token>'
 
   const options = {
-    'url': `https://internal-admin.pubnub.com/api/app/keys?app_id=${req.query.app_id}&page=1&limit=99`,
+    'url': `https://admin.pubnub.com/api/app/keys?app_id=${req.query.app_id}&page=1&limit=99`,
     'headers': { 'X-Session-Token': req.query.token }
   };
 
@@ -38,34 +39,36 @@ app.get('/keys', (req, res) => {
   });
 });
 
-
-
 app.get('/apps', (req, res) => {
   console.log("in get /apps");
 
-  // curl --request GET 'https://internal-admin.pubnub.com/api/apps?owner_id=<account_id>&no_keys=1' 
+  // curl --request GET 'https://admin.pubnub.com/api/apps?owner_id=<account_id>&no_keys=1' 
   // --header 'X-Session-Token: <session_token>'
 
   const options = {
-    url: `https://internal-admin.pubnub.com/api/apps?owner_id=${req.query.ownerid}&no_keys=1`,
+    url: `https://${domain}/api/apps?owner_id=${req.query.ownerid}&no_keys=1`,
     headers: { 'X-Session-Token': req.query.token }
   };
 
-  console.log(`apps options: ${JSON.stringify(options)}`);
+  console.log("apps options", options);
 
   request.get(options, (err1, res1, body1) => {
+    console.log("in request.get apps");
+
     if (err1) {
       return console.log(err1);
     }
 
-    let data = JSON.parse(body1).result;
+    let data = JSON.parse(res1.body);
+    console.log("apps", data);
     res.send(data);
   });
 });
 
+// external customer login (no pn vpn required)
 app.get('/login', (req, res) => {
   console.log("in /login");
-  // curl --request POST 'https://internal-admin.pubnub.com/api/me' \
+  // curl --request POST 'https://admin.pubnub.com/api/me' \
   // --header 'Content-Type: application/json' \
   // --data-raw '{"email":"<email>","password":"<password>"}'
 
@@ -73,7 +76,7 @@ app.get('/login', (req, res) => {
   ///////////
 
   const options = {
-    url: 'https://internal-admin.pubnub.com/api/me',
+    url: `https://${domain}/api/me`,
     json: true,
     body: {
       email: req.query.username,
@@ -81,10 +84,10 @@ app.get('/login', (req, res) => {
     }
   };
 
-  // console.log("login options", options);
+  console.log("login options", options);
 
   request.post(options, (err, res1, body) => {
-    // console.log("login post response", JSON.stringify(res1));
+    console.log("login post response", JSON.stringify(res1));
 
     if (err) {
       return console.log(err);
@@ -94,12 +97,14 @@ app.get('/login', (req, res) => {
     //////////////////
 
     const options = {
-      url: `https://internal-admin.pubnub.com/api/accounts?user_id= + ${res1.body.result.user_id}`,
+      url: `https://${domain}/api/accounts?user_id=${res1.body.result.user_id}`,
       headers: { 'X-Session-Token': res1.body.result.token },
-      // json: true
     };
 
+    console.log("account options", options);
+
     request.get(options, (err, res2, body2) => {
+      // console.log("accounts get response", JSON.stringify(res2));
       if (err) {
         return console.log(err);
       }
@@ -115,7 +120,8 @@ app.get('/login', (req, res) => {
       };
 
       data.accounts = JSON.parse(body2).result.accounts;
-      res.send(data);
+      console.log("accounts", data.accounts);
+      res.send(data); 
     });
   });
 });

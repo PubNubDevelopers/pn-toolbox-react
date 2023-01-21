@@ -129,5 +129,6 @@ AdminNavbar.defaultProps = {
 
 AdminNavbar.propTypes = {
   // use this to make the Sidebar open on responsive mode
-  openSidebarResponsive: PropTypes.func.isRequired,
+  // openSidebarResponsive: PropTypes.func.isRequired,
+  openSidebarResponsive: 1,
 };

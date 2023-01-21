@@ -25,6 +25,7 @@ const Footer = () => {
           display="flex"
           alignItems="center"
           className={classes.justifyContentCenter}
+          justifyContent="flex-end"
         >
           <div className={classes.copyrightWrapper}>
             © {new Date().getFullYear()}{" "}

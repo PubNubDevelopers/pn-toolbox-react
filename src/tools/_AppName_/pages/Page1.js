@@ -304,7 +304,7 @@
 //                 </CardHeader>
 //                 <CardBody>
 //                   <div className="pl-lg-4">
-//                     <Table className="align-items-center table-flush" responsive >
+//                     <Table className="align-items-center table-flush" >
 //                       <Rows channels={_appNameContext_.registeredChannels} handleRemoveChannel={handleRemoveChannel}/>
 //                     </Table>
 //                   </div>

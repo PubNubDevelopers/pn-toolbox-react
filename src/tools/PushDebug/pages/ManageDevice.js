@@ -478,7 +478,7 @@ const ManageDevice = () => {
                 </CardHeader>
                 <CardBody>
                   <div className="pl-lg-4">
-                    <Table className="align-items-center table-flush" responsive >
+                    <Table className="align-items-center table-flush" >
                       <ChannelRows channels={pushDebugContext.registeredChannels} handleRemoveChannel={handleRemoveChannel}/>
                     </Table>
                   </div>

@@ -1,5 +1,6 @@
 // @material-ui/core components
-import { createMuiTheme } from "@material-ui/core/styles";
+// import { createMuiTheme } from "@material-ui/core/styles";
+import { createTheme } from "@material-ui/core/styles";
 // core components
 import boxShadows from "assets/theme/box-shadow.js";
 import hexToRgb from "assets/theme/hex-to-rgb.js";
@@ -16,7 +17,8 @@ const defaultHeaderStyles = {
 };
 
 // A custom theme for this app
-const theme = createMuiTheme({
+// const theme = createMuiTheme({
+const theme = createTheme({
   breakpoints: {
     values: {
       xs: 0,

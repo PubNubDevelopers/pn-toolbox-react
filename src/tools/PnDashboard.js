@@ -90,13 +90,18 @@ const PnDashboard = () => {
 
     const login = () => {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        timerAlert("PN Dashboard Login", "Please wait while we authenticate...", 5000);
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        timerAlert("PN Dashboard Login", "Please wait while we authenticate...", 10000);
 
         let uri = `/login?username=${keySetContext.portalUsername}&password=${keySetContext.portalPassword}`;
         console.log(`uri: ${uri}`);
 
-        fetch(uri, { signal: controller.signal }).then(res => res.json()).then(
+        fetch(uri, { signal: controller.signal, 
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+                }
+        }).then(res => res.json()).then(
             (result) => {
                 console.log("result", result);
 
@@ -111,12 +116,12 @@ const PnDashboard = () => {
             (error) => {
                 hideAlert();
                 console.log("PN Dashboard Login error:", error);
-                timerAlert("PN Dashboard Login error", error + " (VPN enabled?)", 5000);
+                timerAlert("PN Dashboard Login error", error + " (VPN enabled?)", 10000);
             }
         ).catch = (error) => {
             hideAlert();
             console.log("login error:", error);
-            timerAlert("fetch /login", error, 5000);
+            timerAlert("fetch /login", error, 10000);
         };
     }
 
@@ -295,7 +300,7 @@ const PnDashboard = () => {
                                 </Row>
                             </CardHeader>
                             <CardBody>
-                                <Table className="align-items-center table-flush" responsive>
+                                <Table className="align-items-center table-flush" >
                                     <thead className="thead-light">
                                         <tr>
                                             <th scope="col">Account ID</th>
@@ -363,7 +368,7 @@ const PnDashboard = () => {
                             </CardHeader>
                             <CardBody>
                                 <AppsTable
-                                    data={keySetContext.portalApps}
+                                    data={keySetContext.portalApps.result}
                                     rowsPerPage={rowsPerPage1}
                                     page={page1}
                                     emptyRows={emptyRows1}
@@ -513,7 +518,7 @@ const AccountRow = ({ index, row, retrieveApps }) => {
 }
 
 const AppsTable = ({ data, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, retrieveKeys }) => {
-    // console.log("AppsTable", data);
+    console.log("AppsTable data:", data);
 
     if (data == null || data.length === 0) return <><h2>No Results</h2></>;
 

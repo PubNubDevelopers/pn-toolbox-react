@@ -80,6 +80,7 @@
   },
   "keywords": [],
   "proxy": "http://localhost:5000/",
+  "secure": false,
   "directories": {
     "doc": "docs"
   }

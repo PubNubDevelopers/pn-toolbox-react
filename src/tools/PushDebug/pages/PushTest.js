@@ -411,7 +411,7 @@ function ResultsTable(props) {
   );
 
   return (
-    <table className="table-light" responsive
+    <table className="table-light" 
       style={{'border': '2px solid black',}}
     >
       <thead >
