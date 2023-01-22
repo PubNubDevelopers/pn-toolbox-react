@@ -7,7 +7,7 @@ const cors = require('cors');
 const app = express();
 app.use(cors({ origin: '*' }));
 
-const domain = "admin.pubnub.com";
+const domain = "internal-admin.pubnub.com";
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
@@ -65,7 +65,33 @@ app.get('/apps', (req, res) => {
   });
 });
 
-// external customer login (no pn vpn required)
+app.get('/search', (req, res) => {
+  console.log("in get /search");
+
+  // curl --request GET 'https://admin.pubnub.com/api/users?search=<search>' 
+  // --header 'X-Session-Token: <session_token>'
+
+  const options = {
+    url: `https://${domain}/api/users?search=${req.query.search}`,
+    headers: { 'X-Session-Token': req.query.token }
+  };
+
+  console.log("search options", options);
+
+  request.get(options, (err1, res1, body1) => {
+    console.log("in request.get search");
+
+    if (err1) {
+      return console.log(err1);
+    }
+
+    let data = JSON.parse(res1.body);
+    console.log("search results", data);
+    res.send(data);
+  });
+});
+
+
 app.get('/login', (req, res) => {
   console.log("in /login");
   // curl --request POST 'https://admin.pubnub.com/api/me' \

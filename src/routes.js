@@ -3,7 +3,7 @@ import PnDashboard from "tools/PnDashboard";
 import ToolboxApp from "tools/ToolboxApp";
 
 // @mui/icons-material
-import { VpnKey, Dashboard, DynamicForm } from "@mui/icons-material";
+import { VpnKey, Dashboard, DynamicForm, Search } from "@mui/icons-material";
 
 // tool routes
 import routesPushDebug from "tools/PushDebug/routesPushDebug";
@@ -12,6 +12,7 @@ import routesAuthAdmin from "tools/AuthAdmin/routesAuthAdmin"
 import routesChannelGroups from "tools/ChannelGroups/routesChannelGroups";
 import routesSwissArmy from "tools/SwissArmy/routesSwissArmy";
 import routesPresence from "tools/Presence/routesPresence";
+import PnAccountSearch from "tools/PnAccountSearch";
 
 var routes = [
   {
@@ -32,6 +33,16 @@ var routes = [
       index: 0,
     },
     {
+      path: "/account-search",
+      name: "Internal Admin Search",
+      icon: Search,
+      iconColor: "Error",
+      component: PnAccountSearch,
+      layout: "/admin",
+      parent: ToolboxApp,
+      index: 1,
+    },
+    {
       path: "/key-set",
       name: "Manual Entry",
       icon: DynamicForm,
@@ -39,7 +50,7 @@ var routes = [
       component: KeySet,
       layout: "/admin",
       parent: ToolboxApp,
-      index: 1,
+      index: 2,
     },
   ]},
 

@@ -41,7 +41,7 @@ import { useKeySetData } from "./KeySetProvider";
 const PnDashboard = () => {
     const keySetContext = useKeySetData();
 
-    console.log("PnConfig keySetContext: ", keySetContext);
+    console.log("PnDashboard keySetContext: ", keySetContext);
 
     const [sweetAlert, setSweetAlert] = useState(null);
 
@@ -90,8 +90,8 @@ const PnDashboard = () => {
 
     const login = () => {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-        timerAlert("PN Dashboard Login", "Please wait while we authenticate...", 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        timerAlert("PN Dashboard Login", "Please wait while we authenticate...", 5000);
 
         let uri = `/login?username=${keySetContext.portalUsername}&password=${keySetContext.portalPassword}`;
         console.log(`uri: ${uri}`);
@@ -116,14 +116,51 @@ const PnDashboard = () => {
             (error) => {
                 hideAlert();
                 console.log("PN Dashboard Login error:", error);
-                timerAlert("PN Dashboard Login error", error + " (VPN enabled?)", 10000);
+                timerAlert("PN Dashboard Login error", error + " (VPN enabled?)", 5000);
             }
         ).catch = (error) => {
             hideAlert();
             console.log("login error:", error);
-            timerAlert("fetch /login", error, 10000);
+            timerAlert("fetch /login", error, 5000);
         };
     }
+
+    const searchPage = () => {
+        history.push("/admin/account-search");
+    }
+
+    // const search = () => {
+    //     const controller = new AbortController();
+    //     const timeoutId = setTimeout(() => controller.abort(), 5000);
+    //     timerAlert("Internal Admin Search", "Please wait while we search...", 5000);
+
+    //     let uri = `/search?search=${keySetContext.searchBy}&token=${keySetContext.portalToken}`;
+    //     console.log(`uri: ${uri}`);
+
+    //     fetch(uri, { signal: controller.signal, 
+    //         headers: {
+    //             "Accept": "application/json",
+    //             "Content-Type": "application/json"
+    //             }
+    //     }).then(res => res.json()).then(
+    //         (result) => {
+    //             console.log(">>>>>>>> SEARCH RESULTS", result);
+    //             keySetContext.setSearchResults(result);
+
+    //             clearTimeout(timeoutId);
+    //             hideAlert();
+    //         },
+    //         (error) => {
+    //             hideAlert();
+    //             console.log("Internal Admin Search error:", error);
+    //             timerAlert("Internal Admin Search error", error + " (VPN enabled?)", 5000);
+    //         }
+    //     ).catch = (error) => {
+    //         hideAlert();
+    //         console.log("search error:", error);
+    //         timerAlert("fetch /search", error, 5000);
+    //     };
+    // }
 
     const retrieveApps = async (e, record, index) => {
         console.log("retrieveApps");
@@ -223,7 +260,7 @@ const PnDashboard = () => {
                             <CardHeader className="border-0">
                                 <Row className="align-items-center">
                                     <div className="col">
-                                        <h3 className="mb-0">PubNub Dashboard Login</h3>
+                                        <h3 className="mb-0">PubNub Account Login</h3>
                                     </div>
                                 </Row>
                             </CardHeader>
@@ -274,15 +311,28 @@ const PnDashboard = () => {
                                             </FormGroup>
                                             <Row>
                                                 <Col className="col text-right">
-                                                    <Button
+                                                    {(!keySetContext.portalToken
+                                                        ?
+                                                        <Button
                                                         color="danger"
                                                         onClick={login}
                                                         size="sm"
                                                         disabled={keySetContext.portalUsername == null || keySetContext.portalUsername === "" 
                                                             || keySetContext.portalPassword == null || keySetContext.portalPassword === ""}
-                                                    >
-                                                        Login
-                                                    </Button>
+                                                        >
+                                                            Login
+                                                        </Button>
+                                                        : 
+                                                        <Button
+                                                        color="danger"
+                                                        onClick={searchPage}
+                                                        size="sm"
+                                                        disabled={keySetContext.portalUsername == null || keySetContext.portalUsername === "" 
+                                                            || keySetContext.portalPassword == null || keySetContext.portalPassword === ""}
+                                                        >
+                                                            Search Page
+                                                        </Button>
+                                                    )}
                                                 </Col>
                                             </Row>
                                         </Col>

@@ -23,6 +23,8 @@ export const KeySetProvider = ({ children }) => {
   const [portalAccounts, setPortalAccounts] = useState([]);
   const [portalApps, setPortalApps] = useState([]);
   const [portalKeys, setPortalKeys] = useState([]);
+  const [searchBy, setSearchBy] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   
 
   const initKeySet = (keySetConfig) => {
@@ -99,6 +101,8 @@ export const KeySetProvider = ({ children }) => {
     portalAccounts, setPortalAccounts,
     portalApps, setPortalApps,
     portalKeys, setPortalKeys,
+    searchBy, setSearchBy,
+    searchResults, setSearchResults,
   }
 
   return <Context.Provider value={keySetData}> {children} </Context.Provider>
