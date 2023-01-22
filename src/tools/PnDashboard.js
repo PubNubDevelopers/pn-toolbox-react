@@ -129,39 +129,6 @@ const PnDashboard = () => {
         history.push("/admin/account-search");
     }
 
-    // const search = () => {
-    //     const controller = new AbortController();
-    //     const timeoutId = setTimeout(() => controller.abort(), 5000);
-    //     timerAlert("Internal Admin Search", "Please wait while we search...", 5000);
-
-    //     let uri = `/search?search=${keySetContext.searchBy}&token=${keySetContext.portalToken}`;
-    //     console.log(`uri: ${uri}`);
-
-    //     fetch(uri, { signal: controller.signal, 
-    //         headers: {
-    //             "Accept": "application/json",
-    //             "Content-Type": "application/json"
-    //             }
-    //     }).then(res => res.json()).then(
-    //         (result) => {
-    //             console.log(">>>>>>>> SEARCH RESULTS", result);
-    //             keySetContext.setSearchResults(result);
-
-    //             clearTimeout(timeoutId);
-    //             hideAlert();
-    //         },
-    //         (error) => {
-    //             hideAlert();
-    //             console.log("Internal Admin Search error:", error);
-    //             timerAlert("Internal Admin Search error", error + " (VPN enabled?)", 5000);
-    //         }
-    //     ).catch = (error) => {
-    //         hideAlert();
-    //         console.log("search error:", error);
-    //         timerAlert("fetch /search", error, 5000);
-    //     };
-    // }
-
     const retrieveApps = async (e, record, index) => {
         console.log("retrieveApps");
 

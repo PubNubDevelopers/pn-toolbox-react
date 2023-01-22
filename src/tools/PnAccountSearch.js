@@ -126,25 +126,54 @@ const PnAccountSearch = () => {
         console.log(results);
         let data = [];
 
-        for (let i=0; i < results.accounts.length; i++) {
+        if (results.keys != null && results.keys.length == 1) {
             let row = {};
-            row.email = results.users[i].email;
-            row.userid = results.users[i].id;
-            row.accountid = results.accounts[i].id;
-            row.sso = results.users[i].properties.is_sso_admin ? "*" : null;
-            row.paid = results.users[i].properties.is_paying_user ? "$" : null;
-            row.name = results.users[i].properties.first + " " + results.users[i].properties.last;
-            row.company = results.accounts[i].properties.company;
-            row.created = results.accounts[i].created;
-            row.modified = results.accounts[i].modified;
+            data.isKeys = true;
+            row.email = results.users[0].email;
+            row.userid = results.users[0].id;
+            row.accountid = results.accounts[0].id;
+            row.subkey = results.keys[0].subscribe_key;
+            row.pubkey = results.keys[0].publish_key;
+            row.seckey = results.keys[0].secret_key;
+            row.paid = results.users[0].properties.is_paying_user ? "$" : null;
+            row.name = results.users[0].properties.first + " " + results.users[0].properties.last;
+            row.company = results.accounts[0].properties.company;
+            row.created = results.keys[0].created;
+            row.modified = results.keys[0].modified;
             data.push(row);
+        }
+        else {
+            data.isKeys = false;
+            for (let i=0; i < results.accounts.length; i++) {
+                let row = {};
+                row.email = results.users[i].email;
+                row.userid = results.users[i].id;
+                row.accountid = results.accounts[i].id;
+                row.paid = results.users[i].properties.is_paying_user ? "$" : null;
+                row.name = results.users[i].properties.first + " " + results.users[i].properties.last;
+                row.company = results.accounts[i].properties.company;
+                row.created = results.accounts[i].created;
+                row.modified = results.accounts[i].modified;
+                data.push(row);
+            }
         }
 
         keySetContext.setSearchResults(data);
     }
 
-    const doIt = (results) => {
-        console.log("in doIt - TBD");
+    const doAction = (e, record, index, action) => {
+        console.log(`in doAction: ${action}`);
+        if (action == "init") {
+            keySetContext.setPubKey(record.pubkey);
+            keySetContext.setSubKey(record.subkey);
+            keySetContext.setSecKey(record.seckey);
+            history.push("/admin/key-set");
+        }
+        else { // load accounts
+            keySetContext.setPortalAccountId(record.accountid);
+            keySetContext.setPortalAccounts(record.accounts);
+            history.push("/admin/pndashboard");
+        }
     }
 
     const hideAlert = () => {
@@ -237,7 +266,7 @@ const PnAccountSearch = () => {
                                     emptyRows={emptyRows0}
                                     handleChangePage={handleChangePage0}
                                     handleChangeRowsPerPage={handleChangeRowsPerPage0}
-                                    // retrieveApps={retrieveApps}
+                                    doAction={doAction}
                                 />
                             </CardBody>
                             {/* <CardFooter>
@@ -255,7 +284,7 @@ const PnAccountSearch = () => {
 
 export default PnAccountSearch;
 
-const AccountsTable = ({ data, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, retrieveApps }) => {
+const AccountsTable = ({ data, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, doAction }) => {
     console.log("AccountsTable", data);
 
     if (data == null || data.length === 0) return <><h2>No Results</h2></>;
@@ -284,15 +313,19 @@ const AccountsTable = ({ data, rowsPerPage, page, emptyRows, handleChangePage, h
                         <TableRow>
                             <TableCell align="right">#</TableCell>
                             <TableCell>Email</TableCell>
-                            <TableCell>User ID</TableCell>
-                            <TableCell>Account ID</TableCell>
-                            <TableCell>SSO?</TableCell>
-                            <TableCell>Paid?</TableCell>
+                            {data.isKeys && (
+                                <TableCell>Subscribe Key</TableCell>
+                            )}
+                            <TableCell align="center">Paid?</TableCell>
                             <TableCell>Name</TableCell>
                             <TableCell>Company</TableCell>
                             <TableCell>Created</TableCell>
                             <TableCell>Modified</TableCell>
-                            <TableCell align="center">Go</TableCell>
+                            {data.isKeys ? (
+                                <TableCell>Init Key</TableCell>
+                            ) : (
+                                <TableCell>Get Keys</TableCell> 
+                            )}
                         </TableRow>
                     </TableHead>
 
@@ -301,7 +334,7 @@ const AccountsTable = ({ data, rowsPerPage, page, emptyRows, handleChangePage, h
                             ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             : data
                         ).map((row, index) => (
-                            <AccountRow key={index} index={(index + (page * rowsPerPage))} row={row} retrieveApps={retrieveApps} />
+                            <AccountRow key={index} index={(index + (page * rowsPerPage))} row={row} isKeys={data.isKeys} doAction={doAction} />
                         ))}
                         {emptyRows > 0 && (
                             <TableRow style={{ height: 53 * emptyRows }}>
@@ -334,7 +367,7 @@ const AccountsTable = ({ data, rowsPerPage, page, emptyRows, handleChangePage, h
     );
 }
 
-const AccountRow = ({ index, row, retrieveApps }) => {
+const AccountRow = ({ index, row, isKeys, doAction }) => {
     // console.log("AccountRow", row);
 
     return (
@@ -343,18 +376,23 @@ const AccountRow = ({ index, row, retrieveApps }) => {
                 <TableCell align="right">{index}</TableCell>
                 <>
                     <TableCell component="th" scope="row">{row.email}</TableCell>
-                    <TableCell>{row.userid}</TableCell>
-                    <TableCell>{row.accountid}</TableCell>
-                    <TableCell>{row.sso}</TableCell>
-                    <TableCell>{row.paid}</TableCell>
+                    {isKeys && (
+                        <TableCell>{row.subkey}</TableCell>
+                    )}
+                    <TableCell align="center">{row.paid}</TableCell>
                     <TableCell>{row.name}</TableCell>
                     <TableCell>{row.company}</TableCell>
                     <TableCell>{row.created}</TableCell>
                     <TableCell>{row.modified}</TableCell>
                 </>
                 <TableCell align="center">
-                    <IconButton aria-label="edit" size="small" onClick={(e) => doIt(e, row, index)}>
-                        <GetApp />
+                    <IconButton aria-label="edit" size="small" onClick={(e) => doAction(e, row, index, ({isKeys} ? "init" : "accounts"))}>
+                        {isKeys ? (
+                            <Bolt />
+                        ) : (
+                            <GetApp /> 
+                        )}
+                        
                     </IconButton>
                 </TableCell>
             </TableRow>
