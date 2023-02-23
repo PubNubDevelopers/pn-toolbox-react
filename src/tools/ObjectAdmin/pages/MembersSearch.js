@@ -147,7 +147,7 @@ const MembersSearch = () => {
     let more = true;
     let results = [];
     let next = null;
-    let totalRecords = 0;
+    let recordCount = 0;
 
     const limit = objectAdminContext.maxRows < 100 ? objectAdminContext.maxRows : 100;
 
@@ -167,14 +167,15 @@ const MembersSearch = () => {
           page: {next: next}
         });
 
-        totalRecords = result.totalCount;
-
         if (result != null && result.data.length > 0) {
-          results = results.concat(result.data);
-          more = result.data.length >= limit;
+          recordCount += result.data.length;
+          confirmAlert("Searching Members", `${recordCount} Members retrieved of ${objectAdminContext.maxRows}.`);
+          more = result.data.length == limit && recordCount < objectAdminContext.maxRows;
           next = result.next;
         }
         else more = false;
+
+        if (!more) objectAdminContext.setTotalMembers(result.totalCount);
       } 
       catch (status) {
         hideAlert(); // hide the please wait dialog
@@ -190,9 +191,9 @@ const MembersSearch = () => {
 
     hideAlert(); // hide the "searching please wait" dialog
     
-    totalRecords === 0 
-      ? timerAlert("No Members Found!", "Your filter found none Channel Members.", 3)
-      : timerAlert("Channel Members Found!", `${totalRecords} Channel Members Found.`, 2);
+    recordCount === 0 
+      ? timerAlert("No Members Found!", "Your filter found none Members.", 3)
+      : timerAlert("Channel Members Found!", `${recordCount} Members Found.`, 2);
 
     console.log("    members found", results);
     objectAdminContext.setChannelMembersResults(results);
@@ -406,6 +407,7 @@ const MembersSearch = () => {
                 <Row className="align-items-center">
                   <Col>
                     <h3 className="mb-0">Channel Members Results</h3>
+                    {(objectAdminContext.channelMetadataResults.length > 0) ? <h4>[{objectAdminContext.totalMembers} total members]</h4> : ""}
                   </Col>
                   <Col lg="2" className="text-center">
                     <Button

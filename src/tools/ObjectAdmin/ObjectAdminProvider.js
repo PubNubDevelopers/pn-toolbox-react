@@ -22,22 +22,27 @@ export const ObjectAdminProvider = ({ children }) => {
    const [userUpdated, setUserUpdated] = useState([]);
    const [userEtag, setUserEtag] = useState([]); 
 
+   const [maxRows, setMaxRows] = useState(500);
+
   // ChannelsSearch State
   const [channelFilter, setChannelFilter] = useState('name LIKE "*"');
-  const [maxRows, setMaxRows] = useState(500);
   const [channelMetadataResults, setChannelMetadataResults] = useState([]);
+  const [totalChannels, setTotalChannels] = useState(0);
 
   // UsersSearch State
   const [userFilter, setUserFilter] = useState('name LIKE "*"');
   const [userMetadataResults, setUserMetadataResults] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   // ChannelMembersSearch State
   const [channelMembersResults, setChannelMembersResults] = useState([]);
   const [memberFilter, setMemberFilter] = useState();
+  const [totalMembers, setTotalMembers] = useState(0);
 
   // ChannelMembershipsSearch State
   const [channelMembershipsResults, setChannelMembershipsResults] = useState([]);
   const [membershipFilter, setMembershipFilter] = useState();
+  const [totalMemberships, setTotalMemberships] = useState(0);
 
   // expose data/functions to context users
   /////////////////////////////////////////
@@ -61,23 +66,27 @@ export const ObjectAdminProvider = ({ children }) => {
     userUpdated, setUserUpdated,
     userEtag, setUserEtag,
 
+    maxRows, setMaxRows,
+
     // ChannelsSearch State
     channelFilter, setChannelFilter,
-    maxRows, setMaxRows,
     channelMetadataResults, setChannelMetadataResults,
+    totalChannels, setTotalChannels,
 
     // UsersSearch State
     userFilter, setUserFilter,
-    // share ChannelsList state: maxRows, setMaxRows,
     userMetadataResults, setUserMetadataResults,
+    totalUsers, setTotalUsers,
 
     // ChannelMembersSearch State
     channelMembersResults, setChannelMembersResults,
     memberFilter, setMemberFilter,
+    totalMembers, setTotalMembers,
 
     // ChannelMembersSearch State
     channelMembershipsResults, setChannelMembershipsResults,
     membershipFilter, setMembershipFilter,
+    totalMemberships, setTotalMemberships,
   }
 
   

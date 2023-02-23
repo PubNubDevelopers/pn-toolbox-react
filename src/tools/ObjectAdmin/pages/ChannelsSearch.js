@@ -94,7 +94,7 @@ const ChannelsSearch = () => {
     let more = true;
     let results = [];
     let next = null;
-    let totalRecords = 0;
+    let recordCount = 0;
 
     const limit = objectAdminContext.maxRows < 100 ? objectAdminContext.maxRows : 100;
 
@@ -111,15 +111,17 @@ const ChannelsSearch = () => {
           },
           page: {next: next}
         });
-
-        totalRecords = result.totalCount;
         
         if (result != null && result.data.length > 0) {
+          recordCount += result.data.length;
+          confirmAlert("Searching Channels", `${recordCount} Channels retrieved of ${objectAdminContext.maxRows}.`);
           results = results.concat(result.data);
-          more = result.data.length >= limit;
+          more = result.data.length == limit && recordCount < objectAdminContext.maxRows;
           next = result.next;
         }
         else more = false;
+
+        if (!more) objectAdminContext.setTotalChannels(result.totalCount);
       } 
       catch (status) {
         hideAlert(); // hide the please wait dialog
@@ -135,9 +137,9 @@ const ChannelsSearch = () => {
 
     hideAlert(); // hide the "searching please wait" dialog
     
-    totalRecords === 0 
-      ? timerAlert("No Channels Found!", "Your filter found none channels.", 3)
-      : timerAlert("Channels Found!", `${totalRecords} Channels Found.`, 2);
+    recordCount === 0 
+      ? timerAlert("No Channels Found!", "Your filter found none Channels.", 3)
+      : timerAlert("Channels Retrieved!", `${recordCount} Channels retrieved.`, 2);
 
     objectAdminContext.setChannelMetadataResults(results);
   }
@@ -277,8 +279,8 @@ const ChannelsSearch = () => {
                               id="input-max-rows"
                               type="text"
                               value={objectAdminContext.maxRows}
-                              max="5000"
-                              min="5"
+                              max="10000"
+                              min="1"
                               maxLength="5"
                               onChange={(e) => objectAdminContext.setMaxRows(e.target.value)}
                             />
@@ -309,6 +311,7 @@ const ChannelsSearch = () => {
                 <Row className="align-items-center">
                   <div className="col">
                     <h3 className="mb-0">Channel Search Results</h3>
+                    {(objectAdminContext.channelMetadataResults.length > 0) ? <h4>[{objectAdminContext.totalChannels} total channels]</h4> : ""}
                   </div>
                   <div className="col text-right">
                   </div>
