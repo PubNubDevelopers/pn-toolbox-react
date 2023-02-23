@@ -94,11 +94,11 @@ const UsersSearch = () => {
     let more = true;
     let results = [];
     let next = null;
-    let totalRecords = 0;
+    let recordCount = 0;
 
     const limit = objectAdminContext.maxRows < 100 ? objectAdminContext.maxRows : 100;
 
-    confirmAlert("Searching Channels", "Searching for Users, please wait...");
+    confirmAlert("Searching Users", "Searching for Users, please wait...");
 
     do {
       try {
@@ -111,15 +111,17 @@ const UsersSearch = () => {
           },
           page: {next: next}
         });
-
-        totalRecords = result.totalCount;
-
+        
         if (result != null && result.data.length > 0) {
+          confirmAlert("Searching Users", `${recordCount} Users retrieved of ${objectAdminContext.maxRows}.`);
+          recordCount += result.data.length;
           results = results.concat(result.data);
-          more = result.data.length >= limit;
+          more = result.data.length == limit && recordCount < objectAdminContext.maxRows;
           next = result.next;
         }
         else more = false;
+
+        if (!more) objectAdminContext.setTotalUsers(result.totalCount);
       } 
       catch (status) {
         hideAlert(); // hide the please wait dialog
@@ -135,9 +137,9 @@ const UsersSearch = () => {
 
     hideAlert(); // hide the "searching please wait" dialog
     
-    totalRecords === 0 
-      ? timerAlert("No Users Found!", "Your filter found none users.", 3)
-      : timerAlert("Users Found!", `${totalRecords} Users Found.`, 2);
+    recordCount === 0 
+      ? timerAlert("No Users Found!", "Your filter found none Users.", 3)
+      : timerAlert("Users Found!", `${recordCount} Users Found.`, 2);
 
     objectAdminContext.setUserMetadataResults(results);
   }
@@ -310,6 +312,7 @@ const UsersSearch = () => {
                 <Row className="align-items-center">
                   <div className="col">
                     <h3 className="mb-0">User Search Results</h3>
+                    {(objectAdminContext.channelMetadataResults.length > 0) ? <h4>[{objectAdminContext.totalUsers} total users]</h4> : ""}
                   </div>
                   <div className="col text-right">
                   </div>
@@ -531,7 +534,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
                     <TableCell><strong>Profile URL</strong></TableCell>
                     <TableCell width="95%">{row.profileUrl}</TableCell>
                   </TableRow>
-                  <TableRow>
+                  {/* <TableRow>
                     <TableCell width="5%"></TableCell>
                     <TableCell colSpan="2" component="th" width="5%"><strong>Custom Fields</strong></TableCell>
                   </TableRow>
@@ -541,7 +544,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
                       <TableCell>{key}</TableCell>
                       <TableCell width="95%" colSpan="2">{row.custom[key]}</TableCell>
                     </TableRow>
-                  ))}
+                  ))} */}
                 </TableBody>
               </Table>
             </Box>
