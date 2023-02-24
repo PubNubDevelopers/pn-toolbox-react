@@ -18,7 +18,7 @@
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "server": "nodemon server.js  --ignore client",
+    "server": "nodemon src/server.js  --ignore client",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start",
     "compile:scss": "node-sass --importer node_modules/node-sass-package-importer/dist/cli.js src/assets/scss/argon-dashboard-pro-material-ui.scss src/assets/css/argon-dashboard-pro-material-ui.css",
     "minify:scss": "node-sass --importer node_modules/node-sass-package-importer/dist/cli.js src/assets/scss/argon-dashboard-pro-material-ui.scss src/assets/css/argon-dashboard-pro-material-ui.min.css --output-style compressed",
