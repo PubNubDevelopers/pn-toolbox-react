@@ -179,8 +179,7 @@ const ChannelsSearch = () => {
       objectAdminContext.setChannelMetadataResults(temp);
     } 
     catch (status) {
-      confirmAlert(status.status.errorData.error.message, 
-        status.status.errorData.error.details[0].message,
+      confirmAlert(status.status.type, status.status.message,
         "Dismiss", ()=>hideAlert()
       );
     }

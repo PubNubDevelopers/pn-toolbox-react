@@ -125,8 +125,7 @@ const UsersSearch = () => {
       } 
       catch (status) {
         hideAlert(); // hide the please wait dialog
-        confirmAlert(status.status.errorData.error.message, 
-          status.status.errorData.error.details[0].message,
+        confirmAlert(status.status.type, status.status.message,
           "Dismiss", ()=>hideAlert()
         );
 
