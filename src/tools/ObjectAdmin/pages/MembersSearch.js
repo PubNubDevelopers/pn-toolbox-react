@@ -170,6 +170,7 @@ const MembersSearch = () => {
         if (result != null && result.data.length > 0) {
           recordCount += result.data.length;
           confirmAlert("Searching Members", `${recordCount} Members retrieved of ${objectAdminContext.maxRows}.`);
+          results = results.concat(result.data);
           more = result.data.length == limit && recordCount < objectAdminContext.maxRows;
           next = result.next;
         }
@@ -179,8 +180,7 @@ const MembersSearch = () => {
       } 
       catch (status) {
         hideAlert(); // hide the please wait dialog
-        confirmAlert(status.status.errorData.error.message, 
-          status.status.errorData.error.details[0].message,
+        confirmAlert(status.status.type, status.status.message,
           "Dismiss", ()=>hideAlert()
         );
 
@@ -336,8 +336,8 @@ const MembersSearch = () => {
                             id="input-channel-id"
                             placeholder="Enter a channel ID"
                             type="text"
-                            value={channelId}
-                            onChange={(e) => setChannelId(e.target.value)}
+                            value={objectAdminContext.channelId}
+                            onChange={(e) => objectAdminContext.setChannelId(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -357,8 +357,8 @@ const MembersSearch = () => {
                             placeholder="Enter a filter expression"
                             type="textarea"
                             rows="4"
-                            value={memberFilter}
-                            onChange={(e) => setMemberFilter(e.target.value)}
+                            value={objectAdminContext.memberFilter}
+                            onChange={(e) => objectAdminContext.setMemberFilter(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -388,7 +388,7 @@ const MembersSearch = () => {
                             className="form-control-alternative text-align-right"
                             color="danger"
                             onClick={retrieveMembers}
-                            disabled = {keySetContext.pubnub == null || channelId == null}
+                            disabled = {keySetContext.pubnub == null || objectAdminContext.channelId == null}
                           >
                             Search Members
                           </Button>
@@ -407,13 +407,13 @@ const MembersSearch = () => {
                 <Row className="align-items-center">
                   <Col>
                     <h3 className="mb-0">Channel Members Results</h3>
-                    {(objectAdminContext.channelMetadataResults.length > 0) ? <h4>[{objectAdminContext.totalMembers} total members]</h4> : ""}
+                    {(objectAdminContext.channelMembersResults.length > 0) ? <h4>[{objectAdminContext.totalMembers} total members]</h4> : ""}
                   </Col>
                   <Col lg="2" className="text-center">
                     <Button
                       color="info"
                       onClick={toggle}
-                      disabled = {keySetContext.pubnub == null || channelId === ""}
+                      disabled = {keySetContext.pubnub == null || objectAdminContext.channelId === ""}
                     >
                       Add Members
                     </Button>
@@ -495,7 +495,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               <TableCell>User ID</TableCell>
               <TableCell>User Name</TableCell>
               {/* <TableCell>Email</TableCell> */}
-              <TableCell>Custom Membership Data</TableCell>
+              <TableCell>Custom Member Data</TableCell>
               <TableCell>Last Updated</TableCell>
               <TableCell align="center">Actions</TableCell>
             </TableRow>
@@ -554,7 +554,7 @@ const truncate = (data, size, noDots) => {
 }
 
 const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
-  // console.log("MetadataRow", row);
+  console.log("MetadataRow", row);
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -654,7 +654,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
                     <TableCell colSpan="2" component="th" width="5%"><strong>Custom User Fields</strong></TableCell>
                   </TableRow>
 
-                  {Object.keys(row.uuid.custom).map((key) => (
+                  {/* {Object.keys(row.uuid.custom).map((key) => (
                     <TableRow>
                       <TableCell width="5%"></TableCell>
                       <TableCell width="5%"></TableCell>
@@ -662,7 +662,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
                       <TableCell>{key}</TableCell>
                       <TableCell width="95%" colSpan="2">{row.uuid.custom[key]}</TableCell>
                     </TableRow>
-                  ))}
+                  ))} */}
 
                   <TableRow>
                     <TableCell width="5%"></TableCell>

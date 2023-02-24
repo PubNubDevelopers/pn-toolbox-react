@@ -59,7 +59,7 @@ import { Switch, FormControlLabel } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 // import GroupIcon from '@mui/icons-material/Group';
 import ReactBSAlert from "react-bootstrap-sweetalert";
-import AddMembersDialog from "../../utils/AddItemsDialog";
+import AddItemsDialog from "../../utils/AddItemsDialog";
 
 const MembershipsSearch = () => {
   const keySetContext = useKeySetData();
@@ -74,7 +74,7 @@ const MembershipsSearch = () => {
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - objectAdminContext.membershipsResults.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - objectAdminContext.channelMembershipsResults.length) : 0;
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -180,12 +180,8 @@ const MembershipsSearch = () => {
       } 
       catch (status) {
         hideAlert(); // hide the please wait dialog
-        confirmAlert(JSON.stringify(status), 
-        JSON.stringify(status),
+        confirmAlert(status.status.type, status.status.message,
           "Dismiss", ()=>hideAlert()
-        // confirmAlert(status.status.errorData.error.message, 
-        //   status.status.errorData.error.details[0].message,
-        //   "Dismiss", ()=>hideAlert()
         );
 
         // exit loop on error
@@ -294,7 +290,7 @@ const MembershipsSearch = () => {
   return (
     <>
       {sweetAlert}
-      <AddMembersDialog
+      <AddItemsDialog
         // toggle={toggle}
         modal={modal}
         newItems={newMemberships}
@@ -340,8 +336,8 @@ const MembershipsSearch = () => {
                             id="input-user-id"
                             placeholder="Enter a user ID"
                             type="text"
-                            value={userId}
-                            onChange={(e) => setUserId(e.target.value)}
+                            value={objectAdminContext.userId}
+                            onChange={(e) => objectAdminContext.setUserId(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -361,8 +357,8 @@ const MembershipsSearch = () => {
                             placeholder="Enter a filter expression"
                             type="textarea"
                             rows="4"
-                            value={membershipFilter}
-                            onChange={(e) => setMembershipFilter(e.target.value)}
+                            value={objectAdminContext.membershipFilter}
+                            onChange={(e) => objectAdminContext.setMembershipFilter(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
@@ -392,7 +388,7 @@ const MembershipsSearch = () => {
                             className="form-control-alternative text-align-right"
                             color="danger"
                             onClick={retrieveMemberships}
-                            disabled = {keySetContext.pubnub == null || userId == null}
+                            disabled = {keySetContext.pubnub == null || objectAdminContext.userId == null}
                           >
                             Search Members
                           </Button>
@@ -417,7 +413,7 @@ const MembershipsSearch = () => {
                     <Button
                       color="info"
                       onClick={toggle}
-                      disabled = {keySetContext.pubnub == null || userId === ""}
+                      disabled = {keySetContext.pubnub == null || objectAdminContext.userId === ""}
                     >
                       Add Channels
                     </Button>
@@ -496,8 +492,8 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
             <TableRow>
               <TableCell/>
               <TableCell align="right">#</TableCell>
-              <TableCell>User ID</TableCell>
-              <TableCell>User Name</TableCell>
+              <TableCell>Channel ID</TableCell>
+              <TableCell>Channel Name</TableCell>
               <TableCell>Description</TableCell>
               <TableCell>Custom Membership Data</TableCell>
               <TableCell>Last Updated</TableCell>
@@ -558,7 +554,7 @@ const truncate = (data, size, noDots) => {
 }
 
 const MetadataRow = ({index, row, isTruncate, handleRemove, handleEdit}) => {
-  // console.log("MetadataRow", row);
+  console.log("MetadataRow", row);
   const [open, setOpen] = React.useState(false);
 
   return (
