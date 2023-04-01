@@ -122,8 +122,7 @@ const PnAccountSearch = () => {
     }
 
     const processResults = (results) => {
-        // console.log(JSON.stringify(results, null, 2));
-        console.log(results);
+        console.log("processResults", results);
         let data = [];
 
         if (results.keys != null && results.keys.length == 1) {
@@ -156,13 +155,16 @@ const PnAccountSearch = () => {
                 row.modified = results.accounts[i].modified;
                 data.push(row);
             }
+
+            keySetContext.setPortalAccounts(data.accounts);
         }
 
         keySetContext.setSearchResults(data);
     }
 
-    const doAction = (e, record, index, action) => {
-        console.log(`in doAction: ${action}`);
+    const doAction = async (e, record, index, action) => {
+        console.log(`in doAction: ${action}`, record);
+
         if (action == "init") {
             keySetContext.setPubKey(record.pubkey);
             keySetContext.setSubKey(record.subkey);
@@ -170,10 +172,42 @@ const PnAccountSearch = () => {
             history.push("/admin/key-set");
         }
         else { // load accounts
-            keySetContext.setPortalAccountId(record.accountid);
-            keySetContext.setPortalAccounts(record.accounts);
+            const result = await retrieveAccounts(record.userid);
             history.push("/admin/pndashboard");
         }
+    }
+
+    const retrieveAccounts = async (userId) => {
+        console.log("retrieveApps");
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        timerAlert("Retrieving Accounts", "Please wait while we retrieve the accounts...", 5000);
+
+        let uri = `/accounts?user_id=${userId}&token=${keySetContext.portalToken}`;
+
+        console.log(`fetch accounts uri: ${uri}`);
+        fetch(uri, { signal: controller.signal }).then(res => res.json()).then(
+            (result) => {
+                console.log("fetch accounts result", result);
+                keySetContext.setPortalUserId(userId);
+                keySetContext.setPortalAccounts(result.accounts);
+                keySetContext.setPortalApps([]);
+                keySetContext.setPortalKeys([]);
+
+                clearTimeout(timeoutId);
+                hideAlert();
+            },
+            (error) => {
+                hideAlert();
+                console.log("retrieveAccounts error:", error);
+                timerAlert("Error: retrieveAccounts", error, 5000);
+            }
+        ).catch = (error) => {
+            hideAlert();
+            console.log("fetch accounts error:", error);
+            timerAlert("fetch /accounts", error, 5000);
+        };
     }
 
     const hideAlert = () => {
@@ -367,8 +401,8 @@ const AccountsTable = ({ data, rowsPerPage, page, emptyRows, handleChangePage, h
     );
 }
 
-const AccountRow = ({ index, row, isKeys, doAction }) => {
-    // console.log("AccountRow", row);
+const AccountRow = ({ key, index, row, isKeys, doAction }) => {
+    console.log("AccountRow", isKeys, row);
 
     return (
         <>
@@ -386,7 +420,7 @@ const AccountRow = ({ index, row, isKeys, doAction }) => {
                     <TableCell>{row.modified}</TableCell>
                 </>
                 <TableCell align="center">
-                    <IconButton aria-label="edit" size="small" onClick={(e) => doAction(e, row, index, ({isKeys} ? "init" : "accounts"))}>
+                    <IconButton aria-label="edit" size="small" onClick={(e) => doAction(e, row, index, (isKeys ? "init" : "accounts"))}>
                         {isKeys ? (
                             <Bolt />
                         ) : (
