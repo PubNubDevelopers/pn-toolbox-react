@@ -22,7 +22,7 @@ app.get('/keys', (req, res) => {
   // curl 'https://internal-admin.pubnub.com/api/app/keys?app_id=1&page=1&limit=1' --header 'X-Session-Token: <token>'
 
   const options = {
-    'url': `https://admin.pubnub.com/api/app/keys?app_id=${req.query.app_id}&page=1&limit=99`,
+    'url': `https://${domain}/api/app/keys?app_id=${req.query.app_id}&page=1&limit=99`,
     'headers': { 'X-Session-Token': req.query.token }
   };
 
@@ -88,6 +88,47 @@ app.get('/search', (req, res) => {
     let data = JSON.parse(res1.body);
     console.log("search results", data);
     res.send(data);
+  });
+});
+
+app.get('/accounts', (req, res) => {
+  console.log("in /accounts", req);
+  // get accounts //
+  //////////////////
+
+  const options = {
+    url: `https://${domain}/api/accounts?user_id=${req.query.user_id}`,
+    headers: { 'X-Session-Token': req.query.token },
+  };
+
+  console.log("account options", options);
+
+  request.get(options, (err1, res1, body1) => {
+    // console.log("accounts: res", res1, "\n");
+    // console.log("accounts: body", body1, "\n");
+
+    if (err1) return console.log(err1);
+
+    // respond to client with data //
+    /////////////////////////////////
+    
+    // console.log();
+    // console.log();
+    // console.log();
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    // console.log("res.body", res1.body);
+
+    let data = {
+      "session": {
+        "userid": res1.body.user_id,
+        "token": res1.body.token,
+        "accountid": res1.body.account_id
+      },
+      "accounts": JSON.parse(body1).result.accounts
+    };
+
+    console.log("accounts", data.accounts);
+    res.send(data); 
   });
 });
 
