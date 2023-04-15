@@ -5,6 +5,7 @@ import { AuthAdminProvider } from "./AuthAdminProvider";
 // app pages
 import ParseToken from "./pages/ParseToken";
 import GrantToken from "./pages/GrantToken";
+import UnauthDebug from "./pages/UnauthDebug";
 
 var routesAuthAdmin = {
   collapse: true,
@@ -24,6 +25,13 @@ var routesAuthAdmin = {
       path: "/auth/grant-token",
       name: "Grant Token",
       component: GrantToken,
+      parent: AuthAdminProvider,
+      layout: "/admin",
+    },
+    {
+      path: "/auth/debug-403s",
+      name: "Debug 403s",
+      component: UnauthDebug,
       parent: AuthAdminProvider,
       layout: "/admin",
     },
