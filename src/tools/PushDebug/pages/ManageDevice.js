@@ -53,10 +53,10 @@ const ManageDevice = () => {
   console.log("ManageDevice pushDebugContext: ", pushDebugContext);
 
   const [token, setToken] = useState(pushDebugContext.token);
+
   const [pushType, setPushType] = useState(pushDebugContext.pushType); // apns, gcm
   const [environment, setEnvironment] = useState(pushDebugContext.environment);
   const [topic, setTopic] = useState(pushDebugContext.topic);
-
   const [pushRadios, setPushRadios] = useState(pushDebugContext.pushRadios);
   const [environmentRadios, setEnvironmentRadios] = useState(pushDebugContext.environmentRadios);
   const [enableEnvironment, setEnableEnvironment] = useState(pushDebugContext.enableEnvironment);
@@ -64,7 +64,7 @@ const ManageDevice = () => {
   
   const [modal, setModal] = useState(false);
   const toggle = () => setModal(!modal);
-  const newChannels = useRef("");
+  const newChannels = useRef([]);
 
   const getPushParams = (params) => {
     const newParams = params || {};
@@ -108,7 +108,6 @@ const ManageDevice = () => {
     pushDebugContext.setPushType(pushType);
     pushDebugContext.setEnvironment(environment);
     pushDebugContext.setTopic(topic);
-
     pushDebugContext.setPushRadios(pushRadios);
     pushDebugContext.setEnvironmentRadios(environmentRadios);
     pushDebugContext.setEnableEnvironment(enableEnvironment);
@@ -237,7 +236,7 @@ const ManageDevice = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Device Push Details</h3>
+                    <h3 className="mb-0">Manage Device Token (Registered Channels)</h3>
                   </div>
                   <div className="col text-right">
                   </div>
@@ -258,7 +257,7 @@ const ManageDevice = () => {
                           <Input
                             className="form-control-alternative"
                             id="input-token"
-                            placeholder="Input device push token"
+                            placeholder="Enter device push token"
                             type="text"
                             value={token}
                             onChange={(e) => setToken(e.target.value)}

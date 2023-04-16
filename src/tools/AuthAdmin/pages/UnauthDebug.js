@@ -164,9 +164,9 @@ const UnauthDebug = () => {
         console.log("logLine", logLine);
 
         // if subscribe logs - default
-        data.userId = decodeURIComponent(logLine.uuid);
         const qp = JSON.parse(logLine.query_params);
         const auth = decodeURIComponent(qp.auth);
+        data.userId = qp.uuid;
 
         const authToken = keySetContext.pubnub.parseToken(auth);
         
@@ -199,7 +199,7 @@ const UnauthDebug = () => {
           }
           else {
             i = recordCount;
-            // this will exit the processing loop
+          // this will exit the processing loop
           }
         }
 

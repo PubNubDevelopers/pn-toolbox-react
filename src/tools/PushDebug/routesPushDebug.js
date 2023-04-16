@@ -33,7 +33,7 @@ var routesPushDebug = {
       name: "Manage Channel",
       component: ManageChannel,
       parent: PushDebugProvider,
-      layout: "/admin",
+      layout: "/admin", 
     },
   ],
 };
