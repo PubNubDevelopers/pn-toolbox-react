@@ -195,6 +195,7 @@ const PnDashboard = () => {
         keySetContext.setKeySetName(record.properties.name);
         keySetContext.setPubKey(record.publish_key);
         keySetContext.setSubKey(record.subscribe_key);
+        keySetContext.setSecKey(record.secret_key);
         history.push("/admin/key-set");
     }
 

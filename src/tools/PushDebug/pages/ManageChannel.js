@@ -44,6 +44,7 @@ import {
 // core components
 import { useKeySetData } from "../../KeySetProvider";
 import { usePushDebugData } from "../PushDebugProvider";
+import ReactBSAlert from "react-bootstrap-sweetalert";
 
 const ManageChannel = () => {
   const keySetContext = useKeySetData();
@@ -68,6 +69,7 @@ const ManageChannel = () => {
   const [enableEnvironment, setEnableEnvironment] = useState(pushDebugContext.enableEnvironment);
   const [enableTopic, setEnableTopic] = useState(pushDebugContext.enableTopic);
   
+  const [sweetAlert, setSweetAlert] = useState(null);
   const [modal, setModal] = useState(false);
   const toggle = () => setModal(!modal);
   const newDevices = useRef([]);
@@ -85,7 +87,7 @@ const ManageChannel = () => {
     return newParams;
   }
 
-  const listDevices = () => {
+  const listDevices2 = () => {
     keySetContext.pubnub.push.listDevices(
       getPushParams(),
       (status, response) => {
@@ -108,6 +110,46 @@ const ManageChannel = () => {
       }
     );
   }
+
+  // only enale if pub/sub/sec key are entered in init screen
+  const listDevices = async () => {
+    console.log("listDevices");
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    timerAlert("Retrieving Device Tokens", "Please wait while we retrieve the devices...", 5000);
+    
+    let uri = null;
+
+    if (pushType == 'apns2') {
+      uri = `/apns2-devices?pubkey=${keySetContext.pubKey}&subkey=${keySetContext.subKey}&seckey=${keySetContext.secKey}&env=${environment}&topic=${topic}&channel=${manageChannel}`;
+    }
+    else {
+      // apns or gcm
+      uri = `/${pushType}-devices?pubkey=${keySetContext.pubKey}&subkey=${keySetContext.subKey}&seckey=${keySetContext.secKey}&channel=${manageChannel}`;
+    }
+
+    console.log(`retrieve devices uri: ${uri}`);
+    fetch(uri, { signal: controller.signal }).then(res => res.json()).then(
+        (result) => {
+            console.log("retrieve devices result", result);
+
+            pushDebugContext.setRegisteredDevices(result);
+
+            clearTimeout(timeoutId);
+            hideAlert();
+        },
+        (error) => {
+            hideAlert();
+            console.log("retrieve devices error:", error);
+            timerAlert("Error: retrieve devices", error, 5000);
+        }
+    ).catch = (error) => {
+        hideAlert();
+        console.log("fetch /keys error:", error);
+        timerAlert("fetch /keys", error, 5000);
+    };
+}
 
   const updateContextState = () => {
     pushDebugContext.setManageChannel(channel);
@@ -200,6 +242,12 @@ const ManageChannel = () => {
     }
   }
 
+  const disableSignedRequests = () => {
+    return keySetContext.pubnub == null || keySetContext.pubKey === "" 
+      || keySetContext.subKey === "" || keySetContext.secKey === "" 
+      || (pushType === "apns2" && (topic === "" || environment === ""));
+  }
+
   const handleEnvironmentClick = (value) => {
     setEnvironmentRadios(value);
     setEnvironment(value === 0 ? "development" : "production");
@@ -220,6 +268,25 @@ const ManageChannel = () => {
     else if (type === "error") toast.error(title, params);
     else toast.info(title, params);
   }
+
+  const hideAlert = () => {
+    console.log("hideAlert");
+    setSweetAlert(null);
+};
+
+const timerAlert = (title, message, delay) => {
+    setSweetAlert(
+        <ReactBSAlert
+            style={{ display: "block", marginTop: "100px" }}
+            title={title}
+            onConfirm={() => hideAlert()}
+            showConfirm={false}
+        >
+            {message}
+        </ReactBSAlert>
+    );
+    setTimeout(function () { hideAlert() }, delay);
+};
 
   return (
     <>
@@ -410,7 +477,7 @@ const ManageChannel = () => {
                       <Button
                         color="danger"
                         onClick={listDevices}
-                        disabled = {keySetContext.pubnub == null || token === "" || (pushType === "apns2" && topic === "")}
+                        disabled = {disableSignedRequests()}
                         // size="sm"
                       >
                         List Device Tokens
@@ -418,7 +485,7 @@ const ManageChannel = () => {
                       <Button
                         color="secondary"
                         onClick={toggle}
-                        disabled = {keySetContext.pubnub == null || token === "" || (pushType === "apns2" && topic === "")}
+                        disabled = {disableSignedRequests()}
                         // size="sm"
                       >
                         Add Device Tokens
