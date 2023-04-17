@@ -76,7 +76,7 @@ const UnauthDebug = () => {
   const [sweetAlert, setSweetAlert] = useState(null);
 
   const FILE = 10;
-  const [dataSource, setDataSource] = useState(0);
+  const [dataSource, setDataSource] = useState(FILE);
   const [sourceData, setSourceData] = useState([]);
   const [url, setUrl] = useState(decodeURIComponent(sampleSubUrl));
 
@@ -411,7 +411,7 @@ const dateDiffFormatter = (date2, date1) => {
 }
 
 
-const sampleSubUrl = "http://ps.pndsn.com/v2/subscribe/sub-c-c446cfd0-cc2d-4060-8f54-89fb22dd62ab/ChatInbox.MISUSHI%234222,FriendRequest.MISUSHI%234222,UpdateFriendRequest.MISUSHI%234222,DeleteFriend.MISUSHI%234222,FriendInvite.MISUSHI%234222,RequestJoin.MISUSHI%234222/0?heartbeat=300&uuid=MISUSHI%234222&tr=36&tt=16800364855274137&channel-group=FriendUpdates.MISUSHI%234222&pnsdk=PubNub-CSharp-UnityWin%2F6.0.7&auth=qEF2AkF0GmQjTu5DdHRsD0NyZXOlRGNoYW64bXgYUmVxdWVzdEpvaW4uQVZPQ0FE";
+const sampleSubUrl = "tbd";
 
 const ReportTable = ({reportData, rowsPerPage, page, emptyRows, handleChangePage, handleChangeRowsPerPage, isTruncate, setIsTruncate}) => {
   console.log("ReportTable", reportData);
