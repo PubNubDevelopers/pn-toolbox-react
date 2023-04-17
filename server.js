@@ -3,6 +3,9 @@ const request = require('request');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const cors = require('cors');
+const Pubnub = require('pubnub');
+const { signPamFromParams } = require('pubnub/lib/core/utils');
+const CryptoJS = require('pubnub/lib/core/components/cryptography/hmac-sha256');
 
 const app = express();
 app.use(cors({ origin: '*' }));
@@ -14,6 +17,131 @@ app.listen(port, () => console.log(`Listening on port ${port}`));
 app.get('/test', (req, res) => {
   res.send({ express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT' });
 }); 
+
+const signRequest = (publishKey, subscribeKey, secretKey, queryParams, targetUrl) => {
+  console.log("signRequest", publishKey, subscribeKey, secretKey, queryParams, targetUrl);
+
+  let HMACSHA256 = function (data) {
+    console.log("signInput data", data);
+    let hash = CryptoJS.HmacSHA256(data, secretKey);
+    return hash.toString(CryptoJS.enc.Base64);
+  }
+
+  let signInput = subscribeKey + '\n' + publishKey + '\n' + targetUrl + '\n' 
+    + signPamFromParams(queryParams);
+
+  let signature = HMACSHA256(signInput);
+  console.log("signInput: signature", signature);
+
+  signature = signature.replace(/\+/g, '-');
+  signature = signature.replace(/\//g, '_');
+
+  return signature;
+}
+
+app.get('/apns-devices', (req, res) => {
+  console.log("in get /apns-devices", req.query);
+
+  // curl `/v1/push/sub-key/${subscribeKey}/audit-devices
+  //      ?channel=${channel}&timestamp=${timestamp}&type=apns&signature=${signature}`;
+
+  const targetUrl = `/v1/push/sub-key/${req.query.subkey}/audit-devices`
+  const timestamp = Math.floor(new Date().getTime() / 1000);
+
+  let queryParams = {
+      channel: req.query.channel,
+      type: 'apns',
+      timestamp: timestamp
+  }
+
+  const signature = signRequest(req.query.pubkey, req.query.subkey, req.query.seckey, queryParams, targetUrl);
+  console.log("signature", signature);
+
+  const options = {
+    'url': `https://ps.pndsn.com${targetUrl}?channel=${req.query.channel}&timestamp=${timestamp}&type=apns&signature=${signature}`,
+  };
+
+  console.log(`apns-devices options: ${JSON.stringify(options)}`);
+
+  request.get(options, (err1, res1, body1) => {
+    if (err1) {
+      return console.log(err1);
+    }
+
+    let data = body1;
+    console.log("apns-devices", data);
+    res.send(data);
+  });
+});
+
+app.get('/gcm-devices', (req, res) => {
+  console.log("in get /gcm-devices", req.query);
+
+  // curl `/v1/push/sub-key/${subscribeKey}/audit-devices
+  //      ?channel=${channel}&timestamp=${timestamp}&type=gcm&signature=${signature}`;
+
+  const targetUrl = `/v1/push/sub-key/${req.query.subkey}/audit-devices`
+  const timestamp = Math.floor(new Date().getTime() / 1000);
+
+  let queryParams = {
+      channel: req.query.channel,
+      type: 'gcm',
+      timestamp: timestamp
+  }
+
+  const signature = signRequest(req.query.pubkey, req.query.subkey, req.query.seckey, queryParams, targetUrl);
+  console.log("signature", signature);
+
+  const options = {
+    'url': `https://ps.pndsn.com${targetUrl}?channel=${req.query.channel}&timestamp=${timestamp}&type=gcm&signature=${signature}`,
+  };
+
+  console.log(`gcm-devices options: ${JSON.stringify(options)}`);
+
+  request.get(options, (err1, res1, body1) => {
+    if (err1) {
+      return console.log(err1);
+    }
+
+    let data = body1;
+    console.log("gcm-devices", data);
+    res.send(data);
+  });
+});
+
+app.get('/apns2-devices', (req, res) => {
+  console.log("in get /apns2-devices");
+
+  // curl '/v2/push/sub-key/${subscribeKey}/channel/${channel}/audit-devices
+  //      ?environment=${environment}&topic=${topic}&timestamp=${timestamp}&signature=${signature}'
+
+  const targetUrl = `/v2/push/sub-key/${req.query.subkey}/channel/${req.query.channel}/audit-devices`
+  const timestamp = Math.floor(new Date().getTime() / 1000);
+
+  let queryParams = {
+      environment: req.query.env,
+      topic: req.query.topic,
+      timestamp: timestamp
+  };
+
+  const signature = signRequest(req.query.pubkey, req.query.subkey, req.query.seckey, queryParams, targetUrl);
+
+  const options = {
+    'url': `https://ps.pndsn.com${targetUrl}?environment=${req.query.env}&topic=${req.query.topic}&timestamp=${timestamp}&signature=${signature}`,
+  };
+
+  console.log(`apns2-devices options: ${JSON.stringify(options)}`);
+
+  request.get(options, (err1, res1, body1) => {
+    if (err1) {
+      return console.log(err1);
+    }
+
+    let data = JSON.parse(body1).result;
+    console.log("apns2-devices", data);
+    res.send(data);
+  });
+});
 
 
 app.get('/keys', (req, res) => {
