@@ -13,7 +13,10 @@
     "url": "https://github.com/PubNubDevelopers/pn-toolbox-react"
   },
   "scripts": {
-    "start": "concurrently 'npm run server' 'npm run client'",
+    "start1": "concurrently 'npm run pmpn server' 'npm run client'",
+    "start": "node index.js",
+    "preinstall": "npx pnpm install -g pnpm",
+    "install": "pnpm install",
     "client": "react-scripts start",
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
