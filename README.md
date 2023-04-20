@@ -33,6 +33,13 @@ At some point, you will be able to login to your PN account and select a key set
 
 The rest of the nav links on the left are pluggable tools that can be added as required. The process for creating and adding tools is [documented here](docs/tools/README.md). *The Toolbox* and all tools within are created using the *Argon Dashboard React* template from *Creative Tim*. See below for further details about licensing and usage.
 
+## Docker
+
+```
+docker build -t the-toolbox .
+docker run -p 3000:3000 the-toolbox
+```
+
 ## Licensing
 
 - Copyright 2021 Creative Tim (https://www.creative-tim.com/?ref=adr-github-readme)
