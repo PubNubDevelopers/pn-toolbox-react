@@ -50,6 +50,11 @@ const MessageGenerator = () => {
   console.log("MessageGenerator keySetContext: ", keySetContext);
   console.log("MessageGenerator swissArmyContext: ", swissArmyContext);
 
+  const RANDOM = 10;
+  const RROBIN = 11;
+  const RNDRANGE = 12;
+  const EXTRACT = 20;
+
   const [successCount, setSuccessCount] = useState(0);
   const [failCount, setFailCount] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -69,16 +74,16 @@ const MessageGenerator = () => {
   const [isInjectTimestamp, setIsInjectTimestamp] = useState(true);
 
   const [recordCount, setRecordCount] = useState(50);
-  const [requestDelay, setRequestDelay] = useState(10);
 
-  const [channelStrategy, setChannelStrategy] = useState(10);
+  const [requestDelayStrategy, setRequestDelayStrategy] = useState(RANDOM);
+  const [requestDelay, setRequestDelay] = useState("100");
+  const requestDelayList = useRef([]);
+
+  const [channelStrategy, setChannelStrategy] = useState(RANDOM);
   const [targetChannels, setTargetChannels] = useState("");
   const channelList = useRef([]);
 
-  const RANDOM = 10;
-  const RROBIN = 11;
-  const EXTRACT = 20;
-  const [uuidStrategy, setUuidStrategy] = useState(10);
+  const [uuidStrategy, setUuidStrategy] = useState(RANDOM);
   const [senderUuids, setSenderUuids] = useState("");
   const [senderUuidKey, setSenderUuidKey] = useState();
   const uuidList = useRef([]);
@@ -106,10 +111,21 @@ const MessageGenerator = () => {
     pause();
   }
 
+  // disabled until it can be reimplemented using new Request Delay Strategies
+  // -- use max value as worst case estimate
   useEffect(() => {
-    var estMilli = recordCount * 150 + requestDelay * recordCount;
+    createRequestDelayList(requestDelay);
+    const avgDelay = averageRequestDelays();
+    var estMilli = recordCount * 125 + avgDelay * recordCount;
     setEstimatedTime(new Date(estMilli).toISOString().slice(11, 19));
   });
+
+  const averageRequestDelays = () => {
+    const sum = requestDelayList.current.reduce((
+      accumulator, currentValue) => parseInt(accumulator) + parseInt(currentValue), 0);
+    const average = sum / requestDelayList.current.length;
+    return parseInt(average);
+  }
 
   const openFile = (theFile) => {
     if (theFile == null) return;
@@ -129,6 +145,40 @@ const MessageGenerator = () => {
     e.preventDefault();
     setMessageStrategy(e.target.value);
     setMessagePayload(JSON.stringify(messageSamples[e.target.value], null, 2));
+  }
+
+  const pickRequestDelay = (i) => {
+    console.log("  requestDelays: ", i, requestDelay, requestDelayList);
+    // debugger;
+    let val = parseInt(requestDelayList.current[0]);
+    
+    if (requestDelayList.current.length == 1) {
+    }
+    else if (requestDelayStrategy === RANDOM) {
+      val = parseInt(requestDelayList.current[
+        (Math.floor(Math.random() * (requestDelayList.current.length)))]);
+    }
+    else if (requestDelayStrategy === RROBIN) {
+      const rem = (i + 1) % requestDelayList.current.length;
+      val = parseInt(requestDelayList.current[rem]);
+    }
+    else { // RNDRANGE
+      const minValue = parseInt(requestDelayList.current[0]);
+      const maxValue = parseInt(requestDelayList.current[requestDelayList.current.length-1]);
+
+      val = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
+    }
+
+    console.log("    request delay: ", val);
+    return val;
+  }
+
+  const createRequestDelayList = () => {
+    console.log("createRequestDelayList");
+    let tmp = requestDelay.replaceAll("\n", ",").replaceAll(" ", "");
+    setRequestDelay(tmp);
+    requestDelayList.current = tmp.split(",").filter(Boolean);;
+    console.log("    requestDelayList:", requestDelayList.current);
   }
 
   const pickTargetChannel = (i) => {
@@ -179,6 +229,7 @@ const MessageGenerator = () => {
     setProgress(0);
     let i = 0
 
+    createRequestDelayList(requestDelay);
     createChannelList(targetChannels);
     createUuidList(senderUuids);
 
@@ -277,7 +328,7 @@ const MessageGenerator = () => {
 
           sendMessageUri(++i);
         }
-      }, requestDelay);
+      }, pickRequestDelay(i));
     }
     else {
       console.log("    the end");
@@ -433,7 +484,6 @@ const MessageGenerator = () => {
                                 // messageSamples[messageStrategy]
                                 />
                               </>
-
                             }
                           </FormGroup>
                         </Col>
@@ -464,31 +514,7 @@ const MessageGenerator = () => {
                                 />
                               </FormGroup>
                             </Col>
-                            <Col sm="3">
-                              <FormGroup>
-                                <InputLabel
-                                  id="label-request-delay"
-                                  className="form-control-label"
-                                  htmlFor="input-request-delay"
-                                >
-                                  <u>Interval Delay</u>
-                                </InputLabel>
-                                <UncontrolledTooltip
-                                  delay={500}
-                                  placement="top"
-                                  target="label-request-delay"
-                                >
-                                  Amount of delay between publishes (ms).
-                                </UncontrolledTooltip>
-                                <Input
-                                  className="form-control-alternative"
-                                  id="input-request-delay"
-                                  type="text"
-                                  value={requestDelay}
-                                  onChange={(e) => setRequestDelay(e.target.value)}
-                                />
-                              </FormGroup>
-                            </Col>
+
                             <Col></Col>
                             <Col sm="4">
                               <FormGroup>
@@ -544,7 +570,90 @@ const MessageGenerator = () => {
                             </Col>
                           </Row>
                           <Row>
-                            <Col>
+                            {/* disabled because new request delay strategy uses text area */}
+                            {/* <Col sm="3">
+                              <FormGroup>
+                                <InputLabel
+                                  id="label-request-delay"
+                                  className="form-control-label"
+                                  htmlFor="input-request-delay"
+                                >
+                                  <u>Request Delay</u>
+                                </InputLabel>
+                                <UncontrolledTooltip
+                                  delay={500}
+                                  placement="top"
+                                  target="label-request-delay"
+                                >
+                                  Amount of delay between publishes (ms).
+                                </UncontrolledTooltip>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-request-delay"
+                                  type="text"
+                                  value={requestDelay}
+                                  onChange={(e) => setRequestDelay(e.target.value)}
+                                />
+                              </FormGroup>
+                            </Col> */}
+
+                            <Col md="3">
+                              <FormGroup>
+                                <InputLabel id="label-select-request-delay-strategy"><u>Publish Delay Strategy</u></InputLabel>
+                                <Select
+                                  labelId="label-select-request-delay-strategy"
+                                  id="label-select-request-delay-strategy"
+                                  value={requestDelayStrategy}
+                                  label="request Delay Strategy"
+                                  onChange={(e) => setRequestDelayStrategy(e.target.value)}
+                                >
+                                  <MenuItem value={RANDOM}>List - Random</MenuItem>
+                                  <MenuItem value={RROBIN}>List - Round Robin</MenuItem>
+                                  <MenuItem value={RNDRANGE}>Range - Random</MenuItem>
+                                  {/* <MenuItem value={20}>Extract from Message</MenuItem> */}
+                                </Select>
+                                <UncontrolledTooltip
+                                  delay={500}
+                                  placement="top"
+                                  target="label-select-request-delay-strategy"
+                                >
+                                  Choose how to delay the next message generation (milliseconds): random, round-robin, or range random (pair of values).<br />
+                                </UncontrolledTooltip>
+                              </FormGroup>
+                              </Col>
+                              <Col>
+                              <FormGroup>
+                                {(requestDelayStrategy === RNDRANGE || requestDelayStrategy === RANDOM || requestDelayStrategy === RROBIN) &&
+                                  <>
+                                    <InputLabel
+                                      id="label-request-delay-list"
+                                      className="form-control-label"
+                                      htmlFor="input-target-request-delay"
+                                    >
+                                      <u>Publish Delay</u>
+                                    </InputLabel>
+                                    <UncontrolledTooltip
+                                      delay={0}
+                                      placement="top"
+                                      target="label-request-delay-list"
+                                    >
+                                      Enter the target channels (comma-separated or 1 per line).
+                                    </UncontrolledTooltip>
+                                    <Input
+                                      className="form-control-alternative"
+                                      id="input-request-delay"
+                                      type="textarea"
+                                      rows="4"
+                                      value={requestDelay}
+                                      onChange={(e) => setRequestDelay(e.target.value)}
+                                    />
+                                  </>
+                                }
+                              </FormGroup>
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col md="3">
                               <FormGroup>
                                 <InputLabel id="label-select-channel-strategy"><u>Target Channel Strategy</u></InputLabel>
                                 <Select
@@ -566,6 +675,8 @@ const MessageGenerator = () => {
                                   Choose the way target channel will be provided: random or round-robin.<br />
                                 </UncontrolledTooltip>
                               </FormGroup>
+                              </Col>
+                              <Col>
                               <FormGroup>
                                 {(channelStrategy === RANDOM || channelStrategy === RROBIN) &&
                                   <>
@@ -597,7 +708,7 @@ const MessageGenerator = () => {
                             </Col>
                           </Row>
                           <Row>
-                            <Col>
+                            <Col md="3">
                               <FormGroup>
                                 <InputLabel id="label-select-uuid-strategy"><u>Sender UUID Strategy</u></InputLabel>
                                 <Select
@@ -619,6 +730,8 @@ const MessageGenerator = () => {
                                   Choose the way sender UUID will be provided: random, round-robin or extract from provided message payload.<br />
                                 </UncontrolledTooltip>
                               </FormGroup>
+                              </Col>
+                              <Col>
                               <FormGroup>
                                 {(uuidStrategy === RANDOM || uuidStrategy === RROBIN) &&
                                   <>
