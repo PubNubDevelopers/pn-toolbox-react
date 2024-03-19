@@ -484,7 +484,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove}) => {
   const datetime = format(fromUnixTime(pubtt.substring(0,10)), 'yyyy/dd/MM hh:mm:ss');
   const dateVal = datetime.substring(0, 10);
   const timeVal = datetime.substring(11) + "." + pubtt.substring(10, 13) + "." + pubtt.substring(13, 16) + "." + pubtt.substring(16);
-  const mfp = generateMfp(JSON.stringify(row.message));
+  const mfp = generateMfp(row.message);
   const size = messageSize(row.message);
   const txCount = calcTxCount(size);
   // const milli = pubtt.substring(10, 13);
@@ -567,9 +567,8 @@ function message_fingerprint(msg) {
   return mfp[0].toString(16).padStart(8, '0');
 }
 
-function generateMfp(msg) {
-  // debugger;
-  console.log("generateMfp", msg);
+function generateMfp(input) {
+  let msg = typeof input !== "string" ? JSON.stringify(input) : input;
   let mfp  = new Uint32Array(1);
   let walk = 0;
   let len  = msg.length;
