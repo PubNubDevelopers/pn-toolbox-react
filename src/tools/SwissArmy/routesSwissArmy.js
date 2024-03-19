@@ -8,6 +8,7 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 
 import {SwissArmyProvider} from "./SwissArmyProvider"
 import BufferDump from './pages/BufferDump';
+import StatsViewer from './pages/StatsViewer';
 import MessageGenerator from './pages/MessageGenerator';
 import ChannelBrowser from './pages/ChannelBrowser';
 import MessageDelete from './pages/MessageDelete';
@@ -31,6 +32,13 @@ var routesSwissArmy = {
       path: "/swissarmy/message-generator",
       name: "Message Generator",
       component: MessageGenerator,
+      parent: SwissArmyProvider,
+      layout: "/admin",
+    },
+    {
+      path: "/swissarmy/stats-viewer",
+      name: "Stats Viewer",
+      component: StatsViewer,
       parent: SwissArmyProvider,
       layout: "/admin",
     },
