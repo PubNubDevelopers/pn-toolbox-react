@@ -487,7 +487,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove}) => {
   return (
     <>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        {/* disable expand until map/array error is fixed
+        {/* disable expand until map/array error is fixed */ }
         <TableCell>
           <IconButton
             aria-label="expand row"
@@ -496,7 +496,7 @@ const MetadataRow = ({index, row, isTruncate, handleRemove}) => {
           >
             {open ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
           </IconButton>
-        </TableCell> */}
+        </TableCell>
 
         <TableCell align="right">{index}</TableCell>
         {isTruncate && (
