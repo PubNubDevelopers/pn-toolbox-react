@@ -407,6 +407,7 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
             </TableRow>
             <TableRow>
               {/* disable expand icon column: <TableCell/> */}
+              <TableCell align="right"></TableCell>
               <TableCell align="right">#</TableCell>
               <TableCell>Message</TableCell>
               <TableCell>UUID</TableCell>
@@ -414,6 +415,8 @@ const MetadataTable = ({metadata, rowsPerPage, page, emptyRows, handleChangePage
               {/* <TableCell>DateTime</TableCell> */}
               <TableCell>Date</TableCell>
               <TableCell>Time</TableCell>
+              <TableCell>mfp</TableCell>
+              <TableCell>Size [TXs]</TableCell>
               {/* <TableCell align="right">milli</TableCell>
               <TableCell align="right">micro.nano</TableCell> */}
               <TableCell align="center">Actions</TableCell>
@@ -481,6 +484,9 @@ const MetadataRow = ({index, row, isTruncate, handleRemove}) => {
   const datetime = format(fromUnixTime(pubtt.substring(0,10)), 'yyyy/dd/MM hh:mm:ss');
   const dateVal = datetime.substring(0, 10);
   const timeVal = datetime.substring(11) + "." + pubtt.substring(10, 13) + "." + pubtt.substring(13, 16) + "." + pubtt.substring(16);
+  const mfp = generateMfp(JSON.stringify(row.message));
+  const size = messageSize(row.message);
+  const txCount = calcTxCount(size);
   // const milli = pubtt.substring(10, 13);
   // const micronano = pubtt.substring(13, 16) + "." + pubtt.substring(16);
 
@@ -515,6 +521,8 @@ const MetadataRow = ({index, row, isTruncate, handleRemove}) => {
         {/* <TableCell>{datetime}</TableCell> */}
         <TableCell>{dateVal}</TableCell>
         <TableCell>{timeVal}</TableCell>
+        <TableCell>{mfp}</TableCell>
+        <TableCell>{size} [{txCount}]</TableCell>
         {/* <TableCell align="right">{milli}</TableCell>
         <TableCell align="right">{micronano}</TableCell> */}
 
@@ -549,6 +557,36 @@ const MetadataRow = ({index, row, isTruncate, handleRemove}) => {
       </TableRow>
     </>
   );
+}
+
+function message_fingerprint(msg) {
+  let mfp  = new Uint32Array(1);
+  let walk = 0;
+  let len  = msg.length;
+  while (len-- > 0) mfp[0] = (mfp[0] << 5) - mfp[0] + msg.charCodeAt(walk++);
+  return mfp[0].toString(16).padStart(8, '0');
+}
+
+function generateMfp(msg) {
+  // debugger;
+  console.log("generateMfp", msg);
+  let mfp  = new Uint32Array(1);
+  let walk = 0;
+  let len  = msg.length;
+  while (len-- > 0) mfp[0] = (mfp[0] << 5) - mfp[0] + msg.charCodeAt(walk++);
+  mfp = mfp[0].toString(16).padStart(8, '0');
+  console.log("mfp", mfp);
+  return mfp;
+}
+
+function messageSize(str) {
+  const byteSize = encodeURIComponent(str).replace(/%../g, 'x').length;
+  const kilobytes = byteSize / 1024;
+  return kilobytes.toFixed(2);
+}
+
+function calcTxCount(kbSize) {
+  return Math.trunc((kbSize/2) + 1);
 }
 
 function TablePaginationActions(props) {
