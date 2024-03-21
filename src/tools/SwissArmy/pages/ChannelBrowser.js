@@ -32,11 +32,11 @@ import {
   Row,
   Col,
   CardFooter,
+  UncontrolledTooltip,
 } from "reactstrap";
 
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
-import IconButton from '@mui/material/IconButton';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableFooter from '@mui/material/TableFooter';
@@ -52,10 +52,11 @@ import PropTypes from 'prop-types';
 // // core components
 import { useKeySetData } from "../../KeySetProvider";
 import { useSwissArmyData } from "../SwissArmyProvider"
+import { IconButton, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { DeleteForever, FirstPage, KeyboardArrowDown, KeyboardArrowRight, KeyboardArrowLeft, LastPage } from "@mui/icons-material";
 import { Switch, FormControlLabel } from "@mui/material";
 import ReactBSAlert from "react-bootstrap-sweetalert";
-import { format, subMilliseconds, fromUnixTime } from 'date-fns'
+import { format, subMilliseconds, fromUnixTime } from 'date-fns';
 
 const ChannelBrowser = () => {
   const keySetContext = useKeySetData();
@@ -82,7 +83,21 @@ const ChannelBrowser = () => {
   };
 
   // page state
-  const [channel, setChannel] = useState(swissArmyContext.channel);
+  const TRS_NONE = 0;
+  const TRS_AT = 1;
+  const TRS_TT = 2;
+  const TRS_DT = 3;
+
+  const [channel, setChannel] = useState();
+  const [timeRangeStrategy, setTimeRangeStrategy] = useState(TRS_AT);
+  const [atTimetoken, setAtTimetoken] = useState();
+  const [startTimetoken, setStartTimetoken] = useState();
+  const [endTimetoken, setEndTimetoken] = useState();
+  const [startDate, setStartDate] = useState();
+  const [endDate, setEndDate] = useState();
+  const [startTime, setStartTime] = useState();
+  const [endTime, setEndTime] = useState();
+
   const [isTruncate, setIsTruncate] = useState(true);
   const [sweetAlert, setSweetAlert] = useState(null);
   const history = useHistory();
@@ -269,7 +284,7 @@ const ChannelBrowser = () => {
               <CardBody>
                 <Form onSubmit={(e) => e.preventDefault()}>
                     <Row>
-                      <Col sm="4">
+                      <Col sm="10">
                         <FormGroup>
                           <label
                             className="form-control-label"
@@ -281,45 +296,193 @@ const ChannelBrowser = () => {
                             className="form-control-alternative"
                             id="input-channel"
                             placeholder="Enter a channel name"
-                            type="textarea"
-                            rows="4"
+                            type="text"
                             value={channel}
                             onChange={(e) => setChannel(e.target.value)}
                           />
                         </FormGroup>
                       </Col>
                       <Col sm="2">
-                        <Row>
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-max-rows"
+                          >
+                            Max Rows
+                          </label>
+                          <Input
+                            className="form-control-alternative"
+                            id="input-max-rows"
+                            type="text"
+                            value={swissArmyContext.maxRows}
+                            max="9999"
+                            min="5"
+                            maxLength="4"
+                            onChange={(e) => swissArmyContext.setMaxRows(e.target.value)}
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col sm="2">
+                        <FormGroup>
+                          <InputLabel id="label-select-time-range-strategy"><u>Time Range Strategy</u></InputLabel>
+                          <Select
+                            labelId="label-time-range-strategy"
+                            id="label-time-range-strategy"
+                            value={timeRangeStrategy}
+                            label="Timetoken Parameter Strategy"
+                            onChange={(e) => setTimeRangeStrategy(e.target.value)}
+                          >
+                            <MenuItem value={TRS_NONE}>None</MenuItem>
+                            <MenuItem value={TRS_AT}>at Timetoken</MenuItem>
+                            <MenuItem value={TRS_TT}>Timetoken Range</MenuItem>
+                            <MenuItem value={TRS_DT}>Date Time Range</MenuItem>
+                          </Select>
+                          <UncontrolledTooltip
+                            delay={500}
+                            placement="top"
+                            target="label-select-time-range-strategy"
+                          >
+                            How do you want to specify the time range criteria?<br />
+                          </UncontrolledTooltip>
+                        </FormGroup>
+                      </Col>
+                      <Col sm="4">
+                        {(timeRangeStrategy === TRS_AT) &&
+                          <FormGroup>
+                              <label
+                                className="form-control-label"
+                                htmlFor="input-atTimetoken"
+                              >
+                                at Timetoken
+                              </label>
+                              <Input
+                                className="form-control-alternative"
+                                id="input-atTimetoken"
+                                placeholder="Enter a 17 digit timetoken"
+                                type="text"
+                                value={atTimetoken}
+                                onChange={(e) => setAtTimetoken(e.target.value)}
+                              />
+                          </FormGroup>
+                        }
+                        {(timeRangeStrategy === TRS_TT) &&
                           <FormGroup>
                             <label
                               className="form-control-label"
-                              htmlFor="input-max-rows"
+                              htmlFor="input-startTimetoken"
                             >
-                              Max Rows
+                              Start Timetoken
                             </label>
                             <Input
                               className="form-control-alternative"
-                              id="input-max-rows"
+                              id="input-startTimetoken"
+                              placeholder="Enter a 17 digit timetoken (default is NOW)"
                               type="text"
-                              value={swissArmyContext.maxRows}
-                              max="5000"
-                              min="5"
-                              maxLength="5"
-                              onChange={(e) => swissArmyContext.setMaxRows(e.target.value)}
+                              value={startTimetoken}
+                              onChange={(e) => setStartTimetoken(e.target.value)}
+                            />
+                            <label
+                              className="form-control-label"
+                              htmlFor="input-endTimetoken"
+                            >
+                              End Timetoken
+                            </label>
+                            <Input
+                              className="form-control-alternative"
+                              id="input-endTimetoken"
+                              placeholder="Enter a 17 digit timetoken (default is NULL)"
+                              type="text"
+                              value={endTimetoken}
+                              onChange={(e) => setEndTimetoken(e.target.value)}
                             />
                           </FormGroup>
-                        </Row>
-                        <Row>
-                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                          <Button 
-                            className="form-control-alternative text-align-right"
-                            color="danger"
-                            onClick={retrieveMessages}
-                            disabled = {keySetContext.pubnub == null}
-                          >
-                            Retrieve Messages
-                          </Button>
-                        </Row>
+                        }
+                        {(timeRangeStrategy === TRS_DT) &&
+                          <FormGroup>
+                            <Row>
+                            <Col>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-start-date"
+                                >
+                                  Start Date
+                                </label>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-start-date"
+                                  placeholder="Enter a Date"
+                                  type="date"
+                                  value={startDate}
+                                  onChange={(e) => setStartDate(e.target.value)}
+                                />
+                              </Col>
+                              <Col>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-start-time"
+                                >
+                                  Start Time
+                                </label>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-start-time"
+                                  placeholder="Enter a Time (default is NOW)"
+                                  type="time"
+                                  value={startTime}
+                                  onChange={(e) => setStartTime(e.target.value)}
+                                />
+                              </Col>
+                            </Row>
+                            <Row>
+                            <Col>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-end-date"
+                                >
+                                  End Date
+                                </label>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-end-date"
+                                  placeholder="Enter a Date"
+                                  type="date"
+                                  value={endDate}
+                                  onChange={(e) => setEndDate(e.target.value)}
+                                />
+                              </Col>
+                              <Col>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-end-time"
+                                >
+                                  End Time
+                                </label>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-end-time"
+                                  placeholder="Enter a Time"
+                                  type="time"
+                                  value={endTime}
+                                  onChange={(e) => setEndTime(e.target.value)}
+                                />
+                              </Col>
+                            </Row>
+                          </FormGroup>
+                        }
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col>
+                        <Button 
+                          className="form-control-alternative text-align-right"
+                          color="danger"
+                          onClick={retrieveMessages}
+                          disabled = {keySetContext.pubnub == null}
+                        >
+                          Retrieve Messages
+                        </Button>
                       </Col>
                     </Row>
                 </Form>
