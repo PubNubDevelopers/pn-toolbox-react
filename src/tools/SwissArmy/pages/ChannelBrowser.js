@@ -54,7 +54,7 @@ import { useKeySetData } from "../../KeySetProvider";
 import { useSwissArmyData } from "../SwissArmyProvider"
 import { IconButton, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { DeleteForever, FirstPage, KeyboardArrowDown, KeyboardArrowRight, KeyboardArrowLeft, LastPage, ArrowLeft, ArrowRight } from "@mui/icons-material";
-import { Switch, FormControlLabel } from "@mui/material";
+import { Switch, FormControlLabel, Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ReactBSAlert from "react-bootstrap-sweetalert";
 import { format, subMilliseconds, fromUnixTime } from 'date-fns';
 
@@ -89,7 +89,7 @@ const ChannelBrowser = () => {
   const TRS_DT = 3;
 
   const [channel, setChannel] = useState();
-  const [timeRangeStrategy, setTimeRangeStrategy] = useState(TRS_AT);
+  const [timeRangeStrategy, setTimeRangeStrategy] = useState(TRS_NONE);
   const [atTimetoken, setAtTimetoken] = useState();
   const [startTimetoken, setStartTimetoken] = useState();
   const [endTimetoken, setEndTimetoken] = useState();
@@ -98,18 +98,63 @@ const ChannelBrowser = () => {
   const [startTime, setStartTime] = useState();
   const [endTime, setEndTime] = useState();
 
+  const [convertTimetoken, setConvertTimetoken] = useState();
+  const [gmtDatetime, setGmtDatetime] = useState();
+  const [localeDatetime, setLocaleDatetime] = useState();
+
   const [isTruncate, setIsTruncate] = useState(true);
   const [sweetAlert, setSweetAlert] = useState(null);
   const history = useHistory();
 
-  async function retrieveMessages() {
-    // console.log("channelFilter", channelFilter);
+  const doConvertTimetoken = () => {
+    if (convertTimetoken === undefined) return;
 
+    let tt = convertTimetoken.length <= 13 ? convertTimetoken : convertTimetoken.substring(0,10);
+    const theDate = fromUnixTime(tt);
+    const val =  + " " +  + "]";
+    setGmtDatetime(theDate.toGMTString());
+    setLocaleDatetime(theDate.toLocaleString() + " (local)");
+  }
+
+  const getFetchParams = () => {
+    let params = {};
+    params.channels = [channel];
+
+    if (timeRangeStrategy == TRS_NONE) {
+      params.start = null;
+    }
+    else if (timeRangeStrategy == TRS_AT) {
+      params.end = atTimetoken;
+      params.count = 1;
+      swissArmyContext.setMaxRows(1);
+    }
+    else if (timeRangeStrategy == TRS_TT) {
+      params.start = startTimetoken;
+      params.end = endTimetoken;
+    }
+    else if (timeRangeStrategy == TRS_DT) {
+      debugger;
+      params.end = createDatetimeString(endDate, endTime);
+      params.start = createDatetimeString(startDate, startTime);
+      debugger;
+    }
+    
+    return params;
+  }
+
+  const createDatetimeString = (theDate, theTime) => {
+    if (theDate || theTime === undefined) return null;
+
+    const theDateTime = new Date(`${theDate} ${theTime}`);
+    return format(theDateTime, 'yyyy-MM-dd HH:mm:ss:SSS') + "0000"
+  }
+
+  async function retrieveMessages() {
+    let params = getFetchParams();
     let more = true;
     let results = [];
     let next = null;
     let totalRecords = 0;
-    let startTT = null;
 
     const limit = swissArmyContext.maxRows < 1000 ? swissArmyContext.maxRows : 1000;
 
@@ -117,16 +162,7 @@ const ChannelBrowser = () => {
 
     do {
       try {
-        const result = await keySetContext.pubnub.fetchMessages({
-          channels: [channel],
-          start: startTT,
-          // count: limit,
-          // start: ,
-          // end: ,
-          // incluldeMeta: true,
-          // includeMessageActions: true
-        });
-
+        const result = await keySetContext.pubnub.fetchMessages(params);
         const resultCount = result.channels[channel].length;
         totalRecords += resultCount;
 
@@ -134,7 +170,7 @@ const ChannelBrowser = () => {
           results = result.channels[channel].concat(results);
           more = totalRecords < limit && resultCount == 100;
           next = totalRecords == 100;
-          startTT = result.channels[channel][0].timetoken;
+          params.start = result.channels[channel][0].timetoken;
         }
         else more = false;
       }
@@ -156,6 +192,18 @@ const ChannelBrowser = () => {
       ? timerAlert("No Messages Found!", "Your filter found none messages.", 3)
       : timerAlert("Messages Found!", `${totalRecords} Messages Found.`, 2);
     swissArmyContext.setChannelMessageResults(results);
+  }
+
+  const handleEndDate = (e) => {
+    e.preventDefault();
+    setEndDate(e.target.value);
+    console.log(e.target.value);
+  }
+
+  const handleEndTime = (e) => {
+    e.preventDefault();
+    setEndTime(e.target.value);
+    console.log(e.target.value);
   }
 
 
@@ -284,7 +332,7 @@ const ChannelBrowser = () => {
               <CardBody>
                 <Form onSubmit={(e) => e.preventDefault()}>
                   <Row>
-                    <Col sm="10">
+                    <Col sm="8">
                       <FormGroup>
                         <label
                           className="form-control-label"
@@ -324,7 +372,7 @@ const ChannelBrowser = () => {
                     </Col>
                   </Row>
                   <Row>
-                    <Col sm="1">
+                    <Col sm="2">
                       <FormGroup>
                         <InputLabel id="label-select-time-range-strategy"><u>Time Range Strategy</u></InputLabel>
                         <Select
@@ -348,30 +396,32 @@ const ChannelBrowser = () => {
                         </UncontrolledTooltip>
                       </FormGroup>
                     </Col>
-                    <Col sm="3">
+                    <Col sm="6">
                       {(timeRangeStrategy === TRS_AT) &&
                         <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-atTimetoken"
-                          >
-                            at Timetoken
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            id="input-atTimetoken"
-                            placeholder="Enter a 17 digit timetoken"
-                            type="text"
-                            value={atTimetoken}
-                            onChange={(e) => setAtTimetoken(e.target.value)}
-                          />
+                          <Col sm="4">
+                            <label
+                              className="form-control-label"
+                              htmlFor="input-atTimetoken"
+                            >
+                              at Timetoken
+                            </label>
+                            <Input
+                              className="form-control-alternative"
+                              id="input-atTimetoken"
+                              placeholder="Enter a 17 digit timetoken"
+                              type="text"
+                              value={atTimetoken}
+                              onChange={(e) => setAtTimetoken(e.target.value)}
+                            />
+                          </Col>
                         </FormGroup>
                       }
 
                       {(timeRangeStrategy === TRS_TT) &&
                         <FormGroup>
                           <Row>
-                            <Col sm="5">
+                            <Col sm="4">
                               <label
                                 className="form-control-label"
                                 htmlFor="input-endTimetoken"
@@ -381,13 +431,13 @@ const ChannelBrowser = () => {
                               <Input
                                 className="form-control-alternative"
                                 id="input-endTimetoken"
-                                placeholder="Enter a 17 digit timetoken (default is NULL)"
+                                placeholder="Enter a 17 digit timetoken"
                                 type="text"
                                 value={endTimetoken}
                                 onChange={(e) => setEndTimetoken(e.target.value)}
                               />
                             </Col>
-                            <Col sm="5">
+                            <Col sm="4">
                               <label
                                 className="form-control-label"
                                 htmlFor="input-startTimetoken"
@@ -397,7 +447,7 @@ const ChannelBrowser = () => {
                               <Input
                                 className="form-control-alternative"
                                 id="input-startTimetoken"
-                                placeholder="Enter a 17 digit timetoken (default is NOW)"
+                                placeholder="Enter a 17 digit timetoken"
                                 type="text"
                                 value={startTimetoken}
                                 onChange={(e) => setStartTimetoken(e.target.value)}
@@ -405,11 +455,19 @@ const ChannelBrowser = () => {
                             </Col>
                           </Row>
                           <Row>
-                            <Col sm="5" align="left">
-                              <b>|</b><ArrowLeft /><b>-- End here</b>
+                            <Col sm="4" align="left">
+                              <b>|</b><ArrowLeft /><b>End here</b>
                             </Col>
-                            <Col sm="5" align="right">
-                              <ArrowLeft /><b>-- Start now --|</b>
+                            <Col sm="4" align="right">
+                              <ArrowLeft /><b>--- Start now|</b>
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col sm="4" align="left">
+                              <b>|</b><b>Oldest Msg</b>
+                            </Col>
+                            <Col sm="4" align="right">
+                              <b>Newest Msg|</b>
                             </Col>
                           </Row>
                         </FormGroup>
@@ -418,7 +476,7 @@ const ChannelBrowser = () => {
                       {(timeRangeStrategy === TRS_DT) &&
                         <FormGroup>
                           <Row>
-                            <Col sm="5">
+                            <Col sm="4">
                               <label
                                 className="form-control-label"
                                 htmlFor="input-end-date"
@@ -428,10 +486,10 @@ const ChannelBrowser = () => {
                               <Input
                                 className="form-control-alternative"
                                 id="input-end-date"
-                                placeholder="Enter a Date"
                                 type="date"
                                 value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
+                                onChange={(e) => handleEndDate(e)}
+                                // onChange={(e) => setEndDate(e.target.value)}
                               />
                               <label
                                 className="form-control-label"
@@ -442,13 +500,13 @@ const ChannelBrowser = () => {
                               <Input
                                 className="form-control-alternative"
                                 id="input-end-time"
-                                placeholder="Enter a Time"
                                 type="time"
                                 value={endTime}
-                                onChange={(e) => setEndTime(e.target.value)}
+                                onChange={(e) => handleEndTime(e)}
+                                // onChange={(e) => setEndTime(e.target.value)}
                               />
                             </Col>
-                            <Col sm="5">
+                            <Col sm="4">
                               <label
                                 className="form-control-label"
                                 htmlFor="input-start-date"
@@ -458,7 +516,6 @@ const ChannelBrowser = () => {
                               <Input
                                 className="form-control-alternative"
                                 id="input-start-date"
-                                placeholder="Enter a Date"
                                 type="date"
                                 value={startDate}
                                 onChange={(e) => setStartDate(e.target.value)}
@@ -472,7 +529,6 @@ const ChannelBrowser = () => {
                               <Input
                                 className="form-control-alternative"
                                 id="input-start-time"
-                                placeholder="Enter a Time (default is NOW)"
                                 type="time"
                                 value={startTime}
                                 onChange={(e) => setStartTime(e.target.value)}
@@ -480,27 +536,106 @@ const ChannelBrowser = () => {
                             </Col>
                           </Row>
                           <Row>
-                            <Col sm="5" align="left">
-                              <b>|</b><ArrowLeft /><b>-- End here</b>
+                            <Col sm="4" align="left">
+                              <b>|</b><ArrowLeft /><b>End here</b>
                             </Col>
-                            <Col sm="5" align="right">
-                              <ArrowLeft /><b>-- Start now --|</b>
+                            <Col sm="4" align="right">
+                              <ArrowLeft /><b>--- Start now|</b>
+                            </Col>
+                          </Row>
+                          <Row>
+                            <Col sm="4" align="left">
+                              <b>|</b><b>Oldest Msg</b>
+                            </Col>
+                            <Col sm="4" align="right">
+                              <b>Newest Msg|</b>
                             </Col>
                           </Row>
                         </FormGroup>
                       }
                     </Col>
+                  </Row>
+                  <Row>
                     <Col>
-                      <Input
-                        className="form-control-alternative"
-                        id="input-message-file-content"
-                        type="textarea"
-                        rows="5"
-                        disabled
-                        value={"The default value for the Start is null which is 'NOW'.\nIf you want the the most recent messages, leave the Start value empty.\nIf you want to get all the message from now to some date/time in the past then set the End Date and Time as the value in the past that you want to stop at. Remember that Start is exclusive and End is inclusive."}
-                      />
+                      <Accordion>
+                        <AccordionSummary id="panel-header" aria-controls="panel-content">
+                          <strong>&nbsp;&nbsp;&nbsp;Start/End Parameter Behavior</strong>&nbsp;&nbsp;&nbsp;(click for Help)
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <p>
+                            <em>Why is the End input before the Start input?</em><br/> 
+                            Assuming the timeline runs from left (frist/oldest message) to right (last/newest message), the order and the direction that messages are pulled is <em>from now (start) to then (end). In other words, from right to left in the timeline</em>.
+                          </p>
+
+                          <strong>End param</strong>
+                          <ul>
+                            <li>inclusive: any message found with this exact datetime/timetoken value will be included in the results</li>
+                            <li>this value should be less than the start param datetime</li>
+                            <li>no/null value means continue pulling messages until you reach max rows or hit the beginning of the timeline (oldest message reached)</li>
+                          </ul>
+                          <p/>
+                          <strong>Start param</strong>
+                          <ul>
+                            <li>exclusive: any message found with this exact datetime/timetoken value will be ignored</li>
+                            <li>this value should be greater than the end param</li>
+                            <li>no/null value means "right now": start with now and pull messages going backwards in time</li>
+                            <li>specifying a value means skip over messages "newer than" this datetime then start pulling messages older than this datetime</li>
+                          </ul>
+                        </AccordionDetails>
+                      </Accordion>
+                      <Accordion>
+                        <AccordionSummary id="panel-header" aria-controls="panel-content">
+                          <strong>&nbsp;&nbsp;&nbsp;timetoken/datetime conversion tools&nbsp;&nbsp;&nbsp;</strong>(click for Help)
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Row>
+                            <Col sm="3">
+                            
+                              <Input
+                                className="form-control-alternative"
+                                id="input-convert-timetoken"
+                                placeholder="Enter a 17 digit timetoken"
+                                type="text"
+                                value={convertTimetoken}
+                                onChange={(e) => setConvertTimetoken(e.target.value)}
+                              />
+                              
+                            </Col>
+                            <Col sm="3" align="center">
+                            
+                              <Button
+                                className="form-control-alternative text-align-right"
+                                color="danger"
+                                onClick={doConvertTimetoken}
+                              >
+                                Convert to Date Time
+                              </Button>
+                              
+                            </Col>
+                            <Col sm="3">
+                            
+                              <label
+                                className="form-control-label"
+                                htmlFor="input-end-time"
+                              >
+                                {gmtDatetime}<br/>
+                                {localeDatetime}
+                              </label>
+                              {/* <Input
+                                className="form-control-alternative"
+                                id="input-converted-datetime"
+                                disabled
+                                type="text"
+                                value={convertedDateTime}
+                              /> */}
+                              
+                            </Col>
+                          </Row>
+                        </AccordionDetails>
+                      </Accordion>
                     </Col>
                   </Row>
+                  <Row>&nbsp;</Row>
                   <Row>
                     <Col>
                       <Button
