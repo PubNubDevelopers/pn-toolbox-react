@@ -110,12 +110,14 @@ const PushTest = () => {
       feedback = heading + dlist;
     }
     else if (type === "Device") {
+      debugger;
       // parse the gateway type counts - apns: 0 apns2: 16 gcm: 0
       let devices = message.substring(37, message.length-2).split(" ");
       feedback = "Registered Devices:";
-      feedback += "\n  APNs  : " + devices[1];
-      feedback += "\n  APNs 2: " + devices[3];
-      feedback += "\n  FCM   : " + devices[5];
+      // TODO: the indexes are off causing the display bug
+      feedback += "\n  APNs  : " + devices[3];
+      feedback += "\n  APNs 2: " + devices[5];
+      feedback += "\n  FCM   : " + devices[7];
     }
     else feedback = message;
 

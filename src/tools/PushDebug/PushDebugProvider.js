@@ -62,12 +62,6 @@ export const PushDebugProvider = ({ children }) => {
 
   const [manageChannel, setManageChannel] = useState();
   const [registeredDevices, setRegisteredDevices] = useState([]);
-
-  // old state - to be removed
-  // const [apns2DevUri, setApns2DevUri] = useState(defaultApnsUri);
-  // const [apns2PrdUri, setApns2PrdUri] = useState(defaultApns2DevUri);
-  // const [apnsUri, setApnsUri] = useState(defaultApns2PrdUri);
-  // const [fcmUri, setFcmUri] = useState(defaultFcmUri);
   
   //////////////////////
   // common page state
