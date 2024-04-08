@@ -93,7 +93,9 @@ const PushTest = () => {
 
     if (type === "Regist") {
       let heading = message.substring(1, message.indexOf("[") - 1);
-      heading = heading.replace(" count", ":");
+      heading = heading.replace(" timetoken", " \n  timetoken")
+        .replace(" count", " \n  count") + 
+        "\n  -----";
 
       let devices = message.substring(message.indexOf("[")+1, message.length-2);
       devices = devices.replaceAll(" ", "").replaceAll("'", "").split(",");
@@ -119,9 +121,40 @@ const PushTest = () => {
       feedback += "\n  APNs 2: " + devices[5];
       feedback += "\n  FCM   : " + devices[7];
     }
-    else feedback = message;
+    else if (type === "Comple") {
+      // "Completed GCM push job timetoken: 17126153206875623 expected: 1 sent: 0 removed: 1 errored 1"
+      feedback = message.replaceAll('"', '')
+        .replace(" timetoken", "\n  timetoken")
+        .replace(" expected", "\n  expected")
+        .replace(" sent", "\n  sent")
+        .replace(" removed", "\n  removed")
+        .replace(" errored", "\n  errored");
+    }
+    else if (type === "Parse:") {
+      // "Parse: job with timetoken: 17126149800833163 channel: personal.2_1414 priority: 5 body:..."
+      feedback = message.replaceAll('"', '')
+        .replace(":", "")
+        .replace(" with timetoken", "\n  timetoken")
+        .replace(" channel", "\n  channel")
+        .replace(" priority", "\n  priority")
+        .replace(" body", "\n  body");
+    }
+    else if (type === "FCM un" || type === "APNs u" || type === "APNs2 ") {
+      // "APNs2 (or APNs or FCM) unregistered token: device: cjP-... timetoken: 17126165318808721"
+      feedback = message.replaceAll('"', '')
+        .replace(" device", "\n  device token")
+        .replace(" timetoken", "\n  timetoken");
+    }
+    else if (type === "No mob") {
+      // single line of text - nothing to format
+      feedback += "\n" + message.replaceAll('"', '');
+    }
+    else {
+      // the published real-time message payload
+      feedback = "\n\n=====\n\nComplete Real-time Message received:\n" + message;
+    }
 
-    return feedback;
+    return feedback + "\n\n";
   }
 
   const manageSubscription = () => {
@@ -409,7 +442,6 @@ export default PushTest;
 
 function MessageRows(props) {
   console.log("MessageRows: props=", props);
-// debugger;
   if (props.messages === undefined || props.messages.length === 0) return <></>;
 
   const rows = props.messages.map((msg, index) =>
