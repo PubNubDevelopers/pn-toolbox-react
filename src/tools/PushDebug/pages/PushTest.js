@@ -30,7 +30,6 @@ const PushTest = () => {
   const [pushChannel, setPushChannel] = useState(pushDebugContext.pushChannel);
   const [message, setMessage] = useState(pushDebugContext.message);
   const [inputRows, setInputRows] = useState(28);
-
   const [sweetAlert, setSweetAlert] = useState(null);
 
   const outputMessage = useRef([]);
@@ -65,7 +64,6 @@ const PushTest = () => {
         else {
           confirmAlert("Error Detected", JSON.stringify(status));
         }
-
       },
 
       message: function(msg) {
@@ -73,12 +71,16 @@ const PushTest = () => {
         const timestamp = getDateTime(msg.timetoken) + "UTC\n[" + msg.timetoken + "]";
         const message = JSON.stringify(msg.message, null, 2);
 
-        if (msg.channel === pushChannel) {
-          outputMessage.current[0] = timestamp + "\n" + message;
-        }
-        else if (msg.channel === pushChannel + "-pndebug") {
-          outputFeedback.current.push(parseFeedback(message));
-        }
+        // allResults.push(parseFeedback(message));
+        setAllResults((...allResults) => [...allResults,  parseFeedback(message)]);
+        pushDebugContext.setTestResults((...testResults) => [allResults, ...testResults]);
+
+        // if (msg.channel === pushChannel) {
+        //   outputMessage.current[0] = timestamp + "\n" + message;
+        // }
+        // else if (msg.channel === pushChannel + "-pndebug") {
+        //   outputFeedback.current.push(parseFeedback(message));
+        // }
       }
     });
   }
@@ -110,11 +112,9 @@ const PushTest = () => {
       feedback = heading + dlist;
     }
     else if (type === "Device") {
-      debugger;
       // parse the gateway type counts - apns: 0 apns2: 16 gcm: 0
       let devices = message.substring(37, message.length-2).split(" ");
       feedback = "Registered Devices:";
-      // TODO: the indexes are off causing the display bug
       feedback += "\n  APNs  : " + devices[3];
       feedback += "\n  APNs 2: " + devices[5];
       feedback += "\n  FCM   : " + devices[7];
@@ -126,25 +126,18 @@ const PushTest = () => {
 
   const manageSubscription = () => {
     console.log("PushTest:manageSubscription: channel: ", pushDebugContext.pushChannel);
-    
     if (pushDebugContext.subscribeButtonLabel === "Unsubscribe") {
       keySetContext.pubnub.unsubscribeAll();
     }
 
     else {
-      let delay = 0;
-
       if (!keySetContext.pubnub.listener) {
         console.log("need to createListener");
         createListener();
-        delay = 500;
       }
 
-      console.log("before setTimeout: delay=", delay);
-      setTimeout(function(){
-        console.log("before subscribe");
-        keySetContext.pubnub.subscribe({channels: [pushChannel, pushChannel + "-pndebug"]});
-      }, delay);
+      console.log("before subscribe");
+      keySetContext.pubnub.subscribe({channels: [pushChannel, pushChannel + "-pndebug"]});
     }
   }
 
@@ -176,13 +169,13 @@ const PushTest = () => {
         console.log("publish callback", status, response);
         if (!status.error) {
           pushDebugContext.counter.current++;
-          timerAlert(`Publish Success`, "Processing results, please wait just a couple seconds.", 2000);
-          // timerAlert(`Publish Success [${response.timetoken}]`, "Processing results, please wait just a couple seconds.", 2000);
+          // timerAlert(`Publish Success`, "Processing results, please wait just a couple seconds.", 2000);
+          // // timerAlert(`Publish Success [${response.timetoken}]`, "Processing results, please wait just a couple seconds.", 2000);
 
-          setTimeout(function(){ 
-            handleOutputResults();
-            hideAlert();
-          }, 2000);
+          // setTimeout(function(){ 
+          //   // handleOutputResults();
+          //   hideAlert();
+          // }, 2000);
         }
         else { // publish error
           confirmAlert("Error Publishing Message", JSON.stringify(status));
@@ -364,7 +357,18 @@ const PushTest = () => {
                           </CardHeader>
                           <Card body>
                             <div className="pl-lg-12">
-                              <ResultsTable results={allResults}/>
+                              <table className="table-light" 
+                                style={{'border': '2px solid black',}}
+                              >
+                                <thead >
+                                  <tr width="100%">
+                                    <th width="100%">Feedback Results</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <MessageRows messages={allResults}/>
+                                </tbody>
+                              </table>
                             </div>
                           </Card>
                         </Col>
@@ -384,59 +388,33 @@ const PushTest = () => {
 
 export default PushTest;
 
-function ResultsTable(props) {
-  console.log("ResultsTable: props=", props);
+// function MessageTable() {
+//   console.log("MessageTable");
 
-  if (props.results.length === 0) return <></>;
+//   return (
+//     <table className="table-light" 
+//       style={{'border': '2px solid black',}}
+//     >
+//       <thead >
+//         <tr>
+//           <th >Message Payload</th>
+//         </tr>
+//       </thead>
+//       <tbody>
+//         <MessageRows/>
+//       </tbody>
+//     </table>
+//   );
+// }
 
-  const outputRows = props.results.map((item, index) =>
-    <>
-      <tr
-        index={index}
-        width='100%' 
-        style={{
-          'border': '2px solid black',
-          'verticalAlign': 'top',
-          'whiteSpace': 'pre-wrap',
-          'fontFamily': "'Consolas', 'monaco', 'monospace'",
-        }}
-      >
-        <td width='40%'
-          rowSpan={item.feedback.length +1}
-          style={{'padding': '5px'}}
-        >
-          {item.message}
-        </td>
-      </tr>
-      <FeedbackRows feedback={item.feedback}/>
-    </>
-  );
+function MessageRows(props) {
+  console.log("MessageRows: props=", props);
+// debugger;
+  if (props.messages === undefined || props.messages.length === 0) return <></>;
 
-  return (
-    <table className="table-light" 
-      style={{'border': '2px solid black',}}
-    >
-      <thead >
-        <tr>
-          <th >Message Payload</th>
-          <th >Push Feedback</th>
-        </tr>
-      </thead>
-      <tbody>
-        {outputRows}
-      </tbody>
-    </table>
-  );
-}
-
-
-function FeedbackRows(props) {
-  console.log("FeedbackRows: props=", props);
-
-  if (props.feedback.length === 0) return <></>;
-
-  const rows = props.feedback.map((item) =>
+  const rows = props.messages.map((msg, index) =>
     <tr 
+      index={index}
       width='100%' 
       style={{
         'verticalAlign': 'top',
@@ -445,10 +423,10 @@ function FeedbackRows(props) {
       }}
     >
       <td
-        width='60%'
+        width='100%'
         style={{'padding': '10px'}}
       >
-        {item}
+        {msg}
       </td>
     </tr>
   );

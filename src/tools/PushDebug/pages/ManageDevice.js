@@ -67,7 +67,6 @@ const ManageDevice = () => {
   const newChannels = useRef([]);
 
   const getPushParams = (params) => {
-    debugger;
     const newParams = params || {};
     newParams.device = token; 
     newParams.pushGateway = pushType;
@@ -83,10 +82,12 @@ const ManageDevice = () => {
   const listChannels = async () => {
     try {
       debugger;
-      const response = await keySetContext.pubnub.push.listChannels({
-          "device": token,
-          "pushGateway": pushType
-      });
+      const params = getPushParams();
+      const response = await keySetContext.pubnub.push.listChannels(params);
+      // const response = await keySetContext.pubnub.push.listChannels({
+      //   "device": token,
+      //   "pushGateway": pushType
+      // });
       
       updateContextState();
       const sortedChannels = response.channels.sort()
@@ -98,11 +99,9 @@ const ManageDevice = () => {
   }
 
   const listChannels2 = () => {
-    debugger;
     keySetContext.pubnub.push.listChannels(
       getPushParams(),
       (status, response) => {
-        debugger;
         if (!status.error) {
           updateContextState();
 

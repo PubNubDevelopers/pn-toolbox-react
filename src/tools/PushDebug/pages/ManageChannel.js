@@ -74,47 +74,10 @@ const ManageChannel = () => {
   const toggle = () => setModal(!modal);
   const newDevices = useRef([]);
 
-  const getPushParams = (params) => {
-    const newParams = params || {};
-    newParams.channels = [manageChannel]; 
-    newParams.pushGateway = pushType;
-
-    if (pushType === "apns2") {
-      newParams.environment = environment;
-      newParams.topic = topic;
-    }
-    
-    return newParams;
-  }
-
-  // const listDevices = () => {
-  //   console.log("listDevices2");
-  //   keySetContext.pubnub.push.listDevices(
-  //     getPushParams(),
-  //     (status, response) => {
-  //       if (!status.error) {
-  //         updateContextState();
-
-  //         if (response.channels !== null && response.channels.length === 0) {
-  //           toastNotify("info", "No registered device tokens.");
-  //           pushDebugContext.setRegisteredDevices([]);
-  //         }
-  //         else {
-  //           const sortedDevices = response.channels.sort()
-  //           pushDebugContext.setRegisteredDevices(sortedDevices);
-  //         }
-  //       }
-  //       else {
-  //         // show error message to user
-  //         toastNotify("error", status.message);
-  //       }
-  //     }
-  //   );
-  // }
-
   // only enable if pub/sub/sec key are entered in init screen
   const listDevices = async () => {
     console.log("listDevices");
+    updateContextState();
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -150,7 +113,7 @@ const ManageChannel = () => {
         console.log("fetch /keys error:", error);
         timerAlert("fetch /keys", error, 5000);
     };
-}
+  }
 
   const updateContextState = () => {
     pushDebugContext.setManageChannel(manageChannel);
@@ -163,98 +126,55 @@ const ManageChannel = () => {
     pushDebugContext.setEnableTopic(enableTopic);
   }
 
-  // const addDevices2 = async (devices) => {
-  //   console.log("addDevice", device);
-  //   debugger;
-  //   try {
-  //     const result = await keySetContext.pubnub.push.addChannels({
-  //       channels: [manageChannel],
-  //       device: device,
-  //       pushGateway: pushType
-  //     });
+  const addDevice = async (isConfirmed) => {
+    toggle(); // dismiss the modal
+    if (!isConfirmed) return;
 
-  //     console.log(result);
-  //     toastNotify("success", `Devices ${devices} added.`);
-  //     listDevices();
-  //   }
-  //   catch (status) {
-  //     console.error(`add devices failed: ${status}`);
-  //     toastNotify("error", status.message);
-  //   }
-  // }
+    const devices = newDevices.current.split("\n");
 
-  const addDevices = async (isConfirmed) => {
-    toastNotify("Not implementd yet");
-    return;
+    if (devices == null || devices.length === 0) {
+      toastNotify("info", "No new devices provided.")
+      return;
+    }
 
-    // console.log("addDevices: isConfirmed = ", isConfirmed);
-    
-    // toggle(); // dismiss the modal
-    // if (!isConfirmed) return;
-    
-    // const devices = newDevices.current.split("\n");
-
-    // if (devices == null || devices.length === 0) {
-    //   toastNotify("info", "No new devices provided.")
-    //   return;
-    // }
-
-    // console.log("new devices", devices);
-
-    // // TODO: need to loop on newDevices and add channel to each one
-    // for (device in newDevices) {
-    //   try {
-    //     const result = await keySetContext.pubnub.push.addChannels({
-    //       channels: [manageChannel],
-    //       device: device,
-    //       pushGateway: pushType
-    //     });
-  
-    //     console.log(result);
-    //     toastNotify("success", `Devices ${devices} added.`);
-    //     listDevices();
-    //   }
-    //   catch (status) {
-    //     debugger;
-    //     console.error(`add devices failed: ${status}`);
-    //     toastNotify("error", status.message);
-    //   }
-
-
-    //   keySetContext.pubnub.push.addChannels(
-    //     // TODO: change to device token
-    //     getPushParams({"channels": channels}),
-    //     (status) => {
-    //       console.log("status", status);
-
-    //       if (!status.error) {
-    //         toastNotify("success", "Device Tokens added.");
-    //         listDevices();
-    //       }
-    //       else {
-    //         toastNotify("error", status.errorData.error);
-    //       }
+    console.log("addDevice", devices);
+    // try {
+    //   const result = await keySetContext.pubnub.push.addChannels({
+    //     channels: [manageChannel],
+    //     device: devices[0],
+    //     pushGateway: pushType
     //   });
-    // }
-    // return [];
-  }
 
-  const handleRemoveDevice = (e, device) => {
-    e.preventDefault();
-    // TODO: confirm remove modal
-    removeDevice(device);
-  }
+    try {
+      let params = getPushParams();
+      params.device = devices[0];
+      const result = await keySetContext.pubnub.push.addChannels(params);
 
+      console.log(result);
+      toastNotify("success", `Device ${devices[0]} added.`);
+      listDevices();
+    }
+    catch (status) {
+      console.error(`add device failed: ${status}`);
+      toastNotify("error", status.message);
+    }
+  }
 
   const removeDevice = async (device) => {
     console.log("removeDevice", device);
+debugger;
+    // try {
+    //   const result = await keySetContext.pubnub.push.removeChannels({
+    //     channels: [manageChannel],
+    //     device: device,
+    //     pushGateway: pushType
+    //   });
 
     try {
-      const result = await keySetContext.pubnub.push.removeChannels({
-        channels: [manageChannel],
-        device: device,
-        pushGateway: pushType
-      });
+      let params = getPushParams();
+      params.device = device;
+
+      const result = await keySetContext.pubnub.push.removeChannels(params);
 
       console.log(result);
       toastNotify("success", `Device ${device} removed.`);
@@ -264,6 +184,85 @@ const ManageChannel = () => {
       console.error(`remove device failed: ${status}`);
       toastNotify("error", status.message);
     }
+  }
+
+  const getPushParams = (params) => {
+    const newParams = params || {};
+    newParams.channels = [manageChannel]; 
+    newParams.pushGateway = pushType;
+
+    if (pushType === "apns2") {
+      newParams.environment = environment;
+      newParams.topic = topic;
+    }
+    
+    return newParams;
+  }
+
+  // const addDevices = async (isConfirmed) => {
+  //   // toastNotify("info", "Not implemented yet");
+  //   // return;
+
+  //   console.log("addDevices: isConfirmed = ", isConfirmed);
+    
+  //   toggle(); // dismiss the modal
+  //   if (!isConfirmed) return;
+    
+  //   const devices = newDevices.current.split("\n");
+
+  //   if (devices == null || devices.length === 0) {
+  //     toastNotify("info", "No new devices provided.")
+  //     return;
+  //   }
+
+  //   console.log("new devices", devices);
+
+  //   // TODO: need to loop on newDevices and add channel to each one
+  //   for (device in newDevices) {
+  //     try {
+  //       const result = await keySetContext.pubnub.push.addChannels({
+  //         channels: [manageChannel],
+  //         device: device,
+  //         pushGateway: pushType
+  //       });
+  
+  //       console.log(result);
+  //       toastNotify("success", `Devices ${devices} added.`);
+  //       listDevices();
+  //     }
+  //     catch (status) {
+  //       console.error(`add devices failed: ${status}`);
+  //       toastNotify("error", status.message);
+  //     }
+
+
+  //     keySetContext.pubnub.push.addChannels(
+  //       // TODO: change to device token
+  //       getPushParams({"channels": channels}),
+  //       (status) => {
+  //         console.log("status", status);
+
+  //         if (!status.error) {
+  //           toastNotify("success", "Device Tokens added.");
+  //           listDevices();
+  //         }
+  //         else {
+  //           toastNotify("error", status.errorData.error);
+  //         }
+  //     });
+  //   }
+  //   return [];
+  // }
+
+  const handleRemoveDevice = (e, device) => {
+    e.preventDefault();
+
+    confirmAlert(
+      "Confirm Remove Device?", 
+      `${device}`, 
+      "Confirm", ()=> removeDevice(device), 
+      "Cancel", ()=>hideAlert()
+    );
   }
 
   const handlePushTypeClick = (value) => {
@@ -316,29 +315,54 @@ const ManageChannel = () => {
   const hideAlert = () => {
     console.log("hideAlert");
     setSweetAlert(null);
-};
+  };
 
-const timerAlert = (title, message, delay) => {
+  const timerAlert = (title, message, delay) => {
+      setSweetAlert(
+          <ReactBSAlert
+              style={{ display: "block", marginTop: "100px" }}
+              title={title}
+              onConfirm={() => hideAlert()}
+              showConfirm={false}
+          >
+              {message}
+          </ReactBSAlert>
+      );
+      setTimeout(function () { hideAlert() }, delay);
+  };
+
+  const confirmAlert = (title, message, confirmButton, confirmFn, cancelButton, cancelFn) => {
+    debugger;
     setSweetAlert(
         <ReactBSAlert
-            style={{ display: "block", marginTop: "100px" }}
-            title={title}
-            onConfirm={() => hideAlert()}
-            showConfirm={false}
+          question
+          style={{ display: "block", marginTop: "100px" }}
+          title={title}
+          onConfirm={confirmFn}
+          showConfirm={confirmButton != null}
+          confirmBtnBsStyle="danger"
+          confirmBtnText={confirmButton}
+          onCancel={cancelFn}
+          showCancel={cancelButton != null}
+          cancelBtnBsStyle="secondary"
+          cancelBtnText={cancelButton}
+          reverseButtons={true}
+          btnSize=""
         >
-            {message}
+          {message}
         </ReactBSAlert>
     );
-    setTimeout(function () { hideAlert() }, delay);
-};
+  };
 
   return (
     <>
+      {sweetAlert}
       <AddDevicesModal
         // toggle={toggle}
         modal={modal}
         newDevices={newDevices}
-        addDevices={addDevices}
+        // addDevices={addDevices}
+        addDevices={addDevice}
       />
       <ToastContainer
         position="top-center"
@@ -619,13 +643,13 @@ export default ManageChannel;
 function DeviceRows(props) {
   const devices = props.devices;
 
-  const rows = devices.map((ch, index) =>
+  const rows = devices.map((dev, index) =>
     <tr key={index}>
-      <td width="100%">{ch}</td>
+      <td width="100%">{dev}</td>
       <td>
         <Button
           color="warning"
-          onClick={(e) => props.handleRemoveDevice(e, ch)}
+          onClick={(e) => props.handleRemoveDevice(e, dev)}
           size="sm"
         >
           Remove
@@ -653,7 +677,8 @@ const AddDevicesModal = (props) => {
         className="modal-dialog-centered"
       >
         <ModalHeader>
-          <h2>Add New Device Tokens</h2>
+        {/* <h2>Add New Device Tokens</h2> */}
+        <h2>Add New Device Token</h2>
         </ModalHeader>
         <ModalBody>
           {/* TODO: allow comma separated values */}
@@ -662,7 +687,8 @@ const AddDevicesModal = (props) => {
               className="form-control-label"
               htmlFor="input-new-devices"
             >
-              New Devices (one per line)
+              {/* New Devices (one per line) */}
+              New Device (currently limited to 1 device)
             </label>
           </div>
           <Input
@@ -683,4 +709,3 @@ const AddDevicesModal = (props) => {
     </div>
   );
 }
-
