@@ -38,6 +38,7 @@ const PushTest = () => {
   const [allResults, setAllResults] = useState(() => pushDebugContext.testResults || []);
 
   const [registeredDevicesData, setRegisteredDevicesData] = useState({});
+  const [fcmUnregisteredDevices, setFcmUnregisteredDevices] = useState([]);
 
   // should this go in the KeySetContext (where it is now) or
   //  PushDebugContext for tool specific listeners???
@@ -150,6 +151,10 @@ const PushTest = () => {
     }
     else if (type === "FCM un" || type === "APNs u" || type === "APNs2 ") {
       // "APNs2 (or APNs or FCM) unregistered token: device: cjP-... timetoken: 17126165318808721"
+      fcmUnregisteredDevices.push(feedback);
+      let temp = fcmUnregisteredDevices;
+      temp.push()
+
       feedback = message.replaceAll('"', '')
         .replace(" device", "\n  device token")
         .replace(" timetoken", "\n  timetoken");
@@ -313,6 +318,12 @@ const PushTest = () => {
                   <RegisteredDevicesCard data={registeredDevicesData}/>
                 </CardBody>
               </Row>
+
+              <Row>
+                <CardBody>
+                  <DevicesTable data={fcmUnregisteredDevices}/>
+                </CardBody>
+              </Row>
               
               <CardBody>
                 <Form>
@@ -444,6 +455,46 @@ const PushTest = () => {
 }
 
 export default PushTest;
+
+const DevicesTable = ({data}) => {
+  console.log("messages", data);
+
+  if (data == null || data.length ===0) return <>No Results</>;
+
+  return (
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <TableContainer >
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell align="right">#</TableCell>
+              <TableCell>Device</TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {data.map((row, index) => (
+              <DeviceRow index={index} row={row}/>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
+  );
+}
+
+const DeviceRow = ({index, row}) => {
+  console.log("device row", row);
+
+  return (
+    <>
+      <TableRow key={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <TableCell align="right">{index}</TableCell>
+        <TableCell component="th" scope="row">{row}</TableCell>
+      </TableRow>
+    </>
+  );
+}
 
 const RegisteredDevicesCard = (data) => {
   if (data === undefined) return;
