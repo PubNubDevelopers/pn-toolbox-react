@@ -98,7 +98,12 @@ const ManageChannel = () => {
         (result) => {
             console.log("retrieve devices result", result);
 
-            pushDebugContext.setRegisteredDevices(result);
+            if (result !== undefined) {
+              pushDebugContext.setRegisteredDevices(result);
+            }
+            else {
+              pushDebugContext.setRegisteredDevices([]);
+            }
 
             clearTimeout(timeoutId);
             hideAlert();
@@ -106,12 +111,12 @@ const ManageChannel = () => {
         (error) => {
             hideAlert();
             console.log("retrieve devices error:", error);
-            timerAlert("Error: retrieve devices", error, 5000);
+            timerAlert("Error: retrieve devices", error.message, 5000);
         }
     ).catch = (error) => {
         hideAlert();
-        console.log("fetch /keys error:", error);
-        timerAlert("fetch /keys", error, 5000);
+        console.log(`fetch /${pushType}-devices error:`, error);
+        timerAlert(`fetch /${pushType}-devices`, error.message, 5000);
     };
   }
 
@@ -162,7 +167,6 @@ const ManageChannel = () => {
 
   const removeDevice = async (device) => {
     console.log("removeDevice", device);
-debugger;
     // try {
     //   const result = await keySetContext.pubnub.push.removeChannels({
     //     channels: [manageChannel],
@@ -332,7 +336,6 @@ debugger;
   };
 
   const confirmAlert = (title, message, confirmButton, confirmFn, cancelButton, cancelFn) => {
-    debugger;
     setSweetAlert(
         <ReactBSAlert
           question
