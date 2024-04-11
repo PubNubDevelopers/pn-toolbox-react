@@ -179,10 +179,12 @@ const PushTest = () => {
       // "APNs2 (or APNs or FCM) unregistered token: device: cjP-... timetoken: 17126165318808721"
       const temp = message.split(" ");
       let data = [];
-      data.type = temp[0].slice(2);
+      data.type = temp[0].slice(1);
       data.device = temp[4];
-      debugger;
-      setUnregisteredDevices(data);
+      let urd = unregisteredDevices;
+      urd.push(data);
+      // debugger;
+      setUnregisteredDevices(urd);
 
       // let temp = fcmUnregisteredDevices;
       // temp.push(message);
@@ -502,7 +504,7 @@ export default PushTest;
 const DevicesTable = ({data}) => {
   console.log("messages", data);
 
-  if (data == null || data.length ===0) return <>No Results</>;
+  if (data == null || data.length ===0) return <><p>No Results</p></>;
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -552,7 +554,7 @@ const CompletedFcmDevicesCard = ({data}) => {
             <Row>
               <div className="col">
                 <CardTitle className="text-uppercase text-muted mb-0">
-                  Device Summary 
+                  Device Results 
                 </CardTitle>
                 <Col>
                   <Row className= "h2 font-weight-bold mb-0">
@@ -569,19 +571,19 @@ const CompletedFcmDevicesCard = ({data}) => {
                   </Row>
                 </Col>
               </div>
-              {/* <Col className="col-auto">
-                <div className="icon icon-shape bg-danger text-white rounded-circle shadow">
+              <Col className="col-auto">
+                {/* <div className="icon icon-shape bg-danger text-white rounded-circle shadow">
                   <i className="fas fa-chart-bar" />
-                </div>
-              </Col> */}
+                </div> */}
+              </Col>
             </Row>
-            {/* <p className="mt-3 mb-0 text-muted text-sm">
+            <p className="mt-3 mb-0 text-muted text-sm">
               <span className="text-success mr-2">
                 <i className="fa fa-arrow-up" />
                 3.48%
               </span>
               <span className="text-nowrap">Since last month</span>
-            </p> */}
+            </p>
           </CardBody>
         </Card>
       </div>
