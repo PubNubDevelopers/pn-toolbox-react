@@ -103,7 +103,7 @@ const PushTest = () => {
 
   const parseFeedback = (message) => {
     let feedback = "";
-    const type = message.substring(1, 7);
+    const type = message[0] == "{" ? "RTM" : message.substring(1, 7);
 
     console.log("    feedback: ", message.substring(0,20), "; type: ", type);
 
@@ -200,9 +200,9 @@ const PushTest = () => {
       // single line of text - nothing to format
       feedback += "\n" + message.replaceAll('"', '');
     }
-    else if (type[0] == '{') {
+    else if (type == "RTM") {
       // the published real-time message payload
-      feedback = "\n\n=====\n\nComplete Real-time Message received:\n" + message;
+      feedback = "\n\n=====\n\The Published Message was received:\n" + message;
     }
     else { // probably and error or maybe a successful send 
       feedback = "\n\n=====\n\Errors :\n" + message;
@@ -560,7 +560,7 @@ const ErrorsTable = ({data}) => {
 
           <TableBody>
             {data.map((row, index) => (
-              <DeviceRow index={index} row={row}/>
+              <ErrorRow index={index} row={row}/>
             ))}
           </TableBody>
         </Table>
