@@ -27,6 +27,7 @@ import Paper from '@mui/material/Paper';
 // core components
 import { useKeySetData } from "../../../tools/KeySetProvider";
 import { usePushDebugData } from "../PushDebugProvider";
+import { Image } from "@mui/icons-material";
 
 const PushTest = () => {
   const keySetContext = useKeySetData();
@@ -49,6 +50,7 @@ const PushTest = () => {
 
   const [unregisteredDevices, setUnregisteredDevices] = useState([]);
   const [registeredDevices, setRegisteredDevices] = useState([]);
+  const [errorMessages, setErrorMessages] = useState([]);
 
   // should this go in the KeySetContext (where it is now) or
   //  PushDebugContext for tool specific listeners???
@@ -198,9 +200,22 @@ const PushTest = () => {
       // single line of text - nothing to format
       feedback += "\n" + message.replaceAll('"', '');
     }
-    else {
+    else if (type[0] == '{') {
       // the published real-time message payload
       feedback = "\n\n=====\n\nComplete Real-time Message received:\n" + message;
+    }
+    else { // probably and error or maybe a successful send 
+      feedback = "\n\n=====\n\Errors :\n" + message;
+
+      const temp = message.split(": ");
+      let data = [];
+      data.errMsg = `${temp[0]}`;
+      data.errDesc = `${temp[1]} ${temp[2]} ${temp[3]}`;
+      data.device = temp[4].replace(' timetoken');
+      let errs = errorMessages;
+      errs.push(data);
+      debugger;
+      setErrorMessages(errs);
     }
 
     return feedback + "\n\n";
@@ -339,36 +354,58 @@ const PushTest = () => {
                   </div>
                 </Row>
               </CardHeader>   
-                
+              
+              <Row>
+                <Col>
+                  <Row>
+                    <CardBody>
+                      <RegisteredDevicesCard data={registeredDevicesData}/>
+                    </CardBody>
+                  </Row>
+                  <Row>
+                    <CardBody>
+                      <label
+                        className="form-control-label"
+                        htmlFor="output-received-messages"
+                      >
+                        Registered Devices (before)
+                      </label>
+                      <DevicesTable data={registeredDevices}/>
+                    </CardBody>
+                  </Row>
+                </Col>
+
+                <Col>
+                  <Row>
+                    <CardBody>
+                      <CompletedFcmDevicesCard data={fcmCompletedDevicesData}/>
+                    </CardBody>
+                  </Row>
+
+                  <Row>
+                    <CardBody>
+                      <label
+                        className="form-control-label"
+                        htmlFor="output-received-messages"
+                      >
+                        Unregistered Devices (after)
+                      </label>
+                      <DevicesTable data={unregisteredDevices}/>
+                    </CardBody>
+                  </Row>
+                </Col>
+              </Row>
               <Row>
                 <CardBody>
-                  <RegisteredDevicesCard data={registeredDevicesData}/>
-                </CardBody>
-
-                <CardBody>
-                  <CompletedFcmDevicesCard data={fcmCompletedDevicesData}/>
+                  <label
+                    className="form-control-label"
+                    htmlFor="output-received-messages"
+                  >
+                    Errors
+                  </label>
+                  <ErrorsTable data={errorMessages}/>
                 </CardBody>
               </Row>
-
-              <CardBody>
-                <label
-                  className="form-control-label"
-                  htmlFor="output-received-messages"
-                >
-                  Registered Devices (before)
-                </label>
-                <DevicesTable data={registeredDevices}/>
-              </CardBody>
-
-              <CardBody>
-                <label
-                  className="form-control-label"
-                  htmlFor="output-received-messages"
-                >
-                  Unregistered Devices (after)
-                </label>
-                <DevicesTable data={unregisteredDevices}/>
-              </CardBody>
               
               <CardBody>
                 <Form>
@@ -383,6 +420,7 @@ const PushTest = () => {
                             Target Channel
                           </label>
                         </Col>
+
                         <Col className="col text-right">
                           <Button
                             color="danger"
@@ -501,6 +539,52 @@ const PushTest = () => {
 
 export default PushTest;
 
+
+const ErrorsTable = ({data}) => {
+  console.log("ErrorsTable", data);
+
+  if (data == null || data.length ===0) return <><p>No Errors</p></>;
+
+  return (
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <TableContainer >
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell align="right">#</TableCell>
+              <TableCell>Device Token</TableCell>
+              <TableCell>Error Message</TableCell>
+              <TableCell>Error Description</TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {data.map((row, index) => (
+              <DeviceRow index={index} row={row}/>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
+  );
+}
+
+const ErrorRow = ({index, row}) => {
+  console.log("ErrorRow", row);
+
+  return (
+    <>
+      <TableRow key={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <TableCell align="right">{index+1}</TableCell>
+        <TableCell component="th" scope="row">{row.device}</TableCell>
+        <TableCell component="th" scope="row">{row.errMsg || ""}</TableCell>
+        <TableCell component="th" scope="row">{row.errDesc}</TableCell>
+      </TableRow>
+    </>
+  );
+}
+
+
 const DevicesTable = ({data}) => {
   console.log("messages", data);
 
@@ -514,7 +598,7 @@ const DevicesTable = ({data}) => {
             <TableRow>
               <TableCell align="right">#</TableCell>
               <TableCell>Push Type</TableCell>
-              <TableCell>Device</TableCell>
+              <TableCell>Device Token</TableCell>
             </TableRow>
           </TableHead>
 
@@ -572,18 +656,14 @@ const CompletedFcmDevicesCard = ({data}) => {
                 </Col>
               </div>
               <Col className="col-auto">
-                {/* <div className="icon icon-shape bg-danger text-white rounded-circle shadow">
-                  <i className="fas fa-chart-bar" />
-                </div> */}
+                
               </Col>
             </Row>
-            <p className="mt-3 mb-0 text-muted text-sm">
-              <span className="text-success mr-2">
-                <i className="fa fa-arrow-up" />
-                3.48%
-              </span>
-              <span className="text-nowrap">Since last month</span>
-            </p>
+              <p className="mt-3 mb-0 text-muted text-sm">
+                <span className="text-success mr-2">
+                  post-publish results
+                </span>
+              </p>
           </CardBody>
         </Card>
       </div>
@@ -614,6 +694,9 @@ const RegisteredDevicesCard = ({data}) => {
                   <Row className= "h2 font-weight-bold mb-0">
                     <Col>APNs</Col><Col align="right">{data.apnsDevices}</Col>
                   </Row>
+                  <Row className= "h2 font-weight-bold mb-0">
+                    <Col></Col><Col align="right">&nbsp;</Col>
+                  </Row>
                 </Col>
               </div>
               {/* <Col className="col-auto">
@@ -622,13 +705,11 @@ const RegisteredDevicesCard = ({data}) => {
                 </div>
               </Col> */}
             </Row>
-            {/* <p className="mt-3 mb-0 text-muted text-sm">
+            <p className="mt-3 mb-0 text-muted text-sm">
               <span className="text-success mr-2">
-                <i className="fa fa-arrow-up" />
-                3.48%
+                pre-publish results
               </span>
-              <span className="text-nowrap">Since last month</span>
-            </p> */}
+            </p>
           </CardBody>
         </Card>
       </div>
