@@ -31,6 +31,9 @@ import Tab from '@mui/material/Tab';
 import { useKeySetData } from "../../../tools/KeySetProvider";
 import { usePushDebugData } from "../PushDebugProvider";
 import { Image } from "@mui/icons-material";
+import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 
 const PushTest = () => {
   const keySetContext = useKeySetData();
@@ -54,6 +57,8 @@ const PushTest = () => {
   const [unregisteredDevices, setUnregisteredDevices] = useState([]);
   const [registeredDevices, setRegisteredDevices] = useState([]);
   const [errorMessages, setErrorMessages] = useState([]);
+
+  
 
   // should this go in the KeySetContext (where it is now) or
   //  PushDebugContext for tool specific listeners???
@@ -258,7 +263,7 @@ const PushTest = () => {
     const payload = tokenizePayload(message);
 
     hideAlert();
-    setInputRows(4);
+    // setInputRows(4);
 
     keySetContext.pubnub.publish(
       {
@@ -290,13 +295,22 @@ const PushTest = () => {
     return payload;
   }
 
-  const handleOutputResults = () => {
-    let data = {"message" : outputMessage.current[0]};
-    data.feedback = outputFeedback.current;
-
-    setAllResults((allResults) => [data, ...allResults]);
-    pushDebugContext.setTestResults((testResults) => [data, ...testResults]);
+  const clearAllOutput = () => {
+    setRegisteredDevicesData({});
+    setFcmCompletedDevicesData({});
+    setRegisteredDevices([]);
+    setUnregisteredDevices([]);
+    setErrorMessages([]);
+    setAllResults([]);
   }
+
+  // const handleOutputResults = () => {
+  //   let data = {"message" : outputMessage.current[0]};
+  //   data.feedback = outputFeedback.current;
+
+  //   setAllResults((allResults) => [data, ...allResults]);
+  //   pushDebugContext.setTestResults((testResults) => [data, ...testResults]);
+  // }
 
   const getDateTime = (pntt) => {
     return new Date(parseInt((pntt+'').substring(0, 13)))
@@ -349,6 +363,7 @@ const PushTest = () => {
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
+            
             <Card className="bg-secondary shadow"> 
               <CardHeader className="border-0">
                 <Row className="align-items-center">
@@ -357,14 +372,171 @@ const PushTest = () => {
                   </div>
                 </Row>
               </CardHeader>   
-              
+
+              {/* BEGIN: Input section */}
               <Row>
                 <Col>
+                  <Form>
+                    <Accordion defaultExpanded>
+                      <AccordionSummary id="input-header" 
+                        aria-controls="panel-content"
+                        expandIcon={<ExpandMoreIcon />}
+                      >
+                        <Col sm="1">
+                          <strong>&nbsp;&nbsp;&nbsp;Input</strong>&nbsp;&nbsp;&nbsp;
+                        </Col>
+                        
+                        <Col sm="1">
+                          <label
+                            verticalAlign="bottom"
+                            className="form-control-label"
+                            htmlFor="input-channel"
+                          >
+                            Target Channel
+                          </label>
+                        </Col>
+
+                        <Col>
+                          <FormGroup>
+                            <Input
+                              className="form-control-alternative"
+                              id="input-channel"
+                              placeholder="Enter target channel name"
+                              type="text"
+                              value={pushChannel}
+                              onChange={(e) => setPushChannel(e.target.value)}
+                            />
+                          </FormGroup>
+                        </Col>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Row>
+                          <Col>
+                            <Card>
+                              <FormGroup>
+                                <Row>
+                                  <Col>
+                                    <label
+                                      className="form-control-label"
+                                      htmlFor="input-channel"
+                                    >
+                                      Message Payload
+                                    </label>
+                                  </Col>
+                                </Row>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-message"
+                                  placeholder="Enter message with push payload"
+                                  type="textarea"
+                                  rows={inputRows}
+                                  value={message}
+                                  onChange={(e) => setMessage(e.target.value)}
+                                />
+                              </FormGroup>
+                            </Card>
+                          </Col>
+                        </Row>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Form>
+                </Col>
+
+                <Col sm="2" align="center">
+                  <Row><p/></Row>
                   <Row>
-                    <CardBody>
-                      <RegisteredDevicesCard data={registeredDevicesData}/>
-                    </CardBody>
+                    <p/>
+                    <Col>
+                      <Button
+                        color="danger"
+                        onClick={manageSubscription}
+                        size="md"
+                        disabled = {keySetContext.pubnub == null || pushChannel === ""}
+                      >
+                        {pushDebugContext.subscribeButtonLabel}
+                      </Button>
+                    </Col>
+                    <p/>
+
+                    <Col>
+                      <Button
+                        align="right"
+                        color="danger"
+                        size="md"
+                        onClick={handlePublishClick}
+                        disabled={keySetContext.pubnub == null || message === ""}
+                      >
+                        Publish
+                      </Button>
+                    </Col>
+
                   </Row>
+                  <Row><p/></Row>
+                </Col>
+              </Row>
+              {/* END: Input section */}
+            
+
+            <CardHeader>
+              <Row>
+                <Col className="col text-right">
+                  <Button
+                    color="danger"
+                    size="md"
+                    onClick={() => clearAllOutput()}
+                  >
+                    Clear All Output
+                  </Button>
+                </Col>
+              </Row>
+            </CardHeader>
+
+            <Card>
+              {/* BEGIN: Parsed Output section */}
+              <Accordion defaultExpanded>
+                <AccordionSummary id="parsed-output-header" 
+                  aria-controls="panel-content"
+                  expandIcon={<ExpandMoreIcon />}
+                >
+                  <strong>&nbsp;&nbsp;&nbsp;Parsed Output</strong>&nbsp;&nbsp;&nbsp;
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Row>
+                    <Col sm="2">
+                      <Row>
+                        <CardBody>
+                          <RegisteredDevicesCard data={registeredDevicesData}/>
+                        </CardBody>
+                      </Row>
+
+                      <Row>
+                        <CardBody>
+                          <CompletedFcmDevicesCard data={fcmCompletedDevicesData}/>
+                        </CardBody>
+                      </Row>
+                    </Col>
+
+                    <Col sm="8">
+                      <CardBody>
+                        <label
+                          className="form-control-label"
+                          htmlFor="input-channel"
+                        >
+                          Parsed Job
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="input-message"
+                          disabled
+                          type="textarea"
+                          rows="20"
+                          value={message}
+                          onChange={(e) => setMessage(e.target.value)}
+                        />
+                      </CardBody>
+                    </Col>
+                  </Row>
+
                   <Row>
                     <CardBody>
                       <label
@@ -376,12 +548,16 @@ const PushTest = () => {
                       <DevicesTable data={registeredDevices}/>
                     </CardBody>
                   </Row>
-                </Col>
 
-                <Col>
                   <Row>
                     <CardBody>
-                      <CompletedFcmDevicesCard data={fcmCompletedDevicesData}/>
+                      <label
+                        className="form-control-label"
+                        htmlFor="output-received-messages"
+                      >
+                        Errors
+                      </label>
+                      <ErrorsTable data={errorMessages}/>
                     </CardBody>
                   </Row>
 
@@ -396,143 +572,45 @@ const PushTest = () => {
                       <DevicesTable data={unregisteredDevices}/>
                     </CardBody>
                   </Row>
-                </Col>
-              </Row>
-              <Row>
-                <CardBody>
-                  <label
-                    className="form-control-label"
-                    htmlFor="output-received-messages"
-                  >
-                    Errors
-                  </label>
-                  <ErrorsTable data={errorMessages}/>
-                </CardBody>
-              </Row>
-              
-              <CardBody>
-                <Form>
-                  <CardHeader>
-                    <FormGroup>
-                      <Row>
-                        <Col>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-channel"
-                          >
-                            Target Channel
-                          </label>
-                        </Col>
+                </AccordionDetails>
+              </Accordion>
+              {/* END: Parsed Output section */}
 
-                        <Col className="col text-right">
-                          <Button
-                            color="danger"
-                            onClick={manageSubscription}
-                            size="sm"
-                            disabled = {keySetContext.pubnub == null || pushChannel === ""}
+              {/* BEGIN: Raw Output section */}
+              <Accordion>
+                <AccordionSummary id="raw-output-header" 
+                  aria-controls="panel-content"
+                  expandIcon={<ExpandMoreIcon />}
+                >
+                  <strong>&nbsp;&nbsp;&nbsp;Raw Output</strong>&nbsp;&nbsp;&nbsp;
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Row>
+                    <Col sm="12">
+                      <CardBody>
+                        <div className="pl-lg-12">
+                          <table className="table-light" 
+                            style={{'border': '2px solid black',}}
                           >
-                            {pushDebugContext.subscribeButtonLabel}
-                          </Button>
-                        </Col>
-                      </Row>
-                      <Input
-                        className="form-control-alternative"
-                        id="input-channel"
-                        placeholder="Enter primary message channel"
-                        type="text"
-                        value={pushChannel}
-                        onChange={(e) => setPushChannel(e.target.value)}
-                      />
-                    </FormGroup>
-                  </CardHeader>
-                  <div className="nav-wrapper">
-                    <Row>
-                      <Col sm="12">
-                        <Card body>
-                          <FormGroup>
-                            <Row>
-                              <Col>
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="input-channel"
-                                >
-                                  Message Payload
-                                </label>
-                              </Col>
-                              <Col className="col text-right">
-                                <Button
-                                  color="danger"
-                                  size="sm"
-                                  onClick={handlePublishClick}
-                                  disabled={keySetContext.pubnub == null || message === ""}
-                                >
-                                  Publish
-                                </Button>
-                              </Col>
-                            </Row>
-                            <Input
-                              className="form-control-alternative"
-                              id="input-message"
-                              placeholder="Enter message with push payload"
-                              type="textarea"
-                              rows={inputRows}
-                              value={message}
-                              onChange={(e) => setMessage(e.target.value)}
-                            />
-                          </FormGroup>
-                        </Card>
-                      </Col>
-                    </Row>
-
-                    <Card>
-                      <Row>
-                        <Col sm="12">
-                          <CardHeader>
-                            <Row>
-                              <Col>
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="output-received-messages"
-                                >
-                                  Test Results
-                                </label>
-                                
-                              </Col>
-                              <Col className="col text-right">
-                                <Button
-                                  color="danger"
-                                  size="sm"
-                                  onClick={() => setAllResults([])}
-                                >
-                                  Clear
-                                </Button>
-                              </Col>
-                            </Row>
-                          </CardHeader>
-                          <Card body>
-                            <div className="pl-lg-12">
-                              <table className="table-light" 
-                                style={{'border': '2px solid black',}}
-                              >
-                                <thead >
-                                  <tr width="100%">
-                                    <th width="100%">Feedback Results</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <MessageRows messages={allResults}/>
-                                </tbody>
-                              </table>
-                            </div>
-                          </Card>
-                        </Col>
-                      </Row>
-                    </Card>
-                  </div>
-                </Form>
-              </CardBody>
+                            <thead >
+                              <tr width="100%">
+                                <th width="100%">Feedback Results</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <MessageRows messages={allResults}/>
+                            </tbody>
+                          </table>
+                        </div>
+                      </CardBody>
+                    </Col>
+                  </Row>
+                </AccordionDetails>
+              </Accordion>
+              {/* END: Raw Output section */}
             </Card>
-            <p />
+            <p/>
+            </Card>
           </Col>
         </Row>
       </Container>
