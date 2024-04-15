@@ -184,6 +184,8 @@ const PushTest = () => {
         .replace(" channel", "\n  channel")
         .replace(" priority", "\n  priority")
         .replace(" body", "\n  body");
+
+      setParseJobMessage(feedback.split(":"))[6];
     }
     else if (type === "FCM un" || type === "APNs u" || type === "APNs2 ") {
       // "APNs2 (or APNs or FCM) unregistered token: device: cjP-... timetoken: 17126165318808721"
