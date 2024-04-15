@@ -24,6 +24,9 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+
 // core components
 import { useKeySetData } from "../../../tools/KeySetProvider";
 import { usePushDebugData } from "../PushDebugProvider";
