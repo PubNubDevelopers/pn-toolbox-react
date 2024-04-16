@@ -65,7 +65,7 @@ app.get('/apns-devices', (req, res) => {
 
   request.get(options, (err1, res1, body1) => {
     if (err1) {
-      return console.log(err1);
+      return console.log("error", err1);
     }
 
     let data = body1;
@@ -134,7 +134,7 @@ app.get('/apns2-devices', (req, res) => {
 
   request.get(options, (err1, res1, body1) => {
     if (err1) {
-      return console.log(err1);
+      return console.log("error", err1);
     }
 
     let data = JSON.parse(body1).result;

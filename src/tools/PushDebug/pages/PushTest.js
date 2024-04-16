@@ -5,6 +5,7 @@ import ReactBSAlert from "react-bootstrap-sweetalert";
 import {
   Button,
   Card,
+  CardTitle,
   CardHeader,
   CardBody,
   Form,
@@ -15,10 +16,24 @@ import {
   Col,
 } from "reactstrap";
 
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 
 // core components
 import { useKeySetData } from "../../../tools/KeySetProvider";
 import { usePushDebugData } from "../PushDebugProvider";
+import { Image } from "@mui/icons-material";
+import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 
 const PushTest = () => {
   const keySetContext = useKeySetData();
@@ -35,6 +50,18 @@ const PushTest = () => {
   const outputMessage = useRef([]);
   const outputFeedback = useRef([]);
   const [allResults, setAllResults] = useState(() => pushDebugContext.testResults || []);
+
+  const [registeredDevicesData, setRegisteredDevicesData] = useState({});
+  const [fcmCompletedDevicesData, setFcmCompletedDevicesData] = useState([]);
+
+  const [unregisteredDevices, setUnregisteredDevices] = useState([]);
+  const [registeredDevices, setRegisteredDevices] = useState([]);
+  const [errorMessages, setErrorMessages] = useState([]);
+  const [parseJobMessage, setParseJobMessage] = useState();
+
+  const [isInputsExpanded, setIsInputsExpanded] = useState(true);
+
+  
 
   // should this go in the KeySetContext (where it is now) or
   //  PushDebugContext for tool specific listeners???
@@ -87,7 +114,7 @@ const PushTest = () => {
 
   const parseFeedback = (message) => {
     let feedback = "";
-    const type = message.substring(1, 7);
+    const type = message[0] == "{" ? "RTM" : message.substring(1, 7);
 
     console.log("    feedback: ", message.substring(0,20), "; type: ", type);
 
@@ -101,7 +128,10 @@ const PushTest = () => {
       devices = devices.replaceAll(" ", "").replaceAll("'", "").split(",");
 
       let dlist = "";
+      let temp = [];
+
       for (let i in devices) {
+        let data = {};
         const index = parseInt(i) + 1;
         
         let spaces = "  ";
@@ -109,8 +139,12 @@ const PushTest = () => {
         else if (index < 10) spaces = "   "
 
         dlist += "\n" + spaces + index + ") " + devices[i];
+        data.type = "FCM";
+        data.device = devices[i].replace("u", "");
+        temp.push(data);
       }
-
+      
+      setRegisteredDevices(temp);
       feedback = heading + dlist;
     }
     else if (type === "Device") {
@@ -120,9 +154,24 @@ const PushTest = () => {
       feedback += "\n  APNs  : " + devices[3];
       feedback += "\n  APNs 2: " + devices[5];
       feedback += "\n  FCM   : " + devices[7];
+
+      let data = {};
+      data.fcmDevices = devices[7];
+      data.apns2Devices = devices[5];
+      data.apnsDevices = devices[3];
+      setRegisteredDevicesData(data);
     }
     else if (type === "Comple") {
       // "Completed GCM push job timetoken: 17126153206875623 expected: 1 sent: 0 removed: 1 errored 1"
+
+      const temp = message.split(" ");
+      let data = [];
+      data.expected = temp[7];
+      data.sent = temp[9];
+      data.removed = temp[11];
+      data.errored = temp[13].replace('"', "");
+      setFcmCompletedDevicesData(data);
+
       feedback = message.replaceAll('"', '')
         .replace(" timetoken", "\n  timetoken")
         .replace(" expected", "\n  expected")
@@ -138,9 +187,24 @@ const PushTest = () => {
         .replace(" channel", "\n  channel")
         .replace(" priority", "\n  priority")
         .replace(" body", "\n  body");
+      const data = message.slice(message.indexOf("{", message.indexOf("body")))
+        .replaceAll("u'", "'").slice(0, -1).replaceAll("'", '"');
+      setParseJobMessage(data);
     }
     else if (type === "FCM un" || type === "APNs u" || type === "APNs2 ") {
       // "APNs2 (or APNs or FCM) unregistered token: device: cjP-... timetoken: 17126165318808721"
+      const temp = message.split(" ");
+      let data = [];
+      data.type = temp[0].slice(1);
+      data.device = temp[4];
+      let urd = unregisteredDevices;
+      urd.push(data);
+      setUnregisteredDevices(urd);
+
+      // let temp = fcmUnregisteredDevices;
+      // temp.push(message);
+      // setFcmUnregisteredDevices(temp);
+
       feedback = message.replaceAll('"', '')
         .replace(" device", "\n  device token")
         .replace(" timetoken", "\n  timetoken");
@@ -149,9 +213,21 @@ const PushTest = () => {
       // single line of text - nothing to format
       feedback += "\n" + message.replaceAll('"', '');
     }
-    else {
+    else if (type == "RTM") {
       // the published real-time message payload
-      feedback = "\n\n=====\n\nComplete Real-time Message received:\n" + message;
+      feedback = "\n\n=====\n\The Published Message was received:\n" + message;
+    }
+    else { // probably and error or maybe a successful send 
+      feedback = "\n\n=====\n\Errors :\n" + message;
+
+      const temp = message.split(": ");
+      let data = [];
+      data.errMsg = `${temp[0]}`;
+      data.errDesc = `${temp[1]} ${temp[2]} ${temp[3]}`;
+      data.device = temp[4].replace(' timetoken');
+      let errs = errorMessages;
+      errs.push(data);
+      setErrorMessages(errs);
     }
 
     return feedback + "\n\n";
@@ -191,7 +267,8 @@ const PushTest = () => {
     const payload = tokenizePayload(message);
 
     hideAlert();
-    setInputRows(4);
+    // setInputRows(4);
+    setIsInputsExpanded(false)
 
     keySetContext.pubnub.publish(
       {
@@ -223,13 +300,28 @@ const PushTest = () => {
     return payload;
   }
 
-  const handleOutputResults = () => {
-    let data = {"message" : outputMessage.current[0]};
-    data.feedback = outputFeedback.current;
-
-    setAllResults((allResults) => [data, ...allResults]);
-    pushDebugContext.setTestResults((testResults) => [data, ...testResults]);
+  const handleExpandInputs = () => {
+    if (isInputsExpanded) setIsInputsExpanded(false);
+    else setIsInputsExpanded(true);
   }
+
+  const clearAllOutput = () => {
+    setRegisteredDevicesData({});
+    setFcmCompletedDevicesData({});
+    setRegisteredDevices([]);
+    setUnregisteredDevices([]);
+    setErrorMessages([]);
+    setParseJobMessage("");
+    setAllResults([]);
+  }
+
+  // const handleOutputResults = () => {
+  //   let data = {"message" : outputMessage.current[0]};
+  //   data.feedback = outputFeedback.current;
+
+  //   setAllResults((allResults) => [data, ...allResults]);
+  //   pushDebugContext.setTestResults((testResults) => [data, ...testResults]);
+  // }
 
   const getDateTime = (pntt) => {
     return new Date(parseInt((pntt+'').substring(0, 13)))
@@ -282,136 +374,262 @@ const PushTest = () => {
       <Container className="mt--7" fluid>
         <Row className="mt-0">
           <Col className="order-xl-2">
+            
             <Card className="bg-secondary shadow"> 
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Push Message Test</h3>
+                    <h3 className="mb-0">Mobile Push Test</h3>
                   </div>
                 </Row>
-              </CardHeader>             
-              <CardBody>
-                <Form>
-                  <CardHeader>
-                    <FormGroup>
-                      <Row>
-                        <Col>
+              </CardHeader>   
+
+              {/* BEGIN: Input section */}
+              <Row>
+                <Col>
+                  <Form>
+                    <Accordion 
+                      expanded={isInputsExpanded}
+                    >
+                      <AccordionSummary id="input-header" 
+                        aria-controls="panel-content"
+                      >
+                        <Col sm="1">
+                          <strong>&nbsp;&nbsp;&nbsp;Input</strong>&nbsp;&nbsp;&nbsp;
+                        </Col>
+                        
+                        <Col sm="1">
                           <label
+                            verticalAlign="bottom"
                             className="form-control-label"
                             htmlFor="input-channel"
                           >
                             Target Channel
                           </label>
                         </Col>
-                        <Col className="col text-right">
-                          <Button
-                            color="danger"
-                            onClick={manageSubscription}
-                            size="sm"
-                            disabled = {keySetContext.pubnub == null || pushChannel === ""}
-                          >
-                            {pushDebugContext.subscribeButtonLabel}
-                          </Button>
-                        </Col>
-                      </Row>
-                      <Input
-                        className="form-control-alternative"
-                        id="input-channel"
-                        placeholder="Enter primary message channel"
-                        type="text"
-                        value={pushChannel}
-                        onChange={(e) => setPushChannel(e.target.value)}
-                      />
-                    </FormGroup>
-                  </CardHeader>
-                  <div className="nav-wrapper">
-                    <Row>
-                      <Col sm="12">
-                        <Card body>
+
+                        <Col>
                           <FormGroup>
-                            <Row>
-                              <Col>
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="input-channel"
-                                >
-                                  Message Payload
-                                </label>
-                              </Col>
-                              <Col className="col text-right">
-                                <Button
-                                  color="danger"
-                                  size="sm"
-                                  onClick={handlePublishClick}
-                                  disabled={keySetContext.pubnub == null || message === ""}
-                                >
-                                  Publish
-                                </Button>
-                              </Col>
-                            </Row>
                             <Input
                               className="form-control-alternative"
-                              id="input-message"
-                              placeholder="Enter message with push payload"
-                              type="textarea"
-                              rows={inputRows}
-                              value={message}
-                              onChange={(e) => setMessage(e.target.value)}
+                              id="input-channel"
+                              placeholder="Enter target channel name"
+                              type="text"
+                              value={pushChannel}
+                              onChange={(e) => setPushChannel(e.target.value)}
                             />
                           </FormGroup>
-                        </Card>
-                      </Col>
-                    </Row>
-
-                    <Card>
-                      <Row>
-                        <Col sm="12">
-                          <CardHeader>
-                            <Row>
-                              <Col>
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="output-received-messages"
-                                >
-                                  Test Results
-                                </label>
-                                
-                              </Col>
-                              <Col className="col text-right">
-                                <Button
-                                  color="danger"
-                                  size="sm"
-                                  onClick={() => setAllResults([])}
-                                >
-                                  Clear
-                                </Button>
-                              </Col>
-                            </Row>
-                          </CardHeader>
-                          <Card body>
-                            <div className="pl-lg-12">
-                              <table className="table-light" 
-                                style={{'border': '2px solid black',}}
-                              >
-                                <thead >
-                                  <tr width="100%">
-                                    <th width="100%">Feedback Results</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <MessageRows messages={allResults}/>
-                                </tbody>
-                              </table>
-                            </div>
-                          </Card>
                         </Col>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Row>
+                          <Col>
+                            <Card>
+                              <FormGroup>
+                                <Row>
+                                  <Col>
+                                    <label
+                                      className="form-control-label"
+                                      htmlFor="input-channel"
+                                    >
+                                      Message Payload
+                                    </label>
+                                  </Col>
+                                </Row>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-message"
+                                  placeholder="Enter message with push payload"
+                                  type="textarea"
+                                  rows={inputRows}
+                                  value={message}
+                                  onChange={(e) => setMessage(e.target.value)}
+                                />
+                              </FormGroup>
+                            </Card>
+                          </Col>
+                        </Row>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Form>
+                </Col>
+
+                <Col sm="4" align="center">
+                  <Row><p/></Row>
+                  <Row>
+                    <Col sm="3">
+                      <Button
+                        color="danger"
+                        onClick={handleExpandInputs}
+                        size="md"
+                      >
+                        {isInputsExpanded ? "Hide" : "Show"}
+                      </Button>
+                    </Col>
+
+                    <Col sm="3">
+                      <Button
+                        color="danger"
+                        onClick={manageSubscription}
+                        size="md"
+                        disabled = {keySetContext.pubnub == null || pushChannel === ""}
+                      >
+                        {pushDebugContext.subscribeButtonLabel}
+                      </Button>
+                    </Col>
+
+                    <Col sm="3">
+                      <Button
+                        align="right"
+                        color="danger"
+                        size="md"
+                        onClick={handlePublishClick}
+                        disabled={keySetContext.pubnub == null || message === ""}
+                      >
+                        Publish
+                      </Button>
+                    </Col>
+
+                  </Row>
+                  <Row><p/></Row>
+                </Col>
+              </Row>
+              {/* END: Input section */}
+            
+
+            <CardHeader>
+              <Row>
+                <Col className="col text-right">
+                  <Button
+                    color="danger"
+                    size="md"
+                    onClick={() => clearAllOutput()}
+                  >
+                    Clear All Output
+                  </Button>
+                </Col>
+              </Row>
+            </CardHeader>
+
+            <Card>
+              {/* BEGIN: Parsed Output section */}
+              <Accordion defaultExpanded>
+                <AccordionSummary id="parsed-output-header" 
+                  aria-controls="panel-content"
+                  expandIcon={<ExpandMoreIcon />}
+                >
+                  <strong>&nbsp;&nbsp;&nbsp;Parsed Output</strong>&nbsp;&nbsp;&nbsp;
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Row>
+                    <Col sm="2">
+                      <Row>
+                        <CardBody>
+                          <RegisteredDevicesCard data={registeredDevicesData}/>
+                        </CardBody>
                       </Row>
-                    </Card>
-                  </div>
-                </Form>
-              </CardBody>
+
+                      <Row>
+                        <CardBody>
+                          <CompletedFcmDevicesCard data={fcmCompletedDevicesData}/>
+                        </CardBody>
+                      </Row>
+                    </Col>
+
+                    <Col sm="8">
+                      <CardBody>
+                        <label
+                          className="form-control-label"
+                          htmlFor="input-channel"
+                        >
+                          Parsed Job
+                        </label>
+                        <Input
+                          className="form-control-alternative"
+                          id="input-message"
+                          disabled
+                          type="textarea"
+                          rows="20"
+                          value={parseJobMessage}
+                        />
+                      </CardBody>
+                    </Col>
+                  </Row>
+
+                  <Row>
+                    <CardBody>
+                      <label
+                        className="form-control-label"
+                        htmlFor="output-received-messages"
+                      >
+                        Registered Devices (before)
+                      </label>
+                      <DevicesTable data={registeredDevices}/>
+                    </CardBody>
+                  </Row>
+
+                  <Row>
+                    <CardBody>
+                      <label
+                        className="form-control-label"
+                        htmlFor="output-received-messages"
+                      >
+                        Errors
+                      </label>
+                      <ErrorsTable data={errorMessages}/>
+                    </CardBody>
+                  </Row>
+
+                  <Row>
+                    <CardBody>
+                      <label
+                        className="form-control-label"
+                        htmlFor="output-received-messages"
+                      >
+                        Unregistered Devices (after)
+                      </label>
+                      <DevicesTable data={unregisteredDevices}/>
+                    </CardBody>
+                  </Row>
+                </AccordionDetails>
+              </Accordion>
+              {/* END: Parsed Output section */}
+
+              {/* BEGIN: Raw Output section */}
+              <Accordion>
+                <AccordionSummary id="raw-output-header" 
+                  aria-controls="panel-content"
+                  expandIcon={<ExpandMoreIcon />}
+                >
+                  <strong>&nbsp;&nbsp;&nbsp;Raw Output</strong>&nbsp;&nbsp;&nbsp;
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Row>
+                    <Col sm="12">
+                      <CardBody>
+                        <div className="pl-lg-12">
+                          <table className="table-light" 
+                            style={{'border': '2px solid black',}}
+                          >
+                            <thead >
+                              <tr width="100%">
+                                <th width="100%">Feedback Results</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <MessageRows messages={allResults}/>
+                            </tbody>
+                          </table>
+                        </div>
+                      </CardBody>
+                    </Col>
+                  </Row>
+                </AccordionDetails>
+              </Accordion>
+              {/* END: Raw Output section */}
             </Card>
-            <p />
+            <p/>
+            </Card>
           </Col>
         </Row>
       </Container>
@@ -420,6 +638,186 @@ const PushTest = () => {
 }
 
 export default PushTest;
+
+
+const ErrorsTable = ({data}) => {
+  console.log("ErrorsTable", data);
+
+  if (data == null || data.length ===0) return <><p>No Errors</p></>;
+
+  return (
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <TableContainer >
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell align="right">#</TableCell>
+              <TableCell>Device Token</TableCell>
+              <TableCell>Error Message</TableCell>
+              <TableCell>Error Description</TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {data.map((row, index) => (
+              <ErrorRow index={index} row={row}/>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
+  );
+}
+
+const ErrorRow = ({index, row}) => {
+  console.log("ErrorRow", row);
+
+  return (
+    <>
+      <TableRow key={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <TableCell align="right">{index+1}</TableCell>
+        <TableCell component="th" scope="row">{row.device}</TableCell>
+        <TableCell component="th" scope="row">{row.errMsg || ""}</TableCell>
+        <TableCell component="th" scope="row">{row.errDesc}</TableCell>
+      </TableRow>
+    </>
+  );
+}
+
+
+const DevicesTable = ({data}) => {
+  console.log("messages", data);
+
+  if (data == null || data.length ===0) return <><p>No Results</p></>;
+
+  return (
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <TableContainer >
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell align="right">#</TableCell>
+              <TableCell>Push Type</TableCell>
+              <TableCell>Device Token</TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {data.map((row, index) => (
+              <DeviceRow index={index} row={row}/>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
+  );
+}
+
+const DeviceRow = ({index, row}) => {
+  console.log("device row", row);
+
+  return (
+    <>
+      <TableRow key={index} sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <TableCell align="right">{index+1}</TableCell>
+        <TableCell component="th" scope="row">{row.type || ""}</TableCell>
+        <TableCell component="th" scope="row">{row.device}</TableCell>
+      </TableRow>
+    </>
+  );
+}
+
+const CompletedFcmDevicesCard = ({data}) => {
+  if (data === undefined) return;
+
+  return (
+    <>
+      <div style={{ width: "16rem" }}>
+        <Card className="card-stats mb-4 mb-lg-0">
+          <CardBody>
+            <Row>
+              <div className="col">
+                <CardTitle className="text-uppercase text-muted mb-0">
+                  Device Results 
+                </CardTitle>
+                <Col>
+                  <Row className= "h2 font-weight-bold mb-0">
+                    <Col>Expected</Col><Col align="right">{data.expected}</Col>
+                  </Row>
+                  <Row className= "h2 font-weight-bold mb-0">
+                    <Col>Sent</Col><Col align="right">{data.sent}</Col>
+                  </Row>
+                  <Row className= "h2 font-weight-bold mb-0">
+                    <Col>Removed</Col><Col align="right">{data.removed}</Col>
+                  </Row>
+                  <Row className= "h2 font-weight-bold mb-0">
+                    <Col>Errored</Col><Col align="right">{data.errored}</Col>
+                  </Row>
+                </Col>
+              </div>
+              <Col className="col-auto">
+                
+              </Col>
+            </Row>
+              <p className="mt-3 mb-0 text-muted text-sm">
+                <span className="text-success mr-2">
+                  post-publish results
+                </span>
+              </p>
+          </CardBody>
+        </Card>
+      </div>
+    </>
+  );
+}
+
+const RegisteredDevicesCard = ({data}) => {
+  if (data === undefined) return;
+
+  return (
+    <>
+      <div style={{ width: "16rem" }}>
+        <Card className="card-stats mb-4 mb-lg-0">
+          <CardBody>
+            <Row>
+              <div className="col">
+                <CardTitle className="text-uppercase text-muted mb-0">
+                  Registered Devices
+                </CardTitle>
+                <Col>
+                  <Row className= "h2 font-weight-bold mb-0">
+                    <Col>FCM</Col><Col align="right">{data.fcmDevices}</Col>
+                  </Row>
+                  <Row className= "h2 font-weight-bold mb-0">
+                    <Col>APNs2</Col><Col align="right">{data.apns2Devices}</Col>
+                  </Row>
+                  <Row className= "h2 font-weight-bold mb-0">
+                    <Col>APNs</Col><Col align="right">{data.apnsDevices}</Col>
+                  </Row>
+                  <Row className= "h2 font-weight-bold mb-0">
+                    <Col></Col><Col align="right">&nbsp;</Col>
+                  </Row>
+                </Col>
+              </div>
+              {/* <Col className="col-auto">
+                <div className="icon icon-shape bg-danger text-white rounded-circle shadow">
+                  <i className="fas fa-chart-bar" />
+                </div>
+              </Col> */}
+            </Row>
+            <p className="mt-3 mb-0 text-muted text-sm">
+              <span className="text-success mr-2">
+                pre-publish results
+              </span>
+            </p>
+          </CardBody>
+        </Card>
+      </div>
+    </>
+  );
+}
+
+
 
 // function MessageTable() {
 //   console.log("MessageTable");
