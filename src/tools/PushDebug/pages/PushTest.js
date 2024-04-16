@@ -57,6 +57,9 @@ const PushTest = () => {
   const [unregisteredDevices, setUnregisteredDevices] = useState([]);
   const [registeredDevices, setRegisteredDevices] = useState([]);
   const [errorMessages, setErrorMessages] = useState([]);
+  const [parseJobMessage, setParseJobMessage] = useState();
+
+  const [isInputsExpanded, setIsInputsExpanded] = useState(true);
 
   
 
@@ -184,8 +187,9 @@ const PushTest = () => {
         .replace(" channel", "\n  channel")
         .replace(" priority", "\n  priority")
         .replace(" body", "\n  body");
-
-      setParseJobMessage(feedback.split(":"))[6];
+      const data = message.slice(message.indexOf("{", message.indexOf("body")))
+        .replaceAll("u'", "'").slice(0, -1).replaceAll("'", '"');
+      setParseJobMessage(data);
     }
     else if (type === "FCM un" || type === "APNs u" || type === "APNs2 ") {
       // "APNs2 (or APNs or FCM) unregistered token: device: cjP-... timetoken: 17126165318808721"
@@ -195,7 +199,6 @@ const PushTest = () => {
       data.device = temp[4];
       let urd = unregisteredDevices;
       urd.push(data);
-      // debugger;
       setUnregisteredDevices(urd);
 
       // let temp = fcmUnregisteredDevices;
@@ -224,7 +227,6 @@ const PushTest = () => {
       data.device = temp[4].replace(' timetoken');
       let errs = errorMessages;
       errs.push(data);
-      debugger;
       setErrorMessages(errs);
     }
 
@@ -266,6 +268,7 @@ const PushTest = () => {
 
     hideAlert();
     // setInputRows(4);
+    setIsInputsExpanded(false)
 
     keySetContext.pubnub.publish(
       {
@@ -297,12 +300,18 @@ const PushTest = () => {
     return payload;
   }
 
+  const handleExpandInputs = () => {
+    if (isInputsExpanded) setIsInputsExpanded(false);
+    else setIsInputsExpanded(true);
+  }
+
   const clearAllOutput = () => {
     setRegisteredDevicesData({});
     setFcmCompletedDevicesData({});
     setRegisteredDevices([]);
     setUnregisteredDevices([]);
     setErrorMessages([]);
+    setParseJobMessage("");
     setAllResults([]);
   }
 
@@ -379,10 +388,11 @@ const PushTest = () => {
               <Row>
                 <Col>
                   <Form>
-                    <Accordion defaultExpanded>
+                    <Accordion 
+                      expanded={isInputsExpanded}
+                    >
                       <AccordionSummary id="input-header" 
                         aria-controls="panel-content"
-                        expandIcon={<ExpandMoreIcon />}
                       >
                         <Col sm="1">
                           <strong>&nbsp;&nbsp;&nbsp;Input</strong>&nbsp;&nbsp;&nbsp;
@@ -444,11 +454,20 @@ const PushTest = () => {
                   </Form>
                 </Col>
 
-                <Col sm="2" align="center">
+                <Col sm="4" align="center">
                   <Row><p/></Row>
                   <Row>
-                    <p/>
-                    <Col>
+                    <Col sm="3">
+                      <Button
+                        color="danger"
+                        onClick={handleExpandInputs}
+                        size="md"
+                      >
+                        {isInputsExpanded ? "Hide" : "Show"}
+                      </Button>
+                    </Col>
+
+                    <Col sm="3">
                       <Button
                         color="danger"
                         onClick={manageSubscription}
@@ -458,9 +477,8 @@ const PushTest = () => {
                         {pushDebugContext.subscribeButtonLabel}
                       </Button>
                     </Col>
-                    <p/>
 
-                    <Col>
+                    <Col sm="3">
                       <Button
                         align="right"
                         color="danger"
@@ -532,8 +550,7 @@ const PushTest = () => {
                           disabled
                           type="textarea"
                           rows="20"
-                          value={message}
-                          onChange={(e) => setMessage(e.target.value)}
+                          value={parseJobMessage}
                         />
                       </CardBody>
                     </Col>
