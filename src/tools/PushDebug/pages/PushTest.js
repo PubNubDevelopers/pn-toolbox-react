@@ -117,6 +117,7 @@ const PushTest = () => {
     const type = message[0] == "{" ? "RTM" : message.substring(1, 7);
 
     console.log("    feedback: ", message.substring(0,20), "; type: ", type);
+    console.log("    message: ", message);
 
     if (type === "Regist") {
       let heading = message.substring(1, message.indexOf("[") - 1);
@@ -124,8 +125,12 @@ const PushTest = () => {
         .replace(" count", " \n  count") + 
         "\n  -----";
 
+      const deviceType = message.substring(message.indexOf(" ")+1, message.indexOf("devices"));
+
       let devices = message.substring(message.indexOf("[")+1, message.length-2);
       devices = devices.replaceAll(" ", "").replaceAll("'", "").split(",");
+
+      console.log("    devices:", devices);
 
       let dlist = "";
       let temp = [];
@@ -133,13 +138,16 @@ const PushTest = () => {
       for (let i in devices) {
         let data = {};
         const index = parseInt(i) + 1;
-        
+        console.log("device ", i, devices[i]);
+
         let spaces = "  ";
         if (index > 99) spaces = " "
         else if (index < 10) spaces = "   "
 
         dlist += "\n" + spaces + index + ") " + devices[i];
-        data.type = "FCM";
+        // data.type = "FCM";
+        data.type = deviceType;
+        console.log("DEVICE TYPE", deviceType);
         data.device = devices[i].replace("u", "");
         temp.push(data);
       }
@@ -169,7 +177,7 @@ const PushTest = () => {
       data.expected = temp[7];
       data.sent = temp[9];
       data.removed = temp[11];
-      data.errored = temp[13].replace('"', "");
+      if (temp[13] !== undefined) data.errored = temp[13].replace('"', "");
       setFcmCompletedDevicesData(data);
 
       feedback = message.replaceAll('"', '')
@@ -195,7 +203,7 @@ const PushTest = () => {
       // "APNs2 (or APNs or FCM) unregistered token: device: cjP-... timetoken: 17126165318808721"
       const temp = message.split(" ");
       let data = [];
-      data.type = temp[0].slice(1);
+      if (temp[0] !== undefined) data.type = temp[0].slice(1);
       data.device = temp[4];
       let urd = unregisteredDevices;
       urd.push(data);
@@ -224,7 +232,7 @@ const PushTest = () => {
       let data = [];
       data.errMsg = `${temp[0]}`;
       data.errDesc = `${temp[1]} ${temp[2]} ${temp[3]}`;
-      data.device = temp[4].replace(' timetoken');
+      if (temp[4] !== undefined) data.device = temp[4].replace(' timetoken');
       let errs = errorMessages;
       errs.push(data);
       setErrorMessages(errs);
