@@ -11,7 +11,7 @@ const app = express();
 app.use(cors({ origin: '*' }));
 
 const domain = "internal-admin.pubnub.com";
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
 app.get('/test', (req, res) => {

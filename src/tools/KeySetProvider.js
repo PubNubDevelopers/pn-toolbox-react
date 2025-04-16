@@ -4,6 +4,8 @@ import PubNub from "pubnub";
 const Context = createContext()
 
 export const KeySetProvider = ({ children }) => {
+  const [serverDomain, setServerDomain] = useState("https://pn-toolbox-react.netlify.app/");
+
   const [pubnub, setPubNub] = useState(null);
   const [isInitialized, setIsInitialize] = useState(false);
   const [status, setStatus] = useState("not initialized");
@@ -81,6 +83,8 @@ export const KeySetProvider = ({ children }) => {
   }
 
   const keySetData = {
+    serverDomain, setServerDomain,
+
     // Key Set Initialize
     keySetName, setKeySetName,
     subKey, setSubKey,

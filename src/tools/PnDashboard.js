@@ -93,7 +93,8 @@ const PnDashboard = () => {
         const timeoutId = setTimeout(() => controller.abort(), 5000);
         timerAlert("PN Dashboard Login", "Please wait while we authenticate...", 5000);
 
-        let uri = `/login?username=${keySetContext.portalUsername}&password=${keySetContext.portalPassword}`;
+        // https://pn-toolbox-react.netlify.app/login
+        let uri = `${keySetContext.serverDomain}/login?username=${keySetContext.portalUsername}&password=${keySetContext.portalPassword}`;
         console.log(`uri: ${uri}`);
 
         fetch(uri, { signal: controller.signal, 
@@ -136,7 +137,7 @@ const PnDashboard = () => {
         const timeoutId = setTimeout(() => controller.abort(), 5000);
         timerAlert("Retrieving Apps", "Please wait while we retrieve the apps...", 5000);
 
-        let uri = `/apps?ownerid=${record.id}&token=${keySetContext.portalToken}`;
+        let uri = `${keySetContext.serverDomain}/apps?ownerid=${record.id}&token=${keySetContext.portalToken}`;
 
         console.log(`fetch apps uri: ${uri}`);
         fetch(uri, { signal: controller.signal }).then(res => res.json()).then(
@@ -167,7 +168,7 @@ const PnDashboard = () => {
         const timeoutId = setTimeout(() => controller.abort(), 5000);
         timerAlert("Retrieving Keys", "Please wait while we retrieve the keys...", 5000);
 
-        let uri = `/keys?app_id=${record.id}&token=${keySetContext.portalToken}`;
+        let uri = `${keySetContext.serverDomain}/keys?app_id=${record.id}&token=${keySetContext.portalToken}`;
 
         console.log(`fetch apps uri: ${uri}`);
         fetch(uri, { signal: controller.signal }).then(res => res.json()).then(

@@ -48,7 +48,7 @@ const KeySet = () => {
   const [secKey, setSecKey] = useState(keySetContext.secKey);
   const [uuid, setUuid] = useState(keySetContext.uuid);
   const [authToken, setAuthToken] = useState(keySetContext.authToken);
-  const [showInitButton, setShowInitButton] = useState(true);
+  // const [showInitButton, setShowInitButton] = useState(true);
 
   const openKeySetFile = (theFile) => {
     const propFileReader = new FileReader();
